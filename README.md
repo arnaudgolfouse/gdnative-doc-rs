@@ -6,4 +6,4 @@ This is a documentation tool for [gdnative](https://github.com/godot-rust/godot-
 
 ## syn VS rust-analyzer
 
-In principle, godoc-doc-rs is made with [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer) libraries. This is clearly not ready at the moment, so a fallback implementation can be found in the `syn` branch, that uses [syn](https://crates.io/crates/syn).
+At the moment, [syn](https://crates.io/crates/syn) is used to parse rust and search for the `struct` and `impl`s. This is not optimal however, so another solution is being crafted on the `rust-analyzer` branch, that will use [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer) libraries.
