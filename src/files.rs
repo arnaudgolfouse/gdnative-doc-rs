@@ -1,33 +1,87 @@
+//! Build a crate's module tree
+//!
+//! This allows a (rough) building of the crate's module tree, using
+//! [`Package::from_root_file`].
+
 use std::{collections::HashMap, fmt, fs, io, path::PathBuf};
 
+/// Error encountered while trying to build the crate's tree
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// IO error (usually caused by non-existent or non-readable files).
     #[error("Error at {0}: {1}")]
     Io(PathBuf, io::Error),
+    /// [`syn`] parsing error.
     #[error("{0}")]
     Syn(#[from] syn::Error),
 }
 
+/// Handle for a [`Module`].
 pub type ModuleId = u32;
 
+/// Representation of a Rust module.
 pub struct Module {
-    pub path: PathBuf,
+    /// File in which this module resides.
+    pub file: PathBuf,
+    /// Path of this module within [`file`](Self::file)'s hierarchy.
+    ///
+    /// # Examples
+    /// - in `lib.rs`
+    /// ```rust
+    /// mod a {
+    ///     mod b {}
+    /// }
+    /// ```
+    /// Module `b` has internal_path `["crate", "a", "b"]`.
+    /// - in `c.rs`, module `c` has internal_path `["c"]`.
     pub internal_path: Vec<String>,
+    /// Visibility of this module.
+    ///
+    /// # Note
+    /// This is the syntactic visibility modifier; in other words, in
+    /// ```rust
+    /// mod a {
+    ///     pub mod b {}
+    /// }
+    /// ```
+    /// `b` has visibility `pub`, even though it is not public.
     pub visibility: syn::Visibility,
+    /// Submodules that appear in this module's items, either `mod a;` or
+    /// `mod a { ... }`.
+    ///
+    /// # Note
+    /// This does not contains modules nested inside other items
+    /// ```rust
+    /// fn f() {
+    ///     mod a {}
+    /// }
+    /// ```
+    /// Here the module `a` will be completely missed.
     pub submodules: Vec<ModuleId>,
+    /// Parent module of this module.
+    ///
+    /// If this is the root module, it is its own parent.
     pub parent: ModuleId,
+    /// Items of the module (aka functions, constants, impl blocks...)
     pub items: Vec<syn::Item>,
+    /// Attributes of this module if it is a file module.
     pub attributes: Option<Vec<syn::Attribute>>,
 }
 
+/// Representation of a Rust crate's module tree.
 #[derive(Debug)]
 pub struct Package {
+    /// Which module is the root module.
     pub root_module: ModuleId,
+    /// Map from file to their main module.
     pub files_to_ids: HashMap<PathBuf, ModuleId>,
+    /// Modules of this crate.
     pub modules: HashMap<ModuleId, Module>,
 }
 
 impl Package {
+    /// Try to build the crate tree with the file at the given `path` as
+    /// root module.
     pub fn from_root_file(path: PathBuf) -> Result<Self, Error> {
         let mut builder = PackageBuilder::default();
         let file = match fs::read_to_string(&path) {
@@ -64,7 +118,7 @@ impl fmt::Debug for Module {
         }
         formatter
             .debug_struct("Module")
-            .field("path", &self.path)
+            .field("path", &self.file)
             .field("internal_path", &self.internal_path)
             .field("visibility", &Underscore)
             .field("submodules", &self.submodules)
@@ -75,8 +129,10 @@ impl fmt::Debug for Module {
     }
 }
 
+/// Builder for [`Package`]
 #[derive(Default)]
 struct PackageBuilder {
+    /// Next unallocated id
     next_module_id: ModuleId,
     files_to_ids: HashMap<PathBuf, ModuleId>,
     modules: HashMap<ModuleId, Module>,
@@ -106,7 +162,7 @@ impl PackageBuilder {
         let submodules = self.explore_submodules(&items, id, &path, &internal_path)?;
 
         let module = Module {
-            path,
+            file: path,
             internal_path,
             submodules,
             parent: parent,

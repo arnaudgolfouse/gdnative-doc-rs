@@ -1,7 +1,13 @@
+//! Collect exported items in [`Modules`] to be processed.
+//!
+//! [`Modules`]: crate::files::Package
+
 use std::collections::HashMap;
 
+/// Attribute in a function parameter.
 #[derive(Clone, Copy, Debug)]
 pub enum ParameterAttribute {
+    /// No or unrecognized attribute
     None,
     /// `#[opt]`
     Opt,
@@ -10,36 +16,73 @@ pub enum ParameterAttribute {
 /// Most type are simply `String`, but not all (e.g. return type)
 #[derive(Clone, Debug)]
 pub enum Type {
+    /// `Option<Type>`
     Option(String),
+    /// A single-name type (like `i32`, or `MyType`)
     Named(String),
+    /// `()`
     Unit,
 }
 
+/// Method in an `impl` block.
 #[derive(Clone, Debug)]
 pub struct Method {
+    /// Does this method have a `self` parameter ?
     has_self: bool,
+    /// Name of the method.
     name: String,
+    /// Name of the type that is being `impl`emented.
     self_type: String,
+    /// Parameters of the method (excluding `self`).
+    ///
+    /// Contains:
+    /// - the name of the parameter
+    /// - it's `Type`
+    /// - eventual attributes
     parameters: Vec<(String, Type, ParameterAttribute)>,
+    /// Return type of the method.
     return_type: Type,
+    /// Documentation associated with the method
+    ///
+    /// # Note
+    /// This keeps the leading space in `/// doc`
     documentation: String,
 }
 
+/// Structure that derive `NativeClass`
+///
+/// # Note
+/// It cannot be generic.
 #[derive(Clone, Debug)]
 pub struct GdnativeClass {
+    /// Name of the structure
     name: String,
+    /// Name of the type in `#[inherit(...)]`
     inherit: String,
+    /// Documentation associated with the structure.
     documentation: String,
+    /// Exported methods of this structure
+    ///
+    /// As per `gdnative`'s documentation, exported methods are
+    /// - In a `#[methods]` impl block
+    /// - Either `new`, or marked with `#[export]`
     methods: Vec<Method>,
 }
 
+/// Holds the information necessary to build the crate's documentation
 #[derive(Clone, Debug)]
 pub struct Documentation {
+    /// Documentation of the root module.
     root_documentation: String,
+    /// Classes, organized by name.
+    ///
+    /// TODO: the name of the class is repeated all over the place.
+    ///       It may be better to use identifiers
     classes: HashMap<String, GdnativeClass>,
 }
 
 impl Documentation {
+    /// Create a new, empty `Documentation`
     pub fn new() -> Self {
         Self {
             root_documentation: String::new(),
@@ -47,6 +90,10 @@ impl Documentation {
         }
     }
 
+    /// Extract documentation from the given `items`.
+    ///
+    /// If `root_module` is [`Some`], its content will be used to fill the
+    /// root's module documentation.
     pub fn parse_from_module(
         &mut self,
         items: &[syn::Item],
@@ -108,7 +155,8 @@ impl Documentation {
 }
 
 impl GdnativeClass {
-    pub fn add_method(&mut self, method: &syn::ImplItemMethod) {
+    /// Check that the method is exported, parse it, and add it to the class.
+    fn add_method(&mut self, method: &syn::ImplItemMethod) {
         let syn::ImplItemMethod {
             vis, attrs, sig, ..
         } = method;
@@ -118,11 +166,7 @@ impl GdnativeClass {
             return;
         }
         // not exported nor a constructor
-        if !(attrs
-            .iter()
-            .any(|attr| attr.path.is_ident("export") && attr.tokens.is_empty())
-            || sig.ident == "new")
-        {
+        if !(attributes_contains(attrs, "export") || sig.ident == "new") {
             return;
         }
 
