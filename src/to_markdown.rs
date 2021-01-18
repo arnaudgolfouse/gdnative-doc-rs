@@ -1,4 +1,4 @@
-use crate::documentation::Documentation;
+use crate::documentation::{Documentation, Type};
 use pulldown_cmark::{html, BrokenLink, CowStr, Event, LinkType, Parser, Tag};
 use std::iter;
 
@@ -50,11 +50,78 @@ impl MarkdownContext {
 
             html::push_html(&mut html_result, class_iterator);
             for method in &class.methods {
+                html::push_html(&mut html_result, iter::once(Event::Start(Tag::Heading(2))));
+                let mut function_section = String::from("fn ");
+                function_section.push_str(&method.name);
+                function_section.push('(');
+                for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
+                    function_section.push_str(&name);
+                    function_section.push_str(": ");
+                    html::push_html(
+                        &mut html_result,
+                        iter::once(Event::Text(CowStr::Borrowed(&function_section))),
+                    );
+                    function_section.clear();
+                    // TODO: type resolution here
+                    let (typ, optional) = match typ {
+                        Type::Option(typ) => (self.godot_name(typ.as_str()), true),
+                        Type::Named(typ) => (self.godot_name(typ.as_str()), false),
+                        Type::Unit => ("void", false),
+                    };
+                    match self.resolve(typ) {
+                        Some(link) => {
+                            let link = Tag::Link(
+                                LinkType::Inline,
+                                CowStr::Borrowed(&link),
+                                CowStr::Borrowed(&link),
+                            );
+                            html::push_html(
+                                &mut html_result,
+                                vec![
+                                    Event::Start(link.clone()),
+                                    Event::Text(CowStr::Borrowed(self.godot_name(typ))),
+                                    Event::End(link),
+                                ]
+                                .into_iter(),
+                            );
+                        }
+                        None => function_section.push_str(typ),
+                    }
+                    if optional {
+                        function_section.push_str(" (opt)");
+                    }
+                    if index + 1 != method.parameters.len() {
+                        function_section.push_str(", ");
+                    }
+                }
+                function_section.push_str(") -> ");
+                html::push_html(
+                    &mut html_result,
+                    iter::once(Event::Text(CowStr::Borrowed(&function_section))),
+                );
+
+                let return_type = match &method.return_type {
+                    Type::Option(typ) | Type::Named(typ) => self.godot_name(typ.as_str()),
+                    Type::Unit => "void",
+                };
+                let resolve_return = match self.resolve(return_type) {
+                    Some(resolved) => resolved,
+                    None => String::new(),
+                };
+                let link = Tag::Link(
+                    LinkType::Inline,
+                    CowStr::Borrowed(&resolve_return),
+                    CowStr::Borrowed(&resolve_return),
+                );
+
                 html::push_html(
                     &mut html_result,
                     vec![
-                        Event::Start(Tag::Heading(2)),
-                        Event::Text(CowStr::Borrowed(&format!("fn {}()", method.name))),
+                        Event::Start(link.clone()),
+                        Event::Text(CowStr::Borrowed(
+                            self.godot_name(self.godot_name(return_type)),
+                        )),
+                        Event::End(link),
                         Event::End(Tag::Heading(2)),
                     ]
                     .into_iter(),
@@ -86,22 +153,29 @@ impl MarkdownContext {
         self.resolve(link)
     }
 
+    fn godot_name<'a>(&self, name: &'a str) -> &'a str {
+        match name {
+            "i32" | "i64" => "int",
+            "f32" => "float",
+            "VariantArray" => "Array",
+            "Int32Array" => "PoolIntArray",
+            "Float32Array" => "PoolRealArray",
+            _ => name,
+        }
+    }
+
+    /// Resolve a name to the class it must link to.
     fn resolve(&self, link: &str) -> Option<String> {
         if let Ok(link) = syn::parse_str::<syn::Path>(link) {
             let base = match link.segments.last() {
                 None => return None,
                 Some(base) => base.ident.to_string(),
             };
-            let class = match base.as_str() {
-                "i32" | "i64" => "int",
-                "f32" => "float",
-                _ => base.as_str(),
-            };
             // TODO: differentiate between godot and user-defined classes
             Some(format!(
                 "{}/class_{}.html",
                 self.godot_documentation_path,
-                class.to_lowercase()
+                base.to_lowercase()
             ))
         } else {
             None
