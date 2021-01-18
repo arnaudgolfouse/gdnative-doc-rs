@@ -28,25 +28,25 @@ pub enum Type {
 #[derive(Clone, Debug)]
 pub struct Method {
     /// Does this method have a `self` parameter ?
-    has_self: bool,
+    pub has_self: bool,
     /// Name of the method.
-    name: String,
+    pub name: String,
     /// Name of the type that is being `impl`emented.
-    self_type: String,
+    pub self_type: String,
     /// Parameters of the method (excluding `self`).
     ///
     /// Contains:
     /// - the name of the parameter
     /// - it's `Type`
     /// - eventual attributes
-    parameters: Vec<(String, Type, ParameterAttribute)>,
+    pub parameters: Vec<(String, Type, ParameterAttribute)>,
     /// Return type of the method.
-    return_type: Type,
+    pub return_type: Type,
     /// Documentation associated with the method
     ///
     /// # Note
     /// This keeps the leading space in `/// doc`
-    documentation: String,
+    pub documentation: String,
 }
 
 /// Structure that derive `NativeClass`
@@ -56,29 +56,29 @@ pub struct Method {
 #[derive(Clone, Debug)]
 pub struct GdnativeClass {
     /// Name of the structure
-    name: String,
+    pub name: String,
     /// Name of the type in `#[inherit(...)]`
-    inherit: String,
+    pub inherit: String,
     /// Documentation associated with the structure.
-    documentation: String,
+    pub documentation: String,
     /// Exported methods of this structure
     ///
     /// As per `gdnative`'s documentation, exported methods are
     /// - In a `#[methods]` impl block
     /// - Either `new`, or marked with `#[export]`
-    methods: Vec<Method>,
+    pub methods: Vec<Method>,
 }
 
 /// Holds the information necessary to build the crate's documentation
 #[derive(Clone, Debug)]
 pub struct Documentation {
     /// Documentation of the root module.
-    root_documentation: String,
+    pub root_documentation: String,
     /// Classes, organized by name.
     ///
     /// TODO: the name of the class is repeated all over the place.
     ///       It may be better to use identifiers
-    classes: HashMap<String, GdnativeClass>,
+    pub classes: HashMap<String, GdnativeClass>,
 }
 
 impl Documentation {

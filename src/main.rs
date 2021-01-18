@@ -1,4 +1,6 @@
-use godot_doc_rs::{documentation, files};
+use std::fs;
+
+use godot_doc_rs::{documentation, files, to_markdown};
 
 fn main() {
     let path = std::env::args_os().nth(1).unwrap();
@@ -24,5 +26,15 @@ fn main() {
             .parse_from_module(&module.items, root_module)
             .unwrap();
     }
-    println!("{:#?}", documentation)
+    println!("{:#?}", documentation);
+    println!();
+    println!("===============================");
+    println!("===============================");
+    println!("===============================");
+    println!();
+    let markdown_context = to_markdown::MarkdownContext::from_documentation(documentation);
+    let html = markdown_context.generate_files();
+    for (name, content) in html {
+        fs::write(format!("./{}.html", name), content).unwrap();
+    }
 }
