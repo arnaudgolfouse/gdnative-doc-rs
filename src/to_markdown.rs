@@ -1,17 +1,24 @@
 use crate::documentation::{Documentation, Type};
-use pulldown_cmark::{html, BrokenLink, CowStr, Event, LinkType, Parser, Tag};
-use std::iter;
+use pulldown_cmark::{BrokenLink, CodeBlockKind, CowStr, Event, LinkType, Parser, Tag};
 
-pub struct MarkdownContext {
+pub struct MarkdownContext<Encode>
+where
+    Encode: Fn(&mut String, Vec<Event<'_>>),
+{
+    encoder: Encode,
     godot_documentation_path: String,
     //gdnative_classes: Vec<String>,
     //added_classes: Vec<String>,
     documentation: Documentation,
 }
 
-impl MarkdownContext {
-    pub fn from_documentation(documentation: Documentation) -> MarkdownContext {
-        MarkdownContext {
+impl<Encode> MarkdownContext<Encode>
+where
+    Encode: Fn(&mut String, Vec<Event<'_>>),
+{
+    pub fn new(documentation: Documentation, encoder: Encode) -> Self {
+        Self {
+            encoder,
             godot_documentation_path: String::from(
                 "https://docs.godotengine.org/en/stable/classes",
             ),
@@ -26,18 +33,17 @@ impl MarkdownContext {
         for (name, class) in &self.documentation.classes {
             let mut html_result = String::new();
 
-            html::push_html(
+            (self.encoder)(
                 &mut html_result,
                 vec![
                     Event::Start(Tag::Heading(1)),
                     Event::Text(CowStr::Borrowed(&name)),
                     Event::End(Tag::Heading(1)),
-                ]
-                .into_iter(),
+                ],
             );
             let mut broken_link_callback = |broken_link: BrokenLink<'_>| {
                 self.broken_link_callback(broken_link.reference)
-                    .map(|string| (CowStr::from(string.clone()), CowStr::from(string)))
+                    .map(|string| (CowStr::from(string.clone()), CowStr::Borrowed("")))
             };
             let class_iterator = EventIterator {
                 context: self,
@@ -48,21 +54,20 @@ impl MarkdownContext {
                 ),
             };
 
-            html::push_html(&mut html_result, class_iterator);
+            (self.encoder)(&mut html_result, class_iterator.into_iter().collect());
             for method in &class.methods {
-                html::push_html(&mut html_result, iter::once(Event::Start(Tag::Heading(2))));
-                let mut function_section = String::from("fn ");
+                (self.encoder)(&mut html_result, vec![Event::Start(Tag::Heading(2))]);
+                let mut function_section = String::from("func ");
                 function_section.push_str(&method.name);
                 function_section.push('(');
                 for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
                     function_section.push_str(&name);
                     function_section.push_str(": ");
-                    html::push_html(
+                    (self.encoder)(
                         &mut html_result,
-                        iter::once(Event::Text(CowStr::Borrowed(&function_section))),
+                        vec![Event::Text(CowStr::Borrowed(&function_section))],
                     );
                     function_section.clear();
-                    // TODO: type resolution here
                     let (typ, optional) = match typ {
                         Type::Option(typ) => (self.godot_name(typ.as_str()), true),
                         Type::Named(typ) => (self.godot_name(typ.as_str()), false),
@@ -73,16 +78,15 @@ impl MarkdownContext {
                             let link = Tag::Link(
                                 LinkType::Inline,
                                 CowStr::Borrowed(&link),
-                                CowStr::Borrowed(&link),
+                                CowStr::Borrowed(""),
                             );
-                            html::push_html(
+                            (self.encoder)(
                                 &mut html_result,
                                 vec![
                                     Event::Start(link.clone()),
                                     Event::Text(CowStr::Borrowed(self.godot_name(typ))),
                                     Event::End(link),
-                                ]
-                                .into_iter(),
+                                ],
                             );
                         }
                         None => function_section.push_str(typ),
@@ -95,9 +99,9 @@ impl MarkdownContext {
                     }
                 }
                 function_section.push_str(") -> ");
-                html::push_html(
+                (self.encoder)(
                     &mut html_result,
-                    iter::once(Event::Text(CowStr::Borrowed(&function_section))),
+                    vec![Event::Text(CowStr::Borrowed(&function_section))],
                 );
 
                 let return_type = match &method.return_type {
@@ -111,10 +115,10 @@ impl MarkdownContext {
                 let link = Tag::Link(
                     LinkType::Inline,
                     CowStr::Borrowed(&resolve_return),
-                    CowStr::Borrowed(&resolve_return),
+                    CowStr::Borrowed(""),
                 );
 
-                html::push_html(
+                (self.encoder)(
                     &mut html_result,
                     vec![
                         Event::Start(link.clone()),
@@ -123,13 +127,12 @@ impl MarkdownContext {
                         )),
                         Event::End(link),
                         Event::End(Tag::Heading(2)),
-                    ]
-                    .into_iter(),
+                    ],
                 );
-                html::push_html(&mut html_result, iter::once(Event::Rule));
+                (self.encoder)(&mut html_result, vec![Event::Rule]);
                 let mut broken_link_callback = |broken_link: BrokenLink<'_>| {
                     self.broken_link_callback(broken_link.reference)
-                        .map(|string| (CowStr::from(string.clone()), CowStr::from(string)))
+                        .map(|string| (CowStr::from(string.clone()), CowStr::Borrowed("")))
                 };
                 let method_iterator = EventIterator {
                     context: self,
@@ -139,7 +142,7 @@ impl MarkdownContext {
                         Some(&mut broken_link_callback),
                     ),
                 };
-                html::push_html(&mut html_result, method_iterator);
+                (self.encoder)(&mut html_result, method_iterator.into_iter().collect());
             }
             results.push((name.clone(), html_result))
         }
@@ -199,17 +202,144 @@ impl MarkdownContext {
     }
 }
 
-struct EventIterator<'a> {
-    context: &'a MarkdownContext,
+struct EventIterator<'a, Encode>
+where
+    Encode: Fn(&mut String, Vec<Event<'_>>),
+{
+    context: &'a MarkdownContext<Encode>,
     parser: Parser<'a>,
 }
 
-impl<'a> Iterator for EventIterator<'a> {
+impl<'a, Encode> Iterator for EventIterator<'a, Encode>
+where
+    Encode: Fn(&mut String, Vec<Event<'_>>),
+{
     type Item = Event<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut next_event = self.parser.next()?;
         self.context.resolve_event(&mut next_event);
         Some(next_event)
+    }
+}
+
+pub fn encode_html(s: &mut String, events: Vec<Event<'_>>) {
+    pulldown_cmark::html::push_html(s, events.into_iter())
+}
+
+pub fn encode_markdown(s: &mut String, events: Vec<Event<'_>>) {
+    let mut indentation: u32 = 0;
+    for event in events {
+        match event {
+            Event::Start(tag) => match tag {
+                Tag::Paragraph => {
+                    for _ in 0..indentation {
+                        s.push_str("  ")
+                    }
+                }
+                Tag::Heading(level) => {
+                    for _ in 0..level {
+                        s.push('#');
+                    }
+                    s.push(' ');
+                }
+                Tag::BlockQuote => {
+                    eprintln!("BlockQuote: Unsupported at the moment")
+                }
+                Tag::CodeBlock(kind) => match kind {
+                    CodeBlockKind::Indented => {
+                        indentation += 1;
+                    }
+                    CodeBlockKind::Fenced(lang) => {
+                        s.push_str("```");
+                        s.push_str(&lang);
+                        s.push('\n');
+                    }
+                },
+                Tag::List(_) => {
+                    indentation += 1;
+                }
+                Tag::Item => {
+                    for _ in 0..(indentation.saturating_sub(1)) {
+                        s.push_str("  ")
+                    }
+                    s.push_str("- ")
+                }
+                Tag::FootnoteDefinition(_) => {}
+                Tag::Table(_) => {
+                    eprintln!("Table: Unsupported at the moment")
+                }
+                Tag::TableHead => {}
+                Tag::TableRow => {}
+                Tag::TableCell => {}
+                Tag::Emphasis => s.push('*'),
+                Tag::Strong => s.push_str("**"),
+                Tag::Strikethrough => s.push_str("~~"),
+                Tag::Link(_, _, _) => s.push('['),
+                Tag::Image(_, dest, title) => {
+                    s.push_str("![](");
+                    s.push_str(&dest);
+                    if !title.is_empty() {
+                        s.push_str(" \"");
+                        s.push_str(&title);
+                        s.push('"');
+                    }
+                    s.push(')');
+                }
+            },
+            Event::End(tag) => match tag {
+                Tag::Paragraph => s.push_str("\n\n"),
+                Tag::Heading(_) => s.push('\n'),
+                Tag::BlockQuote => {
+                    eprintln!("BlockQuote: Unsupported at the moment")
+                }
+                Tag::CodeBlock(kind) => match kind {
+                    CodeBlockKind::Indented => {
+                        indentation -= 1;
+                    }
+                    CodeBlockKind::Fenced(_) => {
+                        s.push_str("```");
+                        s.push('\n');
+                    }
+                },
+                Tag::List(_) => {
+                    indentation -= 1;
+                }
+                Tag::Item => s.push('\n'),
+                Tag::FootnoteDefinition(_) => {}
+                Tag::Table(_) => {
+                    eprintln!("Table: Unsupported at the moment")
+                }
+                Tag::TableHead => {}
+                Tag::TableRow => {}
+                Tag::TableCell => {}
+                Tag::Emphasis => s.push('*'),
+                Tag::Strong => s.push_str("**"),
+                Tag::Strikethrough => s.push_str("~~"),
+                Tag::Link(_, dest, title) => {
+                    s.push_str("](");
+                    s.push_str(&dest);
+                    if !title.is_empty() {
+                        s.push_str(" \"");
+                        s.push_str(&title);
+                        s.push('"');
+                    }
+                    s.push(')');
+                }
+                Tag::Image(_, _, _) => {}
+            },
+            Event::Text(text) => s.push_str(&text),
+            Event::Code(code) => {
+                s.push('`');
+                s.push_str(&code);
+                s.push('`');
+            }
+            Event::Html(html) => s.push_str(&html), // ???
+            Event::FootnoteReference(_) => {}
+            Event::SoftBreak => s.push('\n'),
+            Event::HardBreak => s.push_str("\n\n"),
+            Event::Rule => s.push_str("________\n"),
+            Event::TaskListMarker(checked) => s.push_str(if checked { "[X]" } else { "[ ]" }),
+        }
     }
 }
