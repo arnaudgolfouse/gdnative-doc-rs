@@ -2,7 +2,15 @@
 
 This is a documentation tool for [gdnative](https://github.com/godot-rust/godot-rust) projects.
 
-**This is a prototype, nothing works at the moment**
+**This is a prototype, most things will not work properly**
+
+## Usage
+
+To test on a rust crate, run `cargo run -- <path-to-lib.rs>`.
+
+## Example
+
+An example of the output can be found in `/example`.
 
 ## syn VS rust-analyzer
 
