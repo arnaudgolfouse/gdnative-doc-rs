@@ -3,6 +3,13 @@ use std::{fs, path::PathBuf};
 use godot_doc_rs::{backend, config, documentation, files};
 
 fn main() {
+    simplelog::TermLogger::init(
+        simplelog::LevelFilter::Info,
+        simplelog::Config::default(),
+        simplelog::TerminalMode::Stderr,
+    )
+    .unwrap();
+
     let path = match std::env::args_os().nth(1) {
         Some(path) => PathBuf::from(path),
         None => PathBuf::from("./config.toml"),
@@ -33,29 +40,16 @@ fn main() {
             .unwrap();
     }
 
-    let backend = config.backend.clone();
     let backend_config = backend::Config::with_user_config(config);
-    let extension: &'static str;
+    let backend = backend_config.backend;
+    let extension = backend.extension();
     let generator = backend::Generator::new(
         backend_config,
         documentation,
         // Maybe move this to backend::Config ?
         match backend {
-            Some(backend) => match backend.as_str() {
-                "markdown" => {
-                    extension = "md";
-                    Box::new(backend::encode_markdown)
-                }
-                "html" => {
-                    extension = "html";
-                    Box::new(backend::encode_html)
-                }
-                _ => panic!("unknown backend: {}", backend),
-            },
-            None => {
-                extension = "md";
-                Box::new(backend::encode_markdown)
-            }
+            backend::Backend::Markdown => Box::new(backend::encode_markdown),
+            backend::Backend::Html => Box::new(backend::encode_html),
         },
     );
     let files = generator.generate_files();

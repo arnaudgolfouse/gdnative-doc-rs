@@ -7,6 +7,21 @@ pub use markdown::encode_markdown;
 use crate::documentation::{Documentation, Type};
 use pulldown_cmark::{BrokenLink, CowStr, Event, LinkType, Parser, Tag};
 
+#[derive(Debug, Clone, Copy)]
+pub enum Backend {
+    Markdown,
+    Html,
+}
+
+impl Backend {
+    pub fn extension(self) -> &'static str {
+        match self {
+            Self::Markdown => "md",
+            Self::Html => "html",
+        }
+    }
+}
+
 pub struct Generator {
     config: Config,
     encoder: Box<dyn Fn(&mut String, Vec<Event<'_>>)>,
@@ -41,7 +56,29 @@ impl Generator {
                 Some(&mut broken_link_callback),
             ),
         };
-        (self.encoder)(&mut root_file, class_iterator.into_iter().collect());
+        let mut events: Vec<_> = class_iterator.into_iter().collect();
+        events.extend(vec![
+            Event::Start(Tag::Heading(1)),
+            Event::Text(CowStr::Borrowed("Classes:")),
+            Event::End(Tag::Heading(1)),
+            Event::Start(Tag::List(None)),
+        ]);
+        for (class_name, _) in &self.documentation.classes {
+            let link = Tag::Link(
+                LinkType::Inline,
+                format!("./{}.{}", class_name, self.config.backend_extension()).into(),
+                CowStr::Borrowed(""),
+            );
+            events.extend(vec![
+                Event::Start(Tag::Item),
+                Event::Start(link.clone()),
+                Event::Text(CowStr::Borrowed(&class_name)),
+                Event::End(link.clone()),
+                Event::End(Tag::Item),
+            ])
+        }
+        events.push(Event::End(Tag::List(None)));
+        (self.encoder)(&mut root_file, events);
         root_file
     }
 

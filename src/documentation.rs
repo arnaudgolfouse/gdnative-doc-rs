@@ -111,7 +111,7 @@ impl Documentation {
                         let self_type = match get_type_name(*impl_block.self_ty.clone()) {
                             Some(Type::Named(self_type)) => self_type,
                             _ => {
-                                eprintln!("Unknown type in 'impl' block");
+                                log::error!("Unknown type in 'impl' block");
                                 continue;
                             }
                         };

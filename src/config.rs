@@ -18,7 +18,8 @@ pub struct UserConfig {
     pub(crate) overrides: Option<HashMap<String, String>>,
     pub root_file: Option<PathBuf>,
     pub output: PathBuf,
-    pub backend: Option<String>,
+    // TODO: allow multiple backends ?
+    pub(crate) backend: Option<String>,
     pub(crate) markdown_options: Option<Vec<String>>,
 }
 
@@ -41,7 +42,7 @@ impl UserConfig {
                     "STRIKETHROUGH" => markdown_options.insert(Options::ENABLE_STRIKETHROUGH),
                     "TABLES" => markdown_options.insert(Options::ENABLE_TABLES),
                     "TASKLISTS" => markdown_options.insert(Options::ENABLE_TASKLISTS),
-                    _ => eprintln!("[WARN] unknown markdown option: {}", option),
+                    _ => log::warn!("unknown markdown option: {}", option),
                 }
             }
             Some(markdown_options)

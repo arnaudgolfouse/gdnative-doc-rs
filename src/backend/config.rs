@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use super::Backend;
 use crate::config::UserConfig;
 
 /// Configuration options for [Generator](super::Generator).
@@ -12,6 +13,7 @@ pub struct Config {
     pub(crate) overrides: HashMap<String, String>,
     /// Markdown options
     pub(crate) options: pulldown_cmark::Options,
+    pub backend: Backend,
 }
 
 // TODO: get these from godot's documentation ?
@@ -67,6 +69,7 @@ impl Default for Config {
             rust_to_godot,
             overrides: HashMap::new(),
             options: pulldown_cmark::Options::ENABLE_STRIKETHROUGH,
+            backend: Backend::Markdown,
         }
     }
 }
@@ -80,7 +83,21 @@ impl Config {
         if let Some(overrides) = user_config.overrides {
             config.overrides = overrides;
         }
+        if let Some(backend) = user_config.backend {
+            config.backend = match backend.as_str() {
+                "markdown" => Backend::Markdown,
+                "html" => Backend::Html,
+                _ => {
+                    log::error!("unknown backend: {}", backend);
+                    panic!("unknown backend: {}", backend)
+                }
+            }
+        }
 
         config
+    }
+
+    pub fn backend_extension(&self) -> &'static str {
+        self.backend.extension()
     }
 }

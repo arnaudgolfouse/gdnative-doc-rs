@@ -21,7 +21,7 @@ dijkstra_map.clear()
 ```
 ## func duplicate_graph_from(source_instance: [Variant](https://docs.godotengine.org/en/stable/classes/class_variant.html)) -> [int](https://docs.godotengine.org/en/stable/classes/class_int.html)
 ________
-If `source_instance` is a [dijkstra map](Interface), it is cloned into
+If `source_instance` is a [dijkstra map](./Interface.md), it is cloned into
 `self`.
 
 ### Errors

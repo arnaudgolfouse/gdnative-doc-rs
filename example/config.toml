@@ -1,3 +1,5 @@
 output = "./doc"
 root_file = "./lib.rs"
 markdown_options = ["STRIKETHROUGH"]
+backend = "markdown"
+overrides = { Interface = "./Interface.md" }

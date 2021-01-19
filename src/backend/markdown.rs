@@ -17,7 +17,7 @@ pub fn encode_markdown(s: &mut String, events: Vec<Event<'_>>) {
                     s.push(' ');
                 }
                 Tag::BlockQuote => {
-                    eprintln!("BlockQuote: Unsupported at the moment")
+                    log::warn!("BlockQuote: Unsupported at the moment")
                 }
                 Tag::CodeBlock(kind) => match kind {
                     CodeBlockKind::Indented => {
@@ -40,7 +40,7 @@ pub fn encode_markdown(s: &mut String, events: Vec<Event<'_>>) {
                 }
                 Tag::FootnoteDefinition(_) => {}
                 Tag::Table(_) => {
-                    eprintln!("Table: Unsupported at the moment")
+                    log::warn!("Table: Unsupported at the moment")
                 }
                 Tag::TableHead => {}
                 Tag::TableRow => {}
@@ -64,7 +64,7 @@ pub fn encode_markdown(s: &mut String, events: Vec<Event<'_>>) {
                 Tag::Paragraph => s.push_str("\n\n"),
                 Tag::Heading(_) => s.push('\n'),
                 Tag::BlockQuote => {
-                    eprintln!("BlockQuote: Unsupported at the moment")
+                    log::warn!("BlockQuote: Unsupported at the moment")
                 }
                 Tag::CodeBlock(kind) => match kind {
                     CodeBlockKind::Indented => {
@@ -81,7 +81,7 @@ pub fn encode_markdown(s: &mut String, events: Vec<Event<'_>>) {
                 Tag::Item => s.push('\n'),
                 Tag::FootnoteDefinition(_) => {}
                 Tag::Table(_) => {
-                    eprintln!("Table: Unsupported at the moment")
+                    log::warn!("Table: Unsupported at the moment")
                 }
                 Tag::TableHead => {}
                 Tag::TableRow => {}
