@@ -1,7 +1,6 @@
 - Improve link resolution
 - Add a reStructuredText backend ?
 - Cleanup markdown generation / find a markdown generator crate
-- Add configuration options, via a `<some-name>.toml`
 - Find a way to generate [gut](https://github.com/bitwes/Gut) tests from documentation
 - In the markdown output, move some inline links:
   ```markdown

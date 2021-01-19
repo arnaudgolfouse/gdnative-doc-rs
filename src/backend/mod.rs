@@ -1,11 +1,10 @@
+mod config;
 mod markdown;
 
+pub use config::Config;
 pub use markdown::encode_markdown;
 
-use crate::{
-    config::Config,
-    documentation::{Documentation, Type},
-};
+use crate::documentation::{Documentation, Type};
 use pulldown_cmark::{BrokenLink, CowStr, Event, LinkType, Parser, Tag};
 
 pub struct Generator {
@@ -27,13 +26,34 @@ impl Generator {
         }
     }
 
+    /// Generate the root documentation file of the crate.
+    pub fn generate_root_file(&self) -> String {
+        let mut root_file = String::new();
+        let mut broken_link_callback = |broken_link: BrokenLink<'_>| {
+            self.broken_link_callback(broken_link.reference)
+                .map(|string| (CowStr::from(string.clone()), CowStr::Borrowed("")))
+        };
+        let class_iterator = EventIterator {
+            context: self,
+            parser: pulldown_cmark::Parser::new_with_broken_link_callback(
+                &self.documentation.root_documentation,
+                self.config.options,
+                Some(&mut broken_link_callback),
+            ),
+        };
+        (self.encoder)(&mut root_file, class_iterator.into_iter().collect());
+        root_file
+    }
+
+    /// Generate pairs of (class_name, file_content).
     pub fn generate_files(&self) -> Vec<(String, String)> {
+        // TODO: this is kind of a mess, need to cleanup
         let mut results = Vec::new();
         for (name, class) in &self.documentation.classes {
-            let mut html_result = String::new();
+            let mut class_file = String::new();
 
             (self.encoder)(
-                &mut html_result,
+                &mut class_file,
                 vec![
                     Event::Start(Tag::Heading(1)),
                     Event::Text(CowStr::Borrowed(&name)),
@@ -48,14 +68,14 @@ impl Generator {
                 context: self,
                 parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                     &class.documentation,
-                    pulldown_cmark::Options::ENABLE_STRIKETHROUGH,
+                    self.config.options,
                     Some(&mut broken_link_callback),
                 ),
             };
 
-            (self.encoder)(&mut html_result, class_iterator.into_iter().collect());
+            (self.encoder)(&mut class_file, class_iterator.into_iter().collect());
             for method in &class.methods {
-                (self.encoder)(&mut html_result, vec![Event::Start(Tag::Heading(2))]);
+                (self.encoder)(&mut class_file, vec![Event::Start(Tag::Heading(2))]);
                 let mut function_section = String::from("func ");
                 function_section.push_str(&method.name);
                 function_section.push('(');
@@ -63,7 +83,7 @@ impl Generator {
                     function_section.push_str(&name);
                     function_section.push_str(": ");
                     (self.encoder)(
-                        &mut html_result,
+                        &mut class_file,
                         vec![Event::Text(CowStr::Borrowed(&function_section))],
                     );
                     function_section.clear();
@@ -80,7 +100,7 @@ impl Generator {
                                 CowStr::Borrowed(""),
                             );
                             (self.encoder)(
-                                &mut html_result,
+                                &mut class_file,
                                 vec![
                                     Event::Start(link.clone()),
                                     Event::Text(CowStr::Borrowed(self.godot_name(typ))),
@@ -99,7 +119,7 @@ impl Generator {
                 }
                 function_section.push_str(") -> ");
                 (self.encoder)(
-                    &mut html_result,
+                    &mut class_file,
                     vec![Event::Text(CowStr::Borrowed(&function_section))],
                 );
 
@@ -118,7 +138,7 @@ impl Generator {
                 );
 
                 (self.encoder)(
-                    &mut html_result,
+                    &mut class_file,
                     vec![
                         Event::Start(link.clone()),
                         Event::Text(CowStr::Borrowed(
@@ -128,7 +148,7 @@ impl Generator {
                         Event::End(Tag::Heading(2)),
                     ],
                 );
-                (self.encoder)(&mut html_result, vec![Event::Rule]);
+                (self.encoder)(&mut class_file, vec![Event::Rule]);
                 let mut broken_link_callback = |broken_link: BrokenLink<'_>| {
                     self.broken_link_callback(broken_link.reference)
                         .map(|string| (CowStr::from(string.clone()), CowStr::Borrowed("")))
@@ -137,13 +157,13 @@ impl Generator {
                     context: self,
                     parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                         &method.documentation,
-                        pulldown_cmark::Options::ENABLE_STRIKETHROUGH,
+                        self.config.options,
                         Some(&mut broken_link_callback),
                     ),
                 };
-                (self.encoder)(&mut html_result, method_iterator.into_iter().collect());
+                (self.encoder)(&mut class_file, method_iterator.into_iter().collect());
             }
-            results.push((name.clone(), html_result))
+            results.push((name.clone(), class_file))
         }
         results
     }

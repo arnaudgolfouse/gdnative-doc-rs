@@ -1,0 +1,3 @@
+output = "./doc"
+root_file = "./lib.rs"
+markdown_options = ["STRIKETHROUGH"]

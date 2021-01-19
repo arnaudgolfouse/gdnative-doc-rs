@@ -6,7 +6,9 @@ This is a documentation tool for [gdnative](https://github.com/godot-rust/godot-
 
 ## Usage
 
-To test on a rust crate, run `cargo run -- <path-to-lib.rs>`.
+To test on a rust crate:
+1. Create a `config.toml` file, with at least an `output` entry.
+2. Run `cargo run -- <path-to-config.toml>`.
 
 ## Example
 

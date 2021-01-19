@@ -1,66 +1,52 @@
-use std::collections::HashMap;
+use serde::Deserialize;
+use std::{
+    collections::HashMap,
+    fs, io,
+    path::{Path, PathBuf},
+};
 
-pub struct Config {
-    /// Link to godot classes' documentation
-    pub(crate) godot_classes: HashMap<String, String>,
-    /// Mapping from Rust types to gdscript types
-    pub(crate) rust_to_godot: HashMap<String, String>,
-    /// User-defined overrides
-    pub(crate) overrides: HashMap<String, String>,
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("{0}")]
+    Io(#[from] io::Error),
+    #[error("{0}")]
+    Toml(#[from] toml::de::Error),
 }
 
-// TODO: get these from godot's documentation ?
-// https://github.com/godotengine/godot-docs/tree/master/classes
-// OR search https://github.com/godot-rust/godot-rust, they may have found a way
-const GODOT_CLASSES: &[&str] = &[
-    "Array",
-    "AStar",
-    "AStar2D",
-    "bool",
-    "Dictionary",
-    "float",
-    "int",
-    "PoolIntArray",
-    "PoolRealArray",
-    "Rect2",
-    "Transform",
-    "Transform2D",
-    "Variant",
-    "Vector2",
-];
+#[derive(Deserialize)]
+pub struct UserConfig {
+    pub(crate) overrides: Option<HashMap<String, String>>,
+    pub root_file: Option<PathBuf>,
+    pub output: PathBuf,
+    pub backend: Option<String>,
+    pub(crate) markdown_options: Option<Vec<String>>,
+}
 
-const RUST_TO_GODOT: &[(&str, &str)] = &[
-    ("i32", "int"),
-    ("i64", "int"),
-    ("f64", "float"),
-    ("VariantArray", "Array"),
-    ("Int32Array", "PoolIntArray"),
-    ("Float32Array", "PoolRealArray"),
-];
+impl UserConfig {
+    pub fn read_from(path: &Path) -> Result<Self, io::Error> {
+        let config_file = fs::read_to_string(path)?;
+        Ok(toml::from_str(&config_file)?)
+    }
 
-impl Default for Config {
-    fn default() -> Self {
-        let mut godot_classes = HashMap::new();
-        let mut rust_to_godot = HashMap::new();
-
-        for class in GODOT_CLASSES {
-            godot_classes.insert(
-                class.to_string(),
-                format!(
-                    "https://docs.godotengine.org/en/stable/classes/class_{}.html",
-                    class.to_lowercase()
-                ),
-            );
-        }
-
-        for (rust, godot) in RUST_TO_GODOT {
-            rust_to_godot.insert(rust.to_string(), godot.to_string());
-        }
-
-        Self {
-            godot_classes,
-            rust_to_godot,
-            overrides: HashMap::new(),
+    pub(crate) fn markdown_options(&self) -> Option<pulldown_cmark::Options> {
+        use pulldown_cmark::Options;
+        if let Some(options) = &self.markdown_options {
+            let mut markdown_options = Options::empty();
+            for option in options {
+                match option.as_str() {
+                    "FOOTNOTES" => markdown_options.insert(Options::ENABLE_FOOTNOTES),
+                    "SMART_PUNCTUATION" => {
+                        markdown_options.insert(Options::ENABLE_SMART_PUNCTUATION)
+                    }
+                    "STRIKETHROUGH" => markdown_options.insert(Options::ENABLE_STRIKETHROUGH),
+                    "TABLES" => markdown_options.insert(Options::ENABLE_TABLES),
+                    "TASKLISTS" => markdown_options.insert(Options::ENABLE_TASKLISTS),
+                    _ => eprintln!("[WARN] unknown markdown option: {}", option),
+                }
+            }
+            Some(markdown_options)
+        } else {
+            None
         }
     }
 }
