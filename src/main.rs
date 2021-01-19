@@ -1,6 +1,6 @@
 use std::fs;
 
-use godot_doc_rs::{documentation, files, to_markdown};
+use godot_doc_rs::{backend, config, documentation, files};
 
 fn main() {
     let path = std::env::args_os().nth(1).unwrap();
@@ -20,9 +20,11 @@ fn main() {
             .parse_from_module(&module.items, root_module)
             .unwrap();
     }
-    let markdown_context =
-        to_markdown::MarkdownContext::new(documentation, to_markdown::encode_markdown);
-    let html = markdown_context.generate_files();
+
+    let config = config::Config::default();
+    let generator =
+        backend::Generator::new(config, documentation, Box::new(backend::encode_markdown));
+    let html = generator.generate_files();
     for (name, content) in html {
         fs::write(format!("./{}.md", name), content).unwrap();
     }

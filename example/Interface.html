@@ -1,0 +1,428 @@
+<h1>Interface</h1>
+<p>Interface exported to Godot</p>
+<p>All public method of this struct are usable in gdscript.</p>
+<h2>func new() -&gt; <a href="">Self</a></h2>
+<hr />
+<p>Create a new empty [<code>DijkstraMap</code>].</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+</code></pre>
+<h2>func clear() -&gt; <a href="">void</a></h2>
+<hr />
+<p>Clear the underlying [<code>DijkstraMap</code>].</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">dijkstra_map.clear()
+</code></pre>
+<h2>func duplicate_graph_from(source_instance: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>If <code>source_instance</code> is a <a href="Interface">dijkstra map</a>, it is cloned into
+<code>self</code>.</p>
+<h3>Errors</h3>
+<p>This function returns <code>1</code> if <code>source_instance</code> is not a DijkstraMap.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+# fill dijkstra_map
+var dijkstra_map_copy = DijkstraMap.new()
+dijkstra_map_copy.duplicate_graph_from(dijkstra_map)
+</code></pre>
+<h2>func get_available_point_id() -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Returns the first positive available id.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+assert(dijkstra_map.get_available_point_id() == 2)
+</code></pre>
+<h2>func add_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Add a new point with the given <code>terrain_type</code>.</p>
+<p>If <code>terrain_type</code> is [<code>None</code>], <code>-1</code> is used.</p>
+<h3>Errors</h3>
+<p>If a point with the given id already exists, the map is unchanged and
+<code>1</code> is returned.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0) # terrain_type is -1
+dijkstra_map.add_point(1, 0) # terrain_type is 0
+</code></pre>
+<h2>func set_terrain_for_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, terrain_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Set the terrain type for <code>point_id</code>.</p>
+<p>If <code>terrain_id</code> is [<code>None</code>], <code>-1</code> is used.</p>
+<h3>Errors</h3>
+<p>If the given id does not exists in the map, <code>1</code> is returned.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0, 2)
+dijkstra_map.set_terrain_for_point(0, 1)
+assert(dijkstra_map.get_terrain_for_point(0) == 1)
+dijkstra_map.set_terrain_for_point(0)
+assert(dijkstra_map.get_terrain_for_point(0) == -1)
+</code></pre>
+<h2>func get_terrain_for_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Get the terrain type for the given point.</p>
+<p>This function returns <code>-1</code> if no point with the given id exists in the
+map.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0, 1)
+dijkstra_map.add_point(1, -1)
+assert(dijkstra_map.get_terrain_for_point(0) == 1)
+assert(dijkstra_map.get_terrain_for_point(1) == -1)
+# `2` is not in the map, so this returns `-1`
+assert(dijkstra_map.get_terrain_for_point(2) == -1)
+</code></pre>
+<h2>func remove_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Removes a point from the map.</p>
+<h3>Errors</h3>
+<p>Returns <code>1</code> if the point does not exists in the map.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+assert(dijkstra_map.remove_point(0) == 0)
+assert(dijkstra_map.remove_point(0) == 1)
+</code></pre>
+<h2>func has_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a></h2>
+<hr />
+<p>Returns [<code>true</code>] if the map contains the given point.</p>
+<h2>func disable_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Disable the given point for pathfinding.</p>
+<h3>Errors</h3>
+<p>Returns <code>1</code> if the point does not exists in the map.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+assert(dijkstra_map.disable_point(0) == 0)
+assert(dijkstra_map.disable_point(1) == 1)
+</code></pre>
+<h2>func enable_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Enable the given point for pathfinding.</p>
+<h3>Errors</h3>
+<p>Returns <code>1</code> if the point does not exists in the map.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+assert(dijkstra_map.enable_point(0) == 0)
+assert(dijkstra_map.enable_point(1) == 1)
+</code></pre>
+<h2>func is_point_disabled(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a></h2>
+<hr />
+<p>Returns [<code>true</code>] if the point exists and is disabled, otherwise returns
+[<code>false</code>].</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.disable(0)
+assert(dijkstra_map.is_point_disabled(0))
+assert(!dijkstra_map.is_point_disabled(1))
+assert(!dijkstra_map.is_point_disabled(2))
+</code></pre>
+<h2>func connect_points(source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, weight: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt), bidirectional: <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Connects the two given points.</p>
+<h3>Parameters</h3>
+<ul>
+<li><code>source</code> : source point of the connection.</li>
+<li><code>target</code> : target point of the connection.</li>
+<li><code>weight</code> : weight of the connection. Defaults to <code>1.0</code>.</li>
+<li><code>bidirectional</code> : wether or not the reciprocal connection should be
+made. Defaults to [<code>true</code>].</li>
+</ul>
+<h3>Errors</h3>
+<p>Return <code>1</code> if one of the points does not exists in the map.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.add_point(2)
+dijkstra_map.connect_points(0, 1, 2.0)
+dijkstra_map.connect_points(1, 2, 1.0, false)
+# produces the graph :
+# 0 &lt;---&gt; 1 ----&gt; 2
+#    2.0     1.0
+assert(dijkstra_map.connect_points(1, 3) == 1) # 3 does not exists in the map
+</code></pre>
+<h2>func remove_connection(source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, bidirectional: <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Remove a connection between the two given points.</p>
+<h3>Parameters</h3>
+<ul>
+<li><code>source</code> : source point of the connection.</li>
+<li><code>target</code> : target point of the connection.</li>
+<li><code>bidirectional</code> (default : [<code>true</code>]) : if [<code>true</code>], also removes
+connection from target to source.</li>
+</ul>
+<h3>Errors</h3>
+<p>Returns <code>1</code> if one of the points does not exist.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.connect_points(0, 1)
+dijkstra_map.remove_connection(0, 1)
+assert(dijkstra_map.remove_connection(0, 2) == 1) # 2 does not exists in the map
+dijkstra_map.connect_points(0, 1)
+# only removes connection from 0 to 1
+dijkstra_map.remove_connection(0, 1, false)
+assert(dijkstra_map.has_connection(1, 0))
+</code></pre>
+<h2>func has_connection(source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a></h2>
+<hr />
+<p>Returns [<code>true</code>] if there is a connection from <code>source</code> to <code>target</code>
+(and they both exist).</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.connect_points(0, 1, 1.0, false)
+assert(dijkstra_map.has_connection(0, 1))
+assert(!dijkstra_map.has_connection(1, 0))
+assert(!dijkstra_map.has_connection(0, 2))
+</code></pre>
+<h2>func get_direction_at_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Given a point, returns the id of the next point along the shortest path
+toward the target.</p>
+<h3>Errors</h3>
+<p>This function return <code>-1</code> if there is no path from the point to the target.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.add_point(2)
+dijkstra_map.connect_points(0, 1)
+dijkstra_map.recalculate(0)
+assert(dijkstra_map.get_direction_at_point(0) == 0)
+assert(dijkstra_map.get_direction_at_point(1) == 0)
+assert(dijkstra_map.get_direction_at_point(2) == -1)
+</code></pre>
+<h2>func get_cost_at_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a></h2>
+<hr />
+<p>Returns the cost of the shortest path from this point to the target.</p>
+<p>If there is no path, the cost is <a href="f32::INFINITY"><code>INFINITY</code></a>.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.add_point(2)
+dijkstra_map.connect_points(0, 1)
+dijkstra_map.recalculate(0)
+assert(dijkstra_map.get_cost_at_point(0) == 0.0)
+assert(dijkstra_map.get_cost_at_point(1) == 1.0)
+assert(dijkstra_map.get_cost_at_point(2) == INF)
+</code></pre>
+<h2>func recalculate(origin: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, optional_params: <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<hr />
+<p>Recalculates cost map and direction map information for each point,
+overriding previous results.</p>
+<p>This is the central function of the library, the one that actually uses
+Dijkstra's algorithm.</p>
+<h3>Parameters</h3>
+<ul>
+<li>
+<p><code>origin</code> : ID of the origin point, or array of IDs (preferably
+<a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html"><code>Int32Array</code></a>).</p>
+</li>
+<li>
+<p><code>optional_params: </code><a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html"><code>Dictionary</code></a> : Specifies optional arguments. <br />
+Valid arguments are :</p>
+<ul>
+<li><code>&quot;input_is_destination&quot; -&gt; bool</code> (default : [<code>true</code>]) : <br />
+Wether or not the <code>origin</code> points are seen as destination.</li>
+<li><code>&quot;maximum_cost&quot; -&gt; float</code>
+(default : <a href="f32::INFINITY"><code>INFINITY</code></a>) : <br />
+Specifies maximum cost. Once all shortest paths no longer than
+maximum cost are found, algorithm terminates. All points with cost
+bigger than this are treated as inaccessible.</li>
+<li><code>&quot;initial_costs&quot; -&gt; float Array</code> (default : empty) : <br />
+Specifies initial costs for given origins. Values are paired with
+corresponding indices in the origin argument. Every unspecified
+cost is defaulted to <code>0.0</code>. <br />
+Can be used to weigh the origins with a preference.</li>
+<li><code>&quot;terrain_weights&quot; -&gt; Dictionary</code> (default : empty) : <br />
+Specifies weights of terrain types. Keys are terrain type IDs and
+values are floats. Unspecified terrains will have
+<a href="f32::INFINITY"><code>INFINITE</code></a> weight. <br />
+Note that <code>-1</code> correspond to the default terrain (which have a
+weight of <code>1.0</code>), and will thus be ignored if it appears in the
+keys.</li>
+<li><code>&quot;termination_points&quot; -&gt; int OR int Array</code> (default : empty) : <br />
+A set of points that stop the computation if they are reached by
+the algorithm.</li>
+</ul>
+<p>Note that keys of incorrect types are ignored with a warning.</p>
+</li>
+</ul>
+<h3>Errors</h3>
+<p><code>1</code> is returned if :</p>
+<ul>
+<li>One of the keys in <code>optional_params</code> is invalid.</li>
+<li><code>origin</code> is neither an <a href="gdnative::core_types::VariantType::I64"><code>I64</code></a>, a <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html"><code>Int32Array</code></a> or a <a href="https://docs.godotengine.org/en/stable/classes/class_array.html"><code>VariantArray</code></a>.</li>
+</ul>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0, 0)
+dijkstra_map.add_point(1, 1)
+dijkstra_map.add_point(2, 0)
+dijkstra_map.connect_points(0, 1)
+dijkstra_map.connect_points(1, 2, 10.0)
+var optional_params = {
+    &quot;terrain_weights&quot;: { 0: 1.0, 1: 2.0 },
+    &quot;termination_points&quot;: null,
+    &quot;input_is_destination&quot;: true,
+    &quot;maximum_cost&quot;: 2.0,
+    &quot;initial_costs&quot;: null,
+}
+dijkstra_map.recalculate(0, optional_params)
+assert(dijkstra_map.get_direction_at_point(0) == 0)
+assert(dijkstra_map.get_direction_at_point(1) == 0)
+# 2 is too far from 0, so because we set &quot;maximum_cost&quot; to 2.0, it is innaccessible.
+assert(dijkstra_map.get_direction_at_point(2) == -1)
+</code></pre>
+<h2>func get_direction_at_points(points: <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></h2>
+<hr />
+<p>For each point in the given array, returns the id of the next point
+along the shortest path toward the target.</p>
+<p>If a point does not exists, or there is no path from it to the target,
+the corresponding point will be <code>-1</code>.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.add_point(2)
+dijkstra_map.connect_points(0, 1)
+dijkstra_map.recalculate(0)
+assert(Array(dijkstra_map.get_direction_at_points(PoolIntArray([0, 1, 2]))) == [0, 0, -1])
+</code></pre>
+<h2>func get_cost_at_points(points: <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html">PoolRealArray</a></h2>
+<hr />
+<p>For each point in the given array, returns the cost of the shortest
+path from this point to the target.</p>
+<p>If there is no path from a point to the target, the cost is
+<a href="f32::INFINITY"><code>INFINITY</code></a>.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.add_point(2)
+dijkstra_map.connect_points(0, 1)
+dijkstra_map.recalculate(0)
+assert(Array(dijkstra_map.get_cost_at_points(PoolIntArray([0, 1, 2]))) == [0.0, 1.0, INF])
+</code></pre>
+<h2>func get_cost_map() -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h2>
+<hr />
+<p>Returns the entire Dijktra map of costs in form of a Dictionary.</p>
+<p>Keys are points' IDs, and values are costs. Inaccessible points are not
+present in the dictionary.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.add_point(2)
+dijkstra_map.connect_points(0, 1)
+dijkstra_map.recalculate(0)
+var cost_map = { 0: 0.0, 1: 1.0 }
+var computed_cost_map = dijkstra_map.get_cost_map()
+for id in computed_cost_map.keys():
+    assert(computed_cost_map[id] == cost_map[id])
+</code></pre>
+<h2>func get_direction_map() -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h2>
+<hr />
+<p>Returns the entire Dijkstra map of directions in form of a
+<a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html"><code>Dictionary</code></a>.</p>
+<p>Keys are points' IDs, and values are the next point along the shortest
+path.</p>
+<h4>Note</h4>
+<p>Unreacheable points are not present in the map.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.add_point(2)
+dijkstra_map.connect_points(0, 1)
+dijkstra_map.recalculate(0)
+var direction_map = { 0: 0, 1: 0 }
+var computed_direction_map = dijkstra_map.get_direction_map()
+for id in computed_direction_map.keys():
+    assert(computed_direction_map[id] == direction_map[id])
+</code></pre>
+<h2>func get_all_points_with_cost_between(min_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a>, max_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></h2>
+<hr />
+<p>Returns an array of all the points whose cost is between <code>min_cost</code> and
+<code>max_cost</code>.</p>
+<p>The array will be sorted by cost.</p>
+<h3>Example</h3>
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.add_point(0)
+dijkstra_map.add_point(1)
+dijkstra_map.add_point(2)
+dijkstra_map.connect_points(0, 1)
+dijkstra_map.recalculate(0)
+assert(Array(dijkstra_map.get_all_points_with_cost_between(0.5, 1.5)) == [1])
+</code></pre>
+<h2>func get_shortest_path_from_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></h2>
+<hr />
+<p>Returns an <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">array</a> of points describing the shortest path from a
+starting point.</p>
+<p>If the starting point is a target or is inaccessible, the <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">array</a> will
+be empty.</p>
+<h4>Note</h4>
+<p>The starting point itself is not included.</p>
+<h2>func add_square_grid(bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), orthogonal_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt), diagonal_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h2>
+<hr />
+<p>Adds a square grid of connected points.</p>
+<h3>Parameters</h3>
+<ul>
+<li><code>bounds</code> : Dimensions of the grid. At the moment, only <a href="https://docs.godotengine.org/en/stable/classes/class_rect2.html"><code>Rect2</code></a> is
+supported.</li>
+<li><code>terrain_type</code> (default : <code>-1</code>) : Terrain to use for all points of
+the grid.</li>
+<li><code>orthogonal_cost</code> (default : <code>1.0</code>) : specifies cost of orthogonal
+connections (up, down, right and left). <br />
+If <code>orthogonal_cost</code> is <a href="f32::INFINITY"><code>INFINITY</code></a> or <a href="f32::NAN"><code>Nan</code></a>, orthogonal
+connections are disabled.</li>
+<li><code>diagonal_cost</code> (default : <a href="f32::INFINITY"><code>INFINITY</code></a>) : specifies cost of diagonal
+connections. <br />
+If <code>diagonal_cost</code> is <a href="f32::INFINITY"><code>INFINITY</code></a> or <a href="f32::NAN"><code>Nan</code></a>, diagonal connections
+are disabled.</li>
+</ul>
+<h3>Returns</h3>
+<p>This function returns a Dictionary where keys are coordinates of points
+(<a href="https://docs.godotengine.org/en/stable/classes/class_vector2.html"><code>Vector2</code></a>) and values are their corresponding point IDs.</p>
+<h2>func add_hexagonal_grid(bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), weight: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h2>
+<hr />
+<p>Adds a hexagonal grid of connected points.</p>
+<h3>Parameters</h3>
+<ul>
+<li><code>bounds</code> : Dimensions of the grid.</li>
+<li><code>terrain_type</code> (default : <code>-1</code>) : specifies terrain to be used.</li>
+<li><code>weight</code> (default : <code>1.0</code>) : specifies cost of connections.</li>
+</ul>
+<h3>Returns</h3>
+<p>This function returns a <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html"><code>Dictionary</code></a> where keys are coordinates of
+points (<a href="https://docs.godotengine.org/en/stable/classes/class_vector2.html"><code>Vector2</code></a>) and values are their corresponding point IDs.</p>
+<h3>Note</h3>
+<p>Hexgrid is in the &quot;pointy&quot; orentation by default (see example below).</p>
+<p>To switch to &quot;flat&quot; orientation, swap <code>width</code> and <code>height</code>, and switch
+<code>x</code> and <code>y</code> coordinates of the keys in the return <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html"><code>Dictionary</code></a>.
+(<a href="https://docs.godotengine.org/en/stable/classes/class_transform2d.html"><code>Transform2D</code></a> may be convenient there)</p>
+<h3>Example</h3>
+<p>This is what <code>add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)</code> would produce:</p>
+<pre><code class="language-text">    / \     / \
+  /     \ /     \
+ |  1,4  |  2,4  |
+  \     / \     / \
+    \ /     \ /     \
+     |  1,5  |  2,5  |
+    / \     / \     /
+  /     \ /     \ /
+ |  1,6  |  2,6  |
+  \     / \     /
+    \ /     \ /
+</code></pre>

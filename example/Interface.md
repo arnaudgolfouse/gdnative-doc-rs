@@ -3,17 +3,17 @@ Interface exported to Godot
 
 All public method of this struct are usable in gdscript.
 
-## func new() -> [Self](https://docs.godotengine.org/en/stable/classes/class_self.html)
+## func new() -> [Self]()
 ________
-Create a new empty [`DijkstraMap`](https://docs.godotengine.org/en/stable/classes/class_dijkstramap.html).
+Create a new empty [`DijkstraMap`].
 
 ### Example
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 ```
-## func clear() -> [void](https://docs.godotengine.org/en/stable/classes/class_void.html)
+## func clear() -> [void]()
 ________
-Clear the underlying [`DijkstraMap`](https://docs.godotengine.org/en/stable/classes/class_dijkstramap.html).
+Clear the underlying [`DijkstraMap`].
 
 ### Example
 ```gdscript
@@ -21,7 +21,7 @@ dijkstra_map.clear()
 ```
 ## func duplicate_graph_from(source_instance: [Variant](https://docs.godotengine.org/en/stable/classes/class_variant.html)) -> [int](https://docs.godotengine.org/en/stable/classes/class_int.html)
 ________
-If `source_instance` is a [dijkstra map](https://docs.godotengine.org/en/stable/classes/class_interface.html), it is cloned into
+If `source_instance` is a [dijkstra map](Interface), it is cloned into
 `self`.
 
 ### Errors
@@ -49,7 +49,7 @@ assert(dijkstra_map.get_available_point_id() == 2)
 ________
 Add a new point with the given `terrain_type`.
 
-If `terrain_type` is [`None`](https://docs.godotengine.org/en/stable/classes/class_none.html), `-1` is used.
+If `terrain_type` is [`None`], `-1` is used.
 
 ### Errors
 If a point with the given id already exists, the map is unchanged and
@@ -65,7 +65,7 @@ dijkstra_map.add_point(1, 0) # terrain_type is 0
 ________
 Set the terrain type for `point_id`.
 
-If `terrain_id` is [`None`](https://docs.godotengine.org/en/stable/classes/class_none.html), `-1` is used.
+If `terrain_id` is [`None`], `-1` is used.
 
 ### Errors
 If the given id does not exists in the map, `1` is returned.
@@ -247,7 +247,7 @@ assert(dijkstra_map.get_direction_at_point(2) == -1)
 ________
 Returns the cost of the shortest path from this point to the target.
 
-If there is no path, the cost is [`INFINITY`](https://docs.godotengine.org/en/stable/classes/class_infinity.html).
+If there is no path, the cost is [`INFINITY`](f32::INFINITY).
 
 ### Example
 ```gdscript
@@ -271,7 +271,7 @@ Dijkstra's algorithm.
 
 ### Parameters
 -   `origin` : ID of the origin point, or array of IDs (preferably
-[`Int32Array`](https://docs.godotengine.org/en/stable/classes/class_int32array.html)).
+[`Int32Array`](https://docs.godotengine.org/en/stable/classes/class_poolintarray.html)).
 
 
 -   `optional_params: `[`Dictionary`](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) : Specifies optional arguments. 
@@ -282,7 +282,7 @@ Valid arguments are :
 
 Wether or not the `origin` points are seen as destination.
   - `"maximum_cost" -> float`
-(default : [`INFINITY`](https://docs.godotengine.org/en/stable/classes/class_infinity.html)) : 
+(default : [`INFINITY`](f32::INFINITY)) : 
 
 Specifies maximum cost. Once all shortest paths no longer than
 maximum cost are found, algorithm terminates. All points with cost
@@ -298,7 +298,7 @@ Can be used to weigh the origins with a preference.
 
 Specifies weights of terrain types. Keys are terrain type IDs and
 values are floats. Unspecified terrains will have
-[`INFINITE`](https://docs.godotengine.org/en/stable/classes/class_infinity.html) weight. 
+[`INFINITE`](f32::INFINITY) weight. 
 
 Note that `-1` correspond to the default terrain (which have a
 weight of `1.0`), and will thus be ignored if it appears in the
@@ -314,7 +314,7 @@ the algorithm.
 `1` is returned if :
 
 - One of the keys in `optional_params` is invalid.
-- `origin` is neither an [`I64`](https://docs.godotengine.org/en/stable/classes/class_i64.html), a [`Int32Array`](https://docs.godotengine.org/en/stable/classes/class_int32array.html) or a [`VariantArray`](https://docs.godotengine.org/en/stable/classes/class_variantarray.html).
+- `origin` is neither an [`I64`](gdnative::core_types::VariantType::I64), a [`Int32Array`](https://docs.godotengine.org/en/stable/classes/class_poolintarray.html) or a [`VariantArray`](https://docs.godotengine.org/en/stable/classes/class_array.html).
 ### Example
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -360,7 +360,7 @@ For each point in the given array, returns the cost of the shortest
 path from this point to the target.
 
 If there is no path from a point to the target, the cost is
-[`INFINITY`](https://docs.godotengine.org/en/stable/classes/class_infinity.html).
+[`INFINITY`](f32::INFINITY).
 
 ### Example
 ```gdscript
@@ -435,10 +435,10 @@ assert(Array(dijkstra_map.get_all_points_with_cost_between(0.5, 1.5)) == [1])
 ```
 ## func get_shortest_path_from_point(point_id: [int](https://docs.godotengine.org/en/stable/classes/class_int.html)) -> [PoolIntArray](https://docs.godotengine.org/en/stable/classes/class_poolintarray.html)
 ________
-Returns an [array](https://docs.godotengine.org/en/stable/classes/class_int32array.html) of points describing the shortest path from a
+Returns an [array](https://docs.godotengine.org/en/stable/classes/class_poolintarray.html) of points describing the shortest path from a
 starting point.
 
-If the starting point is a target or is inaccessible, the [array](https://docs.godotengine.org/en/stable/classes/class_int32array.html) will
+If the starting point is a target or is inaccessible, the [array](https://docs.godotengine.org/en/stable/classes/class_poolintarray.html) will
 be empty.
 
 #### Note
@@ -456,12 +456,12 @@ the grid.
 - `orthogonal_cost` (default : `1.0`) : specifies cost of orthogonal
 connections (up, down, right and left). 
 
-If `orthogonal_cost` is [`INFINITY`](https://docs.godotengine.org/en/stable/classes/class_infinity.html) or [`Nan`](https://docs.godotengine.org/en/stable/classes/class_nan.html), orthogonal
+If `orthogonal_cost` is [`INFINITY`](f32::INFINITY) or [`Nan`](f32::NAN), orthogonal
 connections are disabled.
-- `diagonal_cost` (default : [`INFINITY`](https://docs.godotengine.org/en/stable/classes/class_infinity.html)) : specifies cost of diagonal
+- `diagonal_cost` (default : [`INFINITY`](f32::INFINITY)) : specifies cost of diagonal
 connections. 
 
-If `diagonal_cost` is [`INFINITY`](https://docs.godotengine.org/en/stable/classes/class_infinity.html) or [`Nan`](https://docs.godotengine.org/en/stable/classes/class_nan.html), diagonal connections
+If `diagonal_cost` is [`INFINITY`](f32::INFINITY) or [`Nan`](f32::NAN), diagonal connections
 are disabled.
 ### Returns
 This function returns a Dictionary where keys are coordinates of points

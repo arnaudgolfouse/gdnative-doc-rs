@@ -1,29 +1,28 @@
-use crate::documentation::{Documentation, Type};
-use pulldown_cmark::{BrokenLink, CodeBlockKind, CowStr, Event, LinkType, Parser, Tag};
+mod markdown;
 
-pub struct MarkdownContext<Encode>
-where
-    Encode: Fn(&mut String, Vec<Event<'_>>),
-{
-    encoder: Encode,
-    godot_documentation_path: String,
-    //gdnative_classes: Vec<String>,
-    //added_classes: Vec<String>,
+pub use markdown::encode_markdown;
+
+use crate::{
+    config::Config,
+    documentation::{Documentation, Type},
+};
+use pulldown_cmark::{BrokenLink, CowStr, Event, LinkType, Parser, Tag};
+
+pub struct Generator {
+    config: Config,
+    encoder: Box<dyn Fn(&mut String, Vec<Event<'_>>)>,
     documentation: Documentation,
 }
 
-impl<Encode> MarkdownContext<Encode>
-where
-    Encode: Fn(&mut String, Vec<Event<'_>>),
-{
-    pub fn new(documentation: Documentation, encoder: Encode) -> Self {
+impl Generator {
+    pub fn new(
+        config: Config,
+        documentation: Documentation,
+        encoder: Box<dyn Fn(&mut String, Vec<Event<'_>>)>,
+    ) -> Self {
         Self {
+            config,
             encoder,
-            godot_documentation_path: String::from(
-                "https://docs.godotengine.org/en/stable/classes",
-            ),
-            //gdnative_classes: vec![],
-            //added_classes: Vec::new(),
             documentation,
         }
     }
@@ -170,16 +169,23 @@ where
     /// Resolve a name to the class it must link to.
     fn resolve(&self, link: &str) -> Option<String> {
         if let Ok(link) = syn::parse_str::<syn::Path>(link) {
-            let base = match link.segments.last() {
+            let mut base = match link.segments.last() {
                 None => return None,
                 Some(base) => base.ident.to_string(),
             };
-            // TODO: differentiate between godot and user-defined classes
-            Some(format!(
-                "{}/class_{}.html",
-                self.godot_documentation_path,
-                base.to_lowercase()
-            ))
+            if let Some(path) = self.config.overrides.get(&base).cloned() {
+                Some(path)
+            } else {
+                base = match self.config.rust_to_godot.get(&base) {
+                    Some(base) => base.clone(),
+                    None => base,
+                };
+                if let Some(path) = self.config.godot_classes.get(&base).cloned() {
+                    Some(path)
+                } else {
+                    None
+                }
+            }
         } else {
             None
         }
@@ -202,18 +208,12 @@ where
     }
 }
 
-struct EventIterator<'a, Encode>
-where
-    Encode: Fn(&mut String, Vec<Event<'_>>),
-{
-    context: &'a MarkdownContext<Encode>,
+struct EventIterator<'a> {
+    context: &'a Generator,
     parser: Parser<'a>,
 }
 
-impl<'a, Encode> Iterator for EventIterator<'a, Encode>
-where
-    Encode: Fn(&mut String, Vec<Event<'_>>),
-{
+impl<'a> Iterator for EventIterator<'a> {
     type Item = Event<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -225,121 +225,4 @@ where
 
 pub fn encode_html(s: &mut String, events: Vec<Event<'_>>) {
     pulldown_cmark::html::push_html(s, events.into_iter())
-}
-
-pub fn encode_markdown(s: &mut String, events: Vec<Event<'_>>) {
-    let mut indentation: u32 = 0;
-    for event in events {
-        match event {
-            Event::Start(tag) => match tag {
-                Tag::Paragraph => {
-                    for _ in 0..indentation {
-                        s.push_str("  ")
-                    }
-                }
-                Tag::Heading(level) => {
-                    for _ in 0..level {
-                        s.push('#');
-                    }
-                    s.push(' ');
-                }
-                Tag::BlockQuote => {
-                    eprintln!("BlockQuote: Unsupported at the moment")
-                }
-                Tag::CodeBlock(kind) => match kind {
-                    CodeBlockKind::Indented => {
-                        indentation += 1;
-                    }
-                    CodeBlockKind::Fenced(lang) => {
-                        s.push_str("```");
-                        s.push_str(&lang);
-                        s.push('\n');
-                    }
-                },
-                Tag::List(_) => {
-                    indentation += 1;
-                }
-                Tag::Item => {
-                    for _ in 0..(indentation.saturating_sub(1)) {
-                        s.push_str("  ")
-                    }
-                    s.push_str("- ")
-                }
-                Tag::FootnoteDefinition(_) => {}
-                Tag::Table(_) => {
-                    eprintln!("Table: Unsupported at the moment")
-                }
-                Tag::TableHead => {}
-                Tag::TableRow => {}
-                Tag::TableCell => {}
-                Tag::Emphasis => s.push('*'),
-                Tag::Strong => s.push_str("**"),
-                Tag::Strikethrough => s.push_str("~~"),
-                Tag::Link(_, _, _) => s.push('['),
-                Tag::Image(_, dest, title) => {
-                    s.push_str("![](");
-                    s.push_str(&dest);
-                    if !title.is_empty() {
-                        s.push_str(" \"");
-                        s.push_str(&title);
-                        s.push('"');
-                    }
-                    s.push(')');
-                }
-            },
-            Event::End(tag) => match tag {
-                Tag::Paragraph => s.push_str("\n\n"),
-                Tag::Heading(_) => s.push('\n'),
-                Tag::BlockQuote => {
-                    eprintln!("BlockQuote: Unsupported at the moment")
-                }
-                Tag::CodeBlock(kind) => match kind {
-                    CodeBlockKind::Indented => {
-                        indentation -= 1;
-                    }
-                    CodeBlockKind::Fenced(_) => {
-                        s.push_str("```");
-                        s.push('\n');
-                    }
-                },
-                Tag::List(_) => {
-                    indentation -= 1;
-                }
-                Tag::Item => s.push('\n'),
-                Tag::FootnoteDefinition(_) => {}
-                Tag::Table(_) => {
-                    eprintln!("Table: Unsupported at the moment")
-                }
-                Tag::TableHead => {}
-                Tag::TableRow => {}
-                Tag::TableCell => {}
-                Tag::Emphasis => s.push('*'),
-                Tag::Strong => s.push_str("**"),
-                Tag::Strikethrough => s.push_str("~~"),
-                Tag::Link(_, dest, title) => {
-                    s.push_str("](");
-                    s.push_str(&dest);
-                    if !title.is_empty() {
-                        s.push_str(" \"");
-                        s.push_str(&title);
-                        s.push('"');
-                    }
-                    s.push(')');
-                }
-                Tag::Image(_, _, _) => {}
-            },
-            Event::Text(text) => s.push_str(&text),
-            Event::Code(code) => {
-                s.push('`');
-                s.push_str(&code);
-                s.push('`');
-            }
-            Event::Html(html) => s.push_str(&html), // ???
-            Event::FootnoteReference(_) => {}
-            Event::SoftBreak => s.push('\n'),
-            Event::HardBreak => s.push_str("\n\n"),
-            Event::Rule => s.push_str("________\n"),
-            Event::TaskListMarker(checked) => s.push_str(if checked { "[X]" } else { "[ ]" }),
-        }
-    }
 }
