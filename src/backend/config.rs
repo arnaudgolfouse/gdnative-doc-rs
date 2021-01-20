@@ -16,25 +16,7 @@ pub struct Config {
     pub backend: Backend,
 }
 
-// TODO: get these from godot's documentation ?
-// https://github.com/godotengine/godot-docs/tree/master/classes
-// OR search https://github.com/godot-rust/godot-rust, they may have found a better way
-const GODOT_CLASSES: &[&str] = &[
-    "Array",
-    "AStar",
-    "AStar2D",
-    "bool",
-    "Dictionary",
-    "float",
-    "int",
-    "PoolIntArray",
-    "PoolRealArray",
-    "Rect2",
-    "Transform",
-    "Transform2D",
-    "Variant",
-    "Vector2",
-];
+pub const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classes");
 
 const RUST_TO_GODOT: &[(&str, &str)] = &[
     ("i32", "int"),

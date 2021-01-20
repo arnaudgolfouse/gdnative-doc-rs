@@ -14,6 +14,7 @@ To test on a rust crate:
 
 An example of the output can be found in `/example`.
 
-## syn VS rust-analyzer
+## Limitations
 
-At the moment, [syn](https://crates.io/crates/syn) is used to parse rust and search for the `struct` and `impl`s. This is not optimal however, so another solution is being crafted on the `rust-analyzer` branch, that will use [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer) libraries.
+At the moment, [syn](https://crates.io/crates/syn) is used to parse rust and search for the `struct` and `impl`s. This is not optimal however and might sometime mess up link resolution.
+[rust-analyzer](https://github.com/rust-analyzer/rust-analyzer) libraries will probably be used in the future to avoid this.
