@@ -1,19 +1,22 @@
 # Interface
 Interface exported to Godot
 
-All public method of this struct are usable in gdscript.
+The map must first be filled by using e.g. `add_point`, `connect_points`,
+`add_square_grid`...
 
-## func new() -> [Self]()
+And then you must call `recalculate` on it.
+
+## func new() -> Self
 ________
-Create a new empty [`DijkstraMap`].
+Create a new empty ~~`Interface`~~ `DijkstraMap`.
 
 ### Example
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 ```
-## func clear() -> [void]()
+## func clear() -> void
 ________
-Clear the underlying [`DijkstraMap`].
+Clear the underlying `DijkstraMap`.
 
 ### Example
 ```gdscript
@@ -21,7 +24,7 @@ dijkstra_map.clear()
 ```
 ## func duplicate_graph_from(source_instance: [Variant](https://docs.godotengine.org/en/stable/classes/class_variant.html)) -> [int](https://docs.godotengine.org/en/stable/classes/class_int.html)
 ________
-If `source_instance` is a [dijkstra map](./Interface.md), it is cloned into
+If `source_instance` is a `dijkstra map`, it is cloned into
 `self`.
 
 ### Errors
@@ -49,7 +52,7 @@ assert(dijkstra_map.get_available_point_id() == 2)
 ________
 Add a new point with the given `terrain_type`.
 
-If `terrain_type` is [`None`], `-1` is used.
+If `terrain_type` not specified, `-1` is used.
 
 ### Errors
 If a point with the given id already exists, the map is unchanged and
@@ -65,7 +68,7 @@ dijkstra_map.add_point(1, 0) # terrain_type is 0
 ________
 Set the terrain type for `point_id`.
 
-If `terrain_id` is [`None`], `-1` is used.
+If `terrain_id` is not specified, `-1` is used.
 
 ### Errors
 If the given id does not exists in the map, `1` is returned.
@@ -112,7 +115,7 @@ assert(dijkstra_map.remove_point(0) == 1)
 ```
 ## func has_point(point_id: [int](https://docs.godotengine.org/en/stable/classes/class_int.html)) -> [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)
 ________
-Returns [`true`] if the map contains the given point.
+Returns [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html) if the map contains the given point.
 
 ## func disable_point(point_id: [int](https://docs.godotengine.org/en/stable/classes/class_int.html)) -> [int](https://docs.godotengine.org/en/stable/classes/class_int.html)
 ________
@@ -144,8 +147,8 @@ assert(dijkstra_map.enable_point(1) == 1)
 ```
 ## func is_point_disabled(point_id: [int](https://docs.godotengine.org/en/stable/classes/class_int.html)) -> [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)
 ________
-Returns [`true`] if the point exists and is disabled, otherwise returns
-[`false`].
+Returns [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html) if the point exists and is disabled, otherwise returns
+[`false`](https://docs.godotengine.org/en/stable/classes/class_bool.html).
 
 ### Example
 ```gdscript
@@ -157,7 +160,7 @@ assert(dijkstra_map.is_point_disabled(0))
 assert(!dijkstra_map.is_point_disabled(1))
 assert(!dijkstra_map.is_point_disabled(2))
 ```
-## func connect_points(source: [int](https://docs.godotengine.org/en/stable/classes/class_int.html), target: [int](https://docs.godotengine.org/en/stable/classes/class_int.html), weight: [float](https://docs.godotengine.org/en/stable/classes/class_float.html) (opt), bidirectional: [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) (opt)) -> [int](https://docs.godotengine.org/en/stable/classes/class_int.html)
+## func connect_points(source: [int](https://docs.godotengine.org/en/stable/classes/class_int.html), target: [int](https://docs.godotengine.org/en/stable/classes/class_int.html), weight: f32 (opt), bidirectional: [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) (opt)) -> [int](https://docs.godotengine.org/en/stable/classes/class_int.html)
 ________
 Connects the two given points.
 
@@ -166,7 +169,7 @@ Connects the two given points.
 - `target` : target point of the connection.
 - `weight` : weight of the connection. Defaults to `1.0`.
 - `bidirectional` : wether or not the reciprocal connection should be
-made. Defaults to [`true`].
+made. Defaults to [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html).
 ### Errors
 Return `1` if one of the points does not exists in the map.
 
@@ -190,7 +193,7 @@ Remove a connection between the two given points.
 ### Parameters
 - `source` : source point of the connection.
 - `target` : target point of the connection.
-- `bidirectional` (default : [`true`]) : if [`true`], also removes
+- `bidirectional` (default : [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html)) : if [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html), also removes
 connection from target to source.
 ### Errors
 Returns `1` if one of the points does not exist.
@@ -210,7 +213,7 @@ assert(dijkstra_map.has_connection(1, 0))
 ```
 ## func has_connection(source: [int](https://docs.godotengine.org/en/stable/classes/class_int.html), target: [int](https://docs.godotengine.org/en/stable/classes/class_int.html)) -> [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)
 ________
-Returns [`true`] if there is a connection from `source` to `target`
+Returns [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html) if there is a connection from `source` to `target`
 (and they both exist).
 
 ### Example
@@ -243,11 +246,11 @@ assert(dijkstra_map.get_direction_at_point(0) == 0)
 assert(dijkstra_map.get_direction_at_point(1) == 0)
 assert(dijkstra_map.get_direction_at_point(2) == -1)
 ```
-## func get_cost_at_point(point_id: [int](https://docs.godotengine.org/en/stable/classes/class_int.html)) -> [float](https://docs.godotengine.org/en/stable/classes/class_float.html)
+## func get_cost_at_point(point_id: [int](https://docs.godotengine.org/en/stable/classes/class_int.html)) -> f32
 ________
 Returns the cost of the shortest path from this point to the target.
 
-If there is no path, the cost is [`INFINITY`](f32::INFINITY).
+If there is no path, the cost is [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants).
 
 ### Example
 ```gdscript
@@ -278,11 +281,11 @@ Dijkstra's algorithm.
 
 Valid arguments are :
 
-  - `"input_is_destination" -> bool` (default : [`true`]) : 
+  - `"input_is_destination" -> bool` (default : [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html)) : 
 
 Wether or not the `origin` points are seen as destination.
   - `"maximum_cost" -> float`
-(default : [`INFINITY`](f32::INFINITY)) : 
+(default : [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants)) : 
 
 Specifies maximum cost. Once all shortest paths no longer than
 maximum cost are found, algorithm terminates. All points with cost
@@ -298,7 +301,7 @@ Can be used to weigh the origins with a preference.
 
 Specifies weights of terrain types. Keys are terrain type IDs and
 values are floats. Unspecified terrains will have
-[`INFINITE`](f32::INFINITY) weight. 
+[infinite](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants) weight. 
 
 Note that `-1` correspond to the default terrain (which have a
 weight of `1.0`), and will thus be ignored if it appears in the
@@ -360,7 +363,7 @@ For each point in the given array, returns the cost of the shortest
 path from this point to the target.
 
 If there is no path from a point to the target, the cost is
-[`INFINITY`](f32::INFINITY).
+[`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants).
 
 ### Example
 ```gdscript
@@ -416,7 +419,7 @@ var computed_direction_map = dijkstra_map.get_direction_map()
 for id in computed_direction_map.keys():
     assert(computed_direction_map[id] == direction_map[id])
 ```
-## func get_all_points_with_cost_between(min_cost: [float](https://docs.godotengine.org/en/stable/classes/class_float.html), max_cost: [float](https://docs.godotengine.org/en/stable/classes/class_float.html)) -> [PoolIntArray](https://docs.godotengine.org/en/stable/classes/class_poolintarray.html)
+## func get_all_points_with_cost_between(min_cost: f32, max_cost: f32) -> [PoolIntArray](https://docs.godotengine.org/en/stable/classes/class_poolintarray.html)
 ________
 Returns an array of all the points whose cost is between `min_cost` and
 `max_cost`.
@@ -444,7 +447,7 @@ be empty.
 #### Note
 The starting point itself is not included.
 
-## func add_square_grid(bounds: [Variant](https://docs.godotengine.org/en/stable/classes/class_variant.html), terrain_type: [int](https://docs.godotengine.org/en/stable/classes/class_int.html) (opt), orthogonal_cost: [float](https://docs.godotengine.org/en/stable/classes/class_float.html) (opt), diagonal_cost: [float](https://docs.godotengine.org/en/stable/classes/class_float.html) (opt)) -> [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html)
+## func add_square_grid(bounds: [Variant](https://docs.godotengine.org/en/stable/classes/class_variant.html), terrain_type: [int](https://docs.godotengine.org/en/stable/classes/class_int.html) (opt), orthogonal_cost: f32 (opt), diagonal_cost: f32 (opt)) -> [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html)
 ________
 Adds a square grid of connected points.
 
@@ -456,18 +459,18 @@ the grid.
 - `orthogonal_cost` (default : `1.0`) : specifies cost of orthogonal
 connections (up, down, right and left). 
 
-If `orthogonal_cost` is [`INFINITY`](f32::INFINITY) or [`Nan`](f32::NAN), orthogonal
+If `orthogonal_cost` is [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants) or [`NAN`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants), orthogonal
 connections are disabled.
-- `diagonal_cost` (default : [`INFINITY`](f32::INFINITY)) : specifies cost of diagonal
+- `diagonal_cost` (default : [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants)) : specifies cost of diagonal
 connections. 
 
-If `diagonal_cost` is [`INFINITY`](f32::INFINITY) or [`Nan`](f32::NAN), diagonal connections
+If `diagonal_cost` is [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants) or [`NAN`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants), diagonal connections
 are disabled.
 ### Returns
 This function returns a Dictionary where keys are coordinates of points
 ([`Vector2`](https://docs.godotengine.org/en/stable/classes/class_vector2.html)) and values are their corresponding point IDs.
 
-## func add_hexagonal_grid(bounds: [Variant](https://docs.godotengine.org/en/stable/classes/class_variant.html), terrain_type: [int](https://docs.godotengine.org/en/stable/classes/class_int.html) (opt), weight: [float](https://docs.godotengine.org/en/stable/classes/class_float.html) (opt)) -> [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html)
+## func add_hexagonal_grid(bounds: [Variant](https://docs.godotengine.org/en/stable/classes/class_variant.html), terrain_type: [int](https://docs.godotengine.org/en/stable/classes/class_int.html) (opt), weight: f32 (opt)) -> [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html)
 ________
 Adds a hexagonal grid of connected points.
 

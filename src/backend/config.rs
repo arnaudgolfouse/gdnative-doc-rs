@@ -100,4 +100,12 @@ impl Config {
     pub fn backend_extension(&self) -> &'static str {
         self.backend.extension()
     }
+
+    pub(crate) fn godot_name<'a>(&'a self, name: &'a str) -> &'a str {
+        if let Some(name) = self.rust_to_godot.get(name) {
+            name
+        } else {
+            name
+        }
+    }
 }

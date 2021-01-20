@@ -3,7 +3,7 @@
 //! This internally uses the [dijkstra-map](dijkstra_map) crate.
 //!
 //! Examples describe how to use the code in gdscript, where the name of the
-//! class corresponding to [`Interface`] is `DijkstraMap`.
+//! class corresponding to `Interface` is `DijkstraMap`.
 
 use dijkstra_map::{Cost, DijkstraMap, PointID, Read, TerrainType, Weight};
 use fnv::FnvHashMap;
@@ -20,7 +20,10 @@ const GODOT_ERROR: i64 = 1;
 
 /// Interface exported to Godot
 ///
-/// All public method of this struct are usable in gdscript.
+/// The map must first be filled by using e.g. `add_point`, `connect_points`,
+/// `add_square_grid`...
+///
+/// And then you must call `recalculate` on it.
 #[derive(NativeClass)]
 #[inherit(Reference)]
 pub struct Interface {
@@ -58,7 +61,7 @@ fn variant_to_width_and_height(bounds: Variant) -> Option<(usize, usize, usize, 
 
 #[methods]
 impl Interface {
-    /// Create a new empty [`DijkstraMap`].
+    /// Create a new empty ~~`Interface`~~ `DijkstraMap`.
     ///
     /// # Example
     /// ```gdscript
@@ -71,7 +74,7 @@ impl Interface {
     }
 
     #[export]
-    /// Clear the underlying [`DijkstraMap`].
+    /// Clear the underlying `DijkstraMap`.
     ///
     /// # Example
     /// ```gdscript
@@ -82,7 +85,7 @@ impl Interface {
     }
 
     #[export]
-    /// If `source_instance` is a [dijkstra map](Interface), it is cloned into
+    /// If `source_instance` is a `dijkstra map`, it is cloned into
     /// `self`.
     ///
     /// # Errors
@@ -133,7 +136,7 @@ impl Interface {
     #[export]
     /// Add a new point with the given `terrain_type`.
     ///
-    /// If `terrain_type` is [`None`], `-1` is used.
+    /// If `terrain_type` not specified, `-1` is used.
     ///
     /// # Errors
     ///
@@ -160,7 +163,7 @@ impl Interface {
     #[export]
     /// Set the terrain type for `point_id`.
     ///
-    /// If `terrain_id` is [`None`], `-1` is used.
+    /// If `terrain_id` is not specified, `-1` is used.
     ///
     /// # Errors
     ///
@@ -427,7 +430,7 @@ impl Interface {
     #[export]
     /// Returns the cost of the shortest path from this point to the target.
     ///
-    /// If there is no path, the cost is [`INFINITY`](f32::INFINITY).
+    /// If there is no path, the cost is [`INF`].
     ///
     /// # Example
     /// ```gdscript
@@ -461,7 +464,7 @@ impl Interface {
     ///   - `"input_is_destination" -> bool` (default : [`true`]) : \
     ///     Wether or not the `origin` points are seen as destination.
     ///   - `"maximum_cost" -> float`
-    ///         (default : [`INFINITY`](f32::INFINITY)) : \
+    ///         (default : [`INF`]) : \
     ///     Specifies maximum cost. Once all shortest paths no longer than
     ///     maximum cost are found, algorithm terminates. All points with cost
     ///     bigger than this are treated as inaccessible.
@@ -473,7 +476,7 @@ impl Interface {
     ///   - `"terrain_weights" -> Dictionary` (default : empty) : \
     ///     Specifies weights of terrain types. Keys are terrain type IDs and
     ///     values are floats. Unspecified terrains will have
-    ///     [`INFINITE`](f32::INFINITY) weight. \
+    ///     [infinite](INF) weight. \
     ///     Note that `-1` correspond to the default terrain (which have a
     ///     weight of `1.0`), and will thus be ignored if it appears in the
     ///     keys.
@@ -842,7 +845,7 @@ impl Interface {
     /// path from this point to the target.
     ///
     /// If there is no path from a point to the target, the cost is
-    /// [`INFINITY`](f32::INFINITY).
+    /// [`INF`].
     ///
     /// # Example
     /// ```gdscript
@@ -1003,20 +1006,17 @@ impl Interface {
     ///   the grid.
     /// - `orthogonal_cost` (default : `1.0`) : specifies cost of orthogonal
     ///   connections (up, down, right and left). \
-    ///   If `orthogonal_cost` is [`INFINITY`] or [`Nan`], orthogonal
+    ///   If `orthogonal_cost` is [`INF`] or [`NAN`], orthogonal
     ///   connections are disabled.
-    /// - `diagonal_cost` (default : [`INFINITY`]) : specifies cost of diagonal
+    /// - `diagonal_cost` (default : [`INF`]) : specifies cost of diagonal
     ///   connections. \
-    ///   If `diagonal_cost` is [`INFINITY`] or [`Nan`], diagonal connections
+    ///   If `diagonal_cost` is [`INF`] or [`NAN`], diagonal connections
     ///   are disabled.
     ///
     /// # Returns
     ///
     /// This function returns a Dictionary where keys are coordinates of points
     /// ([`Vector2`]) and values are their corresponding point IDs.
-    ///
-    /// [`INFINITY`]: f32::INFINITY
-    /// [`Nan`]: f32::NAN
     pub fn add_square_grid(
         &mut self,
         _owner: &Reference,

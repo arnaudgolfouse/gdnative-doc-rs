@@ -125,8 +125,8 @@ impl Generator {
                     );
                     function_section.clear();
                     let (typ, optional) = match typ {
-                        Type::Option(typ) => (self.godot_name(typ.as_str()), true),
-                        Type::Named(typ) => (self.godot_name(typ.as_str()), false),
+                        Type::Option(typ) => (self.config.godot_name(typ.as_str()), true),
+                        Type::Named(typ) => (self.config.godot_name(typ.as_str()), false),
                         Type::Unit => ("void", false),
                     };
                     match self.resolve(typ) {
@@ -140,7 +140,7 @@ impl Generator {
                                 &mut class_file,
                                 vec![
                                     Event::Start(link.clone()),
-                                    Event::Text(CowStr::Borrowed(self.godot_name(typ))),
+                                    Event::Text(CowStr::Borrowed(self.config.godot_name(typ))),
                                     Event::End(link),
                                 ],
                             );
@@ -161,30 +161,34 @@ impl Generator {
                 );
 
                 let return_type = match &method.return_type {
-                    Type::Option(typ) | Type::Named(typ) => self.godot_name(typ.as_str()),
+                    Type::Option(typ) | Type::Named(typ) => self.config.godot_name(typ.as_str()),
                     Type::Unit => "void",
                 };
-                let resolve_return = match self.resolve(return_type) {
-                    Some(resolved) => resolved,
-                    None => String::new(),
+                let resolve_return = self.resolve(return_type);
+                let return_events = match resolve_return.as_ref().map(|return_link| {
+                    Tag::Link(
+                        LinkType::Inline,
+                        CowStr::Borrowed(&return_link),
+                        CowStr::Borrowed(""),
+                    )
+                }) {
+                    Some(link) => {
+                        vec![
+                            Event::Start(link.clone()),
+                            Event::Text(CowStr::Borrowed(self.config.godot_name(return_type))),
+                            Event::End(link),
+                            Event::End(Tag::Heading(2)),
+                        ]
+                    }
+                    None => {
+                        vec![
+                            Event::Text(CowStr::Borrowed(self.config.godot_name(return_type))),
+                            Event::End(Tag::Heading(2)),
+                        ]
+                    }
                 };
-                let link = Tag::Link(
-                    LinkType::Inline,
-                    CowStr::Borrowed(&resolve_return),
-                    CowStr::Borrowed(""),
-                );
 
-                (self.encoder)(
-                    &mut class_file,
-                    vec![
-                        Event::Start(link.clone()),
-                        Event::Text(CowStr::Borrowed(
-                            self.godot_name(self.godot_name(return_type)),
-                        )),
-                        Event::End(link),
-                        Event::End(Tag::Heading(2)),
-                    ],
-                );
+                (self.encoder)(&mut class_file, return_events);
                 (self.encoder)(&mut class_file, vec![Event::Rule]);
                 let mut broken_link_callback = |broken_link: BrokenLink<'_>| {
                     self.broken_link_callback(broken_link.reference)
@@ -212,19 +216,11 @@ impl Generator {
         self.resolve(link)
     }
 
-    fn godot_name<'a>(&self, name: &'a str) -> &'a str {
-        match name {
-            "i32" | "i64" => "int",
-            "f32" => "float",
-            "VariantArray" => "Array",
-            "Int32Array" => "PoolIntArray",
-            "Float32Array" => "PoolRealArray",
-            _ => name,
-        }
-    }
-
     /// Resolve a name to the class it must link to.
     fn resolve(&self, link: &str) -> Option<String> {
+        if let Some(link) = self.config.overrides.get(link).cloned() {
+            return Some(link);
+        }
         if let Ok(link) = syn::parse_str::<syn::Path>(link) {
             let mut base = match link.segments.last() {
                 None => return None,
@@ -233,8 +229,8 @@ impl Generator {
             if let Some(path) = self.config.overrides.get(&base).cloned() {
                 Some(path)
             } else {
-                base = match self.config.rust_to_godot.get(&base) {
-                    Some(base) => base.clone(),
+                base = match self.config.rust_to_godot.get(&base).cloned() {
+                    Some(base) => base,
                     None => base,
                 };
                 if let Some(path) = self.config.godot_classes.get(&base).cloned() {
