@@ -1,5 +1,5 @@
 output = "./doc"
 root_file = "./lib.rs"
 markdown_options = ["STRIKETHROUGH"]
-backend = "markdown"
+backends = ["markdown", "html"]
 overrides = { "INF" = "https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants", "NAN" = "https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants", "true" = "https://docs.godotengine.org/en/stable/classes/class_bool.html", "false" = "https://docs.godotengine.org/en/stable/classes/class_bool.html" }

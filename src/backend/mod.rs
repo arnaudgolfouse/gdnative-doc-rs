@@ -7,7 +7,7 @@ pub use markdown::MarkdownCallbacks;
 use crate::documentation::{Documentation, Type};
 use pulldown_cmark::{BrokenLink, CowStr, Event, LinkType, Parser, Tag};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Backend {
     Markdown,
     Html,
@@ -37,16 +37,16 @@ impl Callbacks for HtmlCallbacks {
     fn finish_encoding(&mut self, _s: &mut String) {}
 }
 
-pub struct Generator {
-    config: Config,
+pub struct Generator<'a> {
+    config: &'a Config,
     callbacks: Box<dyn Callbacks>,
-    documentation: Documentation,
+    documentation: &'a Documentation,
 }
 
-impl Generator {
+impl<'a> Generator<'a> {
     pub fn new(
-        config: Config,
-        documentation: Documentation,
+        config: &'a Config,
+        documentation: &'a Documentation,
         callbacks: Box<dyn Callbacks>,
     ) -> Self {
         Self {
@@ -57,7 +57,7 @@ impl Generator {
     }
 
     /// Generate the root documentation file of the crate.
-    pub fn generate_root_file(&mut self) -> String {
+    pub fn generate_root_file(&mut self, backend: Backend) -> String {
         let mut root_file = String::new();
         let config = &self.config;
         let mut broken_link_callback = |broken_link: BrokenLink<'_>| {
@@ -68,7 +68,7 @@ impl Generator {
             context: config,
             parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                 &self.documentation.root_documentation,
-                self.config.options,
+                self.config.markdown_options,
                 Some(&mut broken_link_callback),
             ),
         };
@@ -82,7 +82,7 @@ impl Generator {
         for (class_name, _) in &self.documentation.classes {
             let link = Tag::Link(
                 LinkType::Inline,
-                format!("./{}.{}", class_name, self.config.backend_extension()).into(),
+                format!("./{}.{}", class_name, backend.extension()).into(),
                 CowStr::Borrowed(""),
             );
             events.extend(vec![
@@ -123,7 +123,7 @@ impl Generator {
                 context: config,
                 parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                     &class.documentation,
-                    self.config.options,
+                    self.config.markdown_options,
                     Some(&mut broken_link_callback),
                 ),
             };
@@ -219,7 +219,7 @@ impl Generator {
                     context: config,
                     parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                         &method.documentation,
-                        self.config.options,
+                        self.config.markdown_options,
                         Some(&mut broken_link_callback),
                     ),
                 };

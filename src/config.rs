@@ -18,8 +18,7 @@ pub struct UserConfig {
     pub(crate) overrides: Option<HashMap<String, String>>,
     pub root_file: Option<PathBuf>,
     pub output: PathBuf,
-    // TODO: allow multiple backends ?
-    pub(crate) backend: Option<String>,
+    pub(crate) backends: Option<Vec<String>>,
     pub(crate) markdown_options: Option<Vec<String>>,
 }
 

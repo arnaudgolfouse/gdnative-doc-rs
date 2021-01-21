@@ -12,8 +12,8 @@ pub struct Config {
     /// User-defined overrides
     pub(crate) overrides: HashMap<String, String>,
     /// Markdown options
-    pub(crate) options: pulldown_cmark::Options,
-    pub backend: Backend,
+    pub(crate) markdown_options: pulldown_cmark::Options,
+    pub backends: Vec<Backend>,
 }
 
 pub const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classes");
@@ -28,11 +28,9 @@ const RUST_TO_GODOT: &[(&str, &str)] = &[
     ("Float32Array", "PoolRealArray"),
 ];
 
-impl Default for Config {
-    fn default() -> Self {
+impl Config {
+    fn godot_classes() -> HashMap<String, String> {
         let mut godot_classes = HashMap::new();
-        let mut rust_to_godot = HashMap::new();
-
         for class in GODOT_CLASSES {
             godot_classes.insert(
                 class.to_string(),
@@ -42,46 +40,57 @@ impl Default for Config {
                 ),
             );
         }
+        godot_classes
+    }
 
+    fn rust_to_godot() -> HashMap<String, String> {
+        let mut rust_to_godot = HashMap::new();
         for (rust, godot) in RUST_TO_GODOT {
             rust_to_godot.insert(rust.to_string(), godot.to_string());
         }
-
-        Self {
-            godot_classes,
-            rust_to_godot,
-            overrides: HashMap::new(),
-            options: pulldown_cmark::Options::ENABLE_STRIKETHROUGH,
-            backend: Backend::Markdown,
-        }
+        rust_to_godot
     }
-}
 
-impl Config {
-    pub fn with_user_config(user_config: UserConfig) -> Self {
-        let mut config = Self::default();
-        if let Some(markdown_options) = user_config.markdown_options() {
-            config.options = markdown_options;
-        }
-        if let Some(overrides) = user_config.overrides {
-            config.overrides = overrides;
-        }
-        if let Some(backend) = user_config.backend {
-            config.backend = match backend.as_str() {
-                "markdown" => Backend::Markdown,
-                "html" => Backend::Html,
-                _ => {
-                    log::error!("unknown backend: {}", backend);
-                    panic!("unknown backend: {}", backend)
+    pub fn from_user_config(user_config: UserConfig) -> Self {
+        let markdown_options = user_config
+            .markdown_options()
+            .unwrap_or(pulldown_cmark::Options::ENABLE_STRIKETHROUGH);
+        let overrides = user_config.overrides.unwrap_or(HashMap::new());
+        let backends = if let Some(backends) = user_config.backends {
+            let mut b = Vec::new();
+            for backend in backends {
+                match backend.as_str() {
+                    "markdown" => {
+                        if b.contains(&Backend::Markdown) {
+                            log::warn!("Backend 'markdown' is already specified")
+                        } else {
+                            b.push(Backend::Markdown)
+                        }
+                    }
+                    "html" => {
+                        if b.contains(&Backend::Html) {
+                            log::warn!("Backend 'html' is already specified")
+                        } else {
+                            b.push(Backend::Html)
+                        }
+                    }
+                    _ => {
+                        log::error!("unknown backend: {}", backend);
+                    }
                 }
             }
+            b
+        } else {
+            vec![Backend::Markdown]
+        };
+
+        Self {
+            godot_classes: Self::godot_classes(),
+            rust_to_godot: Self::rust_to_godot(),
+            overrides,
+            markdown_options,
+            backends,
         }
-
-        config
-    }
-
-    pub fn backend_extension(&self) -> &'static str {
-        self.backend.extension()
     }
 
     pub(crate) fn godot_name<'a>(&'a self, name: &'a str) -> &'a str {

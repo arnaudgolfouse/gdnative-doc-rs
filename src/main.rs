@@ -40,28 +40,29 @@ fn main() {
             .unwrap();
     }
 
-    let backend_config = backend::Config::with_user_config(config);
-    let backend = backend_config.backend;
-    let extension = backend.extension();
-    let mut generator = backend::Generator::new(
-        backend_config,
-        documentation,
-        // Maybe move this to backend::Config ?
-        match backend {
-            backend::Backend::Markdown => Box::new(backend::MarkdownCallbacks::default()),
-            backend::Backend::Html => Box::new(backend::HtmlCallbacks::default()),
-        },
-    );
-    let files = generator.generate_files();
-    let root_file = generator.generate_root_file();
-    fs::create_dir_all(&output_dir).unwrap();
+    let backend_config = backend::Config::from_user_config(config);
+    let backends = backend_config.backends.clone();
+    for backend in backends {
+        let extension = backend.extension();
+        let mut generator = backend::Generator::new(
+            &backend_config,
+            &documentation,
+            match backend {
+                backend::Backend::Markdown => Box::new(backend::MarkdownCallbacks::default()),
+                backend::Backend::Html => Box::new(backend::HtmlCallbacks::default()),
+            },
+        );
+        let files = generator.generate_files();
+        let root_file = generator.generate_root_file(backend);
+        fs::create_dir_all(&output_dir).unwrap();
 
-    fs::write(
-        output_dir.join("index").with_extension(extension),
-        root_file,
-    )
-    .unwrap();
-    for (name, content) in files {
-        fs::write(output_dir.join(name).with_extension(extension), content).unwrap();
+        fs::write(
+            output_dir.join("index").with_extension(extension),
+            root_file,
+        )
+        .unwrap();
+        for (name, content) in files {
+            fs::write(output_dir.join(name).with_extension(extension), content).unwrap();
+        }
     }
 }
