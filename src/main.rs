@@ -16,7 +16,6 @@ fn main() {
     };
     let config = config::UserConfig::read_from(&path).unwrap();
     std::env::set_current_dir(path.parent().unwrap()).unwrap();
-    let output_dir = config.output.clone();
     let root_file = match &config.root_file {
         Some(path) => path.clone(),
         None => {
@@ -42,7 +41,7 @@ fn main() {
 
     let backend_config = backend::Config::from_user_config(config);
     let backends = backend_config.backends.clone();
-    for backend in backends {
+    for (backend, output_dir) in backends {
         let extension = backend.extension();
         let mut generator = backend::Generator::new(
             &backend_config,

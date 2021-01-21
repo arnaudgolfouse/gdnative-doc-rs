@@ -1,4 +1,3 @@
-output = "./doc"
 root_file = "./lib.rs"
 markdown_options = ["STRIKETHROUGH"]
-backends = ["markdown", "html"]
+backends = { "markdown" = "./doc/markdown", "html" = "./doc/html" }

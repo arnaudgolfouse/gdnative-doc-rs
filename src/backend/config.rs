@@ -1,7 +1,7 @@
 use super::Backend;
 use crate::config::UserConfig;
 use pulldown_cmark::{Event, Tag};
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 /// Configuration options for [Generator](super::Generator).
 pub struct Config {
@@ -15,7 +15,7 @@ pub struct Config {
     pub(crate) overrides: HashMap<String, String>,
     /// Markdown options
     pub(crate) markdown_options: pulldown_cmark::Options,
-    pub backends: Vec<Backend>,
+    pub backends: HashMap<Backend, PathBuf>,
 }
 
 pub const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classes");
@@ -82,21 +82,21 @@ impl Config {
             .unwrap_or(pulldown_cmark::Options::ENABLE_STRIKETHROUGH);
         let overrides = user_config.overrides.unwrap_or(HashMap::new());
         let backends = if let Some(backends) = user_config.backends {
-            let mut b = Vec::new();
-            for backend in backends {
+            let mut b = HashMap::new();
+            for (backend, path) in backends {
                 match backend.as_str() {
                     "markdown" => {
-                        if b.contains(&Backend::Markdown) {
+                        if b.get(&Backend::Markdown).is_some() {
                             log::warn!("Backend 'markdown' is already specified")
                         } else {
-                            b.push(Backend::Markdown)
+                            b.insert(Backend::Markdown, path);
                         }
                     }
                     "html" => {
-                        if b.contains(&Backend::Html) {
+                        if b.get(&Backend::Html).is_some() {
                             log::warn!("Backend 'html' is already specified")
                         } else {
-                            b.push(Backend::Html)
+                            b.insert(Backend::Html, path);
                         }
                     }
                     _ => {
@@ -106,8 +106,13 @@ impl Config {
             }
             b
         } else {
-            vec![Backend::Markdown]
+            HashMap::new()
         };
+        if backends.is_empty() {
+            log::error!("You need to enable at least one backend !");
+            log::info!("Valid backends are: 'markdown', 'html'");
+            panic!("You need to enable at least one backend !");
+        }
 
         Self {
             godot_items: Self::godot_items(),

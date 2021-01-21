@@ -17,8 +17,7 @@ pub enum Error {
 pub struct UserConfig {
     pub(crate) overrides: Option<HashMap<String, String>>,
     pub root_file: Option<PathBuf>,
-    pub output: PathBuf,
-    pub(crate) backends: Option<Vec<String>>,
+    pub(crate) backends: Option<HashMap<String, PathBuf>>,
     pub(crate) markdown_options: Option<Vec<String>>,
 }
 

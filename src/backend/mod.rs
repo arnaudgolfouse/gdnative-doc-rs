@@ -7,7 +7,7 @@ pub use markdown::MarkdownCallbacks;
 use crate::documentation::{Documentation, Type};
 use pulldown_cmark::{BrokenLink, CowStr, Event, LinkType, Parser, Tag};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Backend {
     Markdown,
     Html,
