@@ -61,7 +61,7 @@ fn variant_to_width_and_height(bounds: Variant) -> Option<(usize, usize, usize, 
 
 #[methods]
 impl Interface {
-    /// Create a new empty ~~`Interface`~~ `DijkstraMap`.
+    /// Create a new empty `DijkstraMap`.
     ///
     /// # Example
     /// ```gdscript
@@ -473,14 +473,14 @@ impl Interface {
     ///     corresponding indices in the origin argument. Every unspecified
     ///     cost is defaulted to `0.0`. \
     ///     Can be used to weigh the origins with a preference.
-    ///   - `"terrain_weights"": `[`Dictionary`] (default : empty) : \
+    ///   - `"terrain_weights": `[`Dictionary`] (default : empty) : \
     ///     Specifies weights of terrain types. Keys are terrain type IDs and
     ///     values are floats. Unspecified terrains will have
     ///     [infinite](INF) weight. \
     ///     Note that `-1` correspond to the default terrain (which have a
     ///     weight of `1.0`), and will thus be ignored if it appears in the
     ///     keys.
-    ///   - `"termination_points"": `[`int`] OR [`int`] [`Array`] (default : empty) : \
+    ///   - `"termination_points": `[`int`] OR [`int`] [`Array`] (default : empty) : \
     ///     A set of points that stop the computation if they are reached by
     ///     the algorithm.
     ///

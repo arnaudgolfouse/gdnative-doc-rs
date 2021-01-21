@@ -8,9 +8,10 @@ And then you must call `recalculate` on it.
 
 ## func new() -> Self
 ________
-Create a new empty ~~`Interface`~~ `DijkstraMap`.
+Create a new empty `DijkstraMap`.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 ```
@@ -19,6 +20,7 @@ ________
 Clear the underlying `DijkstraMap`.
 
 ### Example
+
 ```gdscript
 dijkstra_map.clear()
 ```
@@ -31,6 +33,7 @@ If `source_instance` is a `dijkstra map`, it is cloned into
 This function returns `1` if `source_instance` is not a DijkstraMap.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 # fill dijkstra_map
@@ -42,6 +45,7 @@ ________
 Returns the first positive available id.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -59,6 +63,7 @@ If a point with the given id already exists, the map is unchanged and
 `1` is returned.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0) # terrain_type is -1
@@ -74,6 +79,7 @@ If `terrain_id` is not specified, `-1` is used.
 If the given id does not exists in the map, `1` is returned.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0, 2)
@@ -90,6 +96,7 @@ This function returns `-1` if no point with the given id exists in the
 map.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0, 1)
@@ -107,6 +114,7 @@ Removes a point from the map.
 Returns `1` if the point does not exists in the map.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -125,6 +133,7 @@ Disable the given point for pathfinding.
 Returns `1` if the point does not exists in the map.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -139,6 +148,7 @@ Enable the given point for pathfinding.
 Returns `1` if the point does not exists in the map.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -151,6 +161,7 @@ Returns [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html)
 [`false`](https://docs.godotengine.org/en/stable/classes/class_bool.html).
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -174,6 +185,7 @@ made. Defaults to [`true`](https://docs.godotengine.org/en/stable/classes/class_
 Return `1` if one of the points does not exists in the map.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -199,6 +211,7 @@ connection from target to source.
 Returns `1` if one of the points does not exist.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -217,6 +230,7 @@ Returns [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html)
 (and they both exist).
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -235,6 +249,7 @@ toward the target.
 This function return `-1` if there is no path from the point to the target.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -253,6 +268,7 @@ Returns the cost of the shortest path from this point to the target.
 If there is no path, the cost is [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants).
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -273,52 +289,49 @@ This is the central function of the library, the one that actually uses
 Dijkstra's algorithm.
 
 ### Parameters
--   `origin` : ID of the origin point, or array of IDs (preferably
+- `origin` : ID of the origin point, or array of IDs (preferably
 [`Int32Array`](https://docs.godotengine.org/en/stable/classes/class_poolintarray.html)).
+- `optional_params: `[`Dictionary`](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) : Specifies optional arguments. 
 
-
--   `optional_params: `[`Dictionary`](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) : Specifies optional arguments. 
-
-Valid arguments are :
+  Valid arguments are :
 
   - `"input_is_destination": `[`bool`](https://docs.godotengine.org/en/stable/classes/class_bool.html) (default : [`true`](https://docs.godotengine.org/en/stable/classes/class_bool.html)) : 
 
-Wether or not the `origin` points are seen as destination.
+    Wether or not the `origin` points are seen as destination.
   - `"maximum_cost": `[`float`](https://docs.godotengine.org/en/stable/classes/class_float.html)
 (default : [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants)) : 
 
-Specifies maximum cost. Once all shortest paths no longer than
+    Specifies maximum cost. Once all shortest paths no longer than
 maximum cost are found, algorithm terminates. All points with cost
 bigger than this are treated as inaccessible.
   - `"initial_costs": `[`float`](https://docs.godotengine.org/en/stable/classes/class_float.html) [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) (default : empty) : 
 
-Specifies initial costs for given origins. Values are paired with
+    Specifies initial costs for given origins. Values are paired with
 corresponding indices in the origin argument. Every unspecified
 cost is defaulted to `0.0`. 
 
-Can be used to weigh the origins with a preference.
-  - `"terrain_weights"": `[`Dictionary`](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) (default : empty) : 
+    Can be used to weigh the origins with a preference.
+  - `"terrain_weights": `[`Dictionary`](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) (default : empty) : 
 
-Specifies weights of terrain types. Keys are terrain type IDs and
+    Specifies weights of terrain types. Keys are terrain type IDs and
 values are floats. Unspecified terrains will have
 [infinite](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants) weight. 
 
-Note that `-1` correspond to the default terrain (which have a
+    Note that `-1` correspond to the default terrain (which have a
 weight of `1.0`), and will thus be ignored if it appears in the
 keys.
-  - `"termination_points"": `[`int`](https://docs.godotengine.org/en/stable/classes/class_int.html) OR [`int`](https://docs.godotengine.org/en/stable/classes/class_int.html) [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) (default : empty) : 
+  - `"termination_points": `[`int`](https://docs.godotengine.org/en/stable/classes/class_int.html) OR [`int`](https://docs.godotengine.org/en/stable/classes/class_int.html) [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) (default : empty) : 
 
-A set of points that stop the computation if they are reached by
+    A set of points that stop the computation if they are reached by
 the algorithm.
-  Note that keys of incorrect types are ignored with a warning.
-
-
+Note that keys of incorrect types are ignored with a warning.
 ### Errors
 `1` is returned if :
 
 - One of the keys in `optional_params` is invalid.
 - `origin` is neither an [`int`](https://docs.godotengine.org/en/stable/classes/class_int.html), a [`PoolIntArray`](https://docs.godotengine.org/en/stable/classes/class_poolintarray.html) or a [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html).
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0, 0)
@@ -348,6 +361,7 @@ If a point does not exists, or there is no path from it to the target,
 the corresponding point will be `-1`.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -366,6 +380,7 @@ If there is no path from a point to the target, the cost is
 [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants).
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -383,6 +398,7 @@ Keys are points' IDs, and values are costs. Inaccessible points are not
 present in the dictionary.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -407,6 +423,7 @@ path.
 Unreacheable points are not present in the map.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -427,6 +444,7 @@ Returns an array of all the points whose cost is between `min_cost` and
 The array will be sorted by cost.
 
 ### Example
+
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -459,12 +477,12 @@ the grid.
 - `orthogonal_cost` (default : `1.0`) : specifies cost of orthogonal
 connections (up, down, right and left). 
 
-If `orthogonal_cost` is [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants) or [`NAN`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants), orthogonal
+  If `orthogonal_cost` is [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants) or [`NAN`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants), orthogonal
 connections are disabled.
 - `diagonal_cost` (default : [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants)) : specifies cost of diagonal
 connections. 
 
-If `diagonal_cost` is [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants) or [`NAN`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants), diagonal connections
+  If `diagonal_cost` is [`INF`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants) or [`NAN`](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants), diagonal connections
 are disabled.
 ### Returns
 This function returns a Dictionary where keys are coordinates of points
@@ -492,6 +510,7 @@ To switch to "flat" orientation, swap `width` and `height`, and switch
 ### Example
 This is what `add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)` would produce:
 
+
 ```text
     / \     / \
   /     \ /     \
@@ -506,11 +525,11 @@ This is what `add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)` would produce:
     \ /     \ /
 ```
 
+[bool]: https://docs.godotengine.org/en/stable/classes/class_bool.html
+[Dictionary]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html
+[Variant]: https://docs.godotengine.org/en/stable/classes/class_variant.html
+[int]: https://docs.godotengine.org/en/stable/classes/class_int.html
 [PoolRealArray]: https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html
 [float]: https://docs.godotengine.org/en/stable/classes/class_float.html
-[Variant]: https://docs.godotengine.org/en/stable/classes/class_variant.html
-[bool]: https://docs.godotengine.org/en/stable/classes/class_bool.html
-[int]: https://docs.godotengine.org/en/stable/classes/class_int.html
-[Dictionary]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html
-[array]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
 [PoolIntArray]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
+[array]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html

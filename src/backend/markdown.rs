@@ -19,11 +19,7 @@ impl super::Callbacks for MarkdownCallbacks {
         for event in events {
             match event {
                 Event::Start(tag) => match tag {
-                    Tag::Paragraph => {
-                        for _ in 0..indentation {
-                            s.push_str("  ")
-                        }
-                    }
+                    Tag::Paragraph => {}
                     Tag::Heading(level) => {
                         for _ in 0..level {
                             s.push('#');
@@ -35,24 +31,28 @@ impl super::Callbacks for MarkdownCallbacks {
                     }
                     Tag::CodeBlock(kind) => match kind {
                         CodeBlockKind::Indented => {
-                            indentation += 1;
+                            trim(s);
+                            s.push_str("\n\n");
+                            indentation += 2;
+                            indent(s, indentation);
                         }
                         CodeBlockKind::Fenced(lang) => {
+                            s.push('\n');
+                            indent(s, indentation);
                             s.push_str("```");
                             s.push_str(&lang);
                             s.push('\n');
+                            indent(s, indentation);
                         }
                     },
-                    Tag::List(_) => {
-                        indentation += 1;
-                    }
+                    Tag::List(_) => {}
                     Tag::Item => {
-                        for _ in 0..(indentation.saturating_sub(1)) {
-                            s.push_str("  ")
-                        }
+                        indentation += 1;
                         s.push_str("- ")
                     }
-                    Tag::FootnoteDefinition(_) => {}
+                    Tag::FootnoteDefinition(_) => {
+                        log::warn!("FootnoteDefinition: Unsupported at the moment")
+                    }
                     Tag::Table(_) => {
                         log::warn!("Table: Unsupported at the moment")
                     }
@@ -83,28 +83,50 @@ impl super::Callbacks for MarkdownCallbacks {
                     }
                 },
                 Event::End(tag) => match tag {
-                    Tag::Paragraph => s.push_str("\n\n"),
-                    Tag::Heading(_) => s.push('\n'),
+                    Tag::Paragraph => {
+                        s.push_str("\n\n");
+                        indent(s, indentation);
+                    }
+                    Tag::Heading(_) => {
+                        s.push('\n');
+                        indent(s, indentation);
+                    }
                     Tag::BlockQuote => {
                         log::warn!("BlockQuote: Unsupported at the moment")
                     }
-                    Tag::CodeBlock(kind) => match kind {
-                        CodeBlockKind::Indented => {
-                            indentation -= 1;
+                    Tag::CodeBlock(kind) => {
+                        match kind {
+                            CodeBlockKind::Indented => {
+                                indentation -= 2;
+                                s.push('\n');
+                                indent(s, indentation);
+                            }
+                            CodeBlockKind::Fenced(_) => {
+                                trim(s);
+                                s.push('\n');
+                                indent(s, indentation);
+                                s.push_str("```");
+                            }
                         }
-                        CodeBlockKind::Fenced(_) => {
-                            s.push_str("```");
-                            s.push('\n');
-                        }
-                    },
+                        s.push('\n');
+                        indent(s, indentation);
+                    }
                     Tag::List(_) => {
+                        while let Some(c) = s.pop() {
+                            if c != ' ' {
+                                s.push(c);
+                                break;
+                            }
+                        }
+                    }
+                    Tag::Item => {
+                        trim(s);
+                        s.push('\n');
                         indentation -= 1;
+                        indent(s, indentation);
                     }
-                    Tag::Item => s.push('\n'),
                     Tag::FootnoteDefinition(_) => {}
-                    Tag::Table(_) => {
-                        log::warn!("Table: Unsupported at the moment")
-                    }
+                    Tag::Table(_) => {}
                     Tag::TableHead => {}
                     Tag::TableRow => {}
                     Tag::TableCell => {}
@@ -146,11 +168,19 @@ impl super::Callbacks for MarkdownCallbacks {
                     self.push_str(s, &code);
                     self.push_str(s, "`");
                 }
-                Event::Html(html) => s.push_str(&html), // ???
-                Event::FootnoteReference(_) => {}
+                Event::Html(html) => s.push_str(&html),
+                Event::FootnoteReference(_) => {
+                    log::warn!("FootnoteReference: Unsupported at the moment")
+                }
                 Event::SoftBreak => s.push('\n'),
-                Event::HardBreak => s.push_str("\n\n"),
-                Event::Rule => s.push_str("________\n"),
+                Event::HardBreak => {
+                    s.push_str("\n\n");
+                    indent(s, indentation)
+                }
+                Event::Rule => {
+                    s.push_str("________\n");
+                    indent(s, indentation)
+                }
                 Event::TaskListMarker(checked) => s.push_str(if checked { "[X]" } else { "[ ]" }),
             }
         }
@@ -198,6 +228,21 @@ impl MarkdownCallbacks {
         } else {
             self.links
                 .insert(shortcut.to_string(), vec![link.to_string()]);
+        }
+    }
+}
+
+fn indent(s: &mut String, level: u32) {
+    for _ in 0..level {
+        s.push_str("  ")
+    }
+}
+
+fn trim(s: &mut String) {
+    while let Some(c) = s.pop() {
+        if !c.is_whitespace() {
+            s.push(c);
+            break;
         }
     }
 }

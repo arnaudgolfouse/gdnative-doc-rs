@@ -5,7 +5,7 @@
 <p>And then you must call <code>recalculate</code> on it.</p>
 <h2>func new() -&gt; Self</h2>
 <hr />
-<p>Create a new empty <del><code>Interface</code></del> <code>DijkstraMap</code>.</p>
+<p>Create a new empty <code>DijkstraMap</code>.</p>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 </code></pre>
@@ -235,26 +235,26 @@ Dijkstra's algorithm.</p>
 <p><code>optional_params: </code><a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html"><code>Dictionary</code></a> : Specifies optional arguments. <br />
 Valid arguments are :</p>
 <ul>
-<li><code>&quot;input_is_destination&quot; -&gt; bool</code> (default : <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html"><code>true</code></a>) : <br />
+<li><code>&quot;input_is_destination&quot;: </code><a href="https://docs.godotengine.org/en/stable/classes/class_bool.html"><code>bool</code></a> (default : <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html"><code>true</code></a>) : <br />
 Wether or not the <code>origin</code> points are seen as destination.</li>
-<li><code>&quot;maximum_cost&quot; -&gt; float</code>
+<li><code>&quot;maximum_cost&quot;: </code><a href="https://docs.godotengine.org/en/stable/classes/class_float.html"><code>float</code></a>
 (default : <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants"><code>INF</code></a>) : <br />
 Specifies maximum cost. Once all shortest paths no longer than
 maximum cost are found, algorithm terminates. All points with cost
 bigger than this are treated as inaccessible.</li>
-<li><code>&quot;initial_costs&quot; -&gt; float Array</code> (default : empty) : <br />
+<li><code>&quot;initial_costs&quot;: </code><a href="https://docs.godotengine.org/en/stable/classes/class_float.html"><code>float</code></a> <a href="https://docs.godotengine.org/en/stable/classes/class_array.html"><code>Array</code></a> (default : empty) : <br />
 Specifies initial costs for given origins. Values are paired with
 corresponding indices in the origin argument. Every unspecified
 cost is defaulted to <code>0.0</code>. <br />
 Can be used to weigh the origins with a preference.</li>
-<li><code>&quot;terrain_weights&quot; -&gt; Dictionary</code> (default : empty) : <br />
+<li><code>&quot;terrain_weights&quot;: </code><a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html"><code>Dictionary</code></a> (default : empty) : <br />
 Specifies weights of terrain types. Keys are terrain type IDs and
 values are floats. Unspecified terrains will have
 <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">infinite</a> weight. <br />
 Note that <code>-1</code> correspond to the default terrain (which have a
 weight of <code>1.0</code>), and will thus be ignored if it appears in the
 keys.</li>
-<li><code>&quot;termination_points&quot; -&gt; int OR int Array</code> (default : empty) : <br />
+<li><code>&quot;termination_points&quot;: </code><a href="https://docs.godotengine.org/en/stable/classes/class_int.html"><code>int</code></a> OR <a href="https://docs.godotengine.org/en/stable/classes/class_int.html"><code>int</code></a> <a href="https://docs.godotengine.org/en/stable/classes/class_array.html"><code>Array</code></a> (default : empty) : <br />
 A set of points that stop the computation if they are reached by
 the algorithm.</li>
 </ul>
@@ -265,7 +265,7 @@ the algorithm.</li>
 <p><code>1</code> is returned if :</p>
 <ul>
 <li>One of the keys in <code>optional_params</code> is invalid.</li>
-<li><code>origin</code> is neither an <a href="gdnative::core_types::VariantType::I64"><code>I64</code></a>, a <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html"><code>Int32Array</code></a> or a <a href="https://docs.godotengine.org/en/stable/classes/class_array.html"><code>VariantArray</code></a>.</li>
+<li><code>origin</code> is neither an <a href="https://docs.godotengine.org/en/stable/classes/class_int.html"><code>int</code></a>, a <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html"><code>PoolIntArray</code></a> or a <a href="https://docs.godotengine.org/en/stable/classes/class_array.html"><code>Array</code></a>.</li>
 </ul>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
