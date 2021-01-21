@@ -5,14 +5,4 @@
   ```markdown
   [`MyStruct::my_method`]
   ```
-- In the markdown output, move some inline links:
-  ```markdown
-  [mylink](url)
-  ```
-  to shortcut links:
-  ```markdown
-  [mylink]
-
-  [mylink]: url
-  ```
 - Add a way to drive this via build script, and command line

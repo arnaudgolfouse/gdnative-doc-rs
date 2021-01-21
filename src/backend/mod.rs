@@ -250,6 +250,17 @@ impl<'a> Iterator for EventIterator<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut next_event = self.parser.next()?;
+        next_event = match next_event {
+            // matches broken reference links that have been restored by the callback
+            // and replaces them by shortcut variants
+            Event::Start(Tag::Link(LinkType::ShortcutUnknown, dest, title)) => {
+                Event::Start(Tag::Link(LinkType::Shortcut, dest, title))
+            }
+            Event::End(Tag::Link(LinkType::ShortcutUnknown, dest, title)) => {
+                Event::End(Tag::Link(LinkType::Shortcut, dest, title))
+            }
+            _ => next_event,
+        };
         self.context.resolve_event(&mut next_event);
         Some(next_event)
     }
