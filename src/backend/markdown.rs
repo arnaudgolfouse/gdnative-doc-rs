@@ -185,18 +185,26 @@ impl super::Callbacks for MarkdownCallbacks {
     }
 
     fn finish_encoding(&mut self, s: &mut String) {
+        let mut link_lines = Vec::new();
         self.shortcut_link.take();
         let links = std::mem::take(&mut self.links);
         for (shortcut, links) in links {
             for (index, link) in links.into_iter().enumerate() {
-                s.push_str("\n[");
-                s.push_str(&shortcut);
+                let mut line = String::new();
+                line.push_str("[");
+                line.push_str(&shortcut);
                 if index != 0 {
-                    s.push_str(&format!("-{}", index));
+                    line.push_str(&format!("-{}", index));
                 }
-                s.push_str("]: ");
-                s.push_str(&link)
+                line.push_str("]: ");
+                line.push_str(&link);
+                link_lines.push(line);
             }
+        }
+        link_lines.sort_unstable();
+        for line in link_lines {
+            s.push('\n');
+            s.push_str(&line)
         }
     }
 }

@@ -525,11 +525,11 @@ This is what `add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)` would produce:
     \ /     \ /
 ```
 
+[Dictionary]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html
+[PoolIntArray]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
+[PoolRealArray]: https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html
 [Variant]: https://docs.godotengine.org/en/stable/classes/class_variant.html
+[array]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
 [bool]: https://docs.godotengine.org/en/stable/classes/class_bool.html
 [float]: https://docs.godotengine.org/en/stable/classes/class_float.html
-[PoolIntArray]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
-[Dictionary]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html
-[PoolRealArray]: https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html
-[array]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
 [int]: https://docs.godotengine.org/en/stable/classes/class_int.html
