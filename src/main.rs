@@ -43,13 +43,13 @@ fn main() {
     let backend_config = backend::Config::with_user_config(config);
     let backend = backend_config.backend;
     let extension = backend.extension();
-    let generator = backend::Generator::new(
+    let mut generator = backend::Generator::new(
         backend_config,
         documentation,
         // Maybe move this to backend::Config ?
         match backend {
-            backend::Backend::Markdown => Box::new(backend::encode_markdown),
-            backend::Backend::Html => Box::new(backend::encode_html),
+            backend::Backend::Markdown => Box::new(backend::MarkdownCallbacks::default()),
+            backend::Backend::Html => Box::new(backend::HtmlCallbacks::default()),
         },
     );
     let files = generator.generate_files();

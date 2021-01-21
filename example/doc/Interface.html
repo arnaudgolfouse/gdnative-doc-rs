@@ -125,7 +125,7 @@ assert(dijkstra_map.is_point_disabled(0))
 assert(!dijkstra_map.is_point_disabled(1))
 assert(!dijkstra_map.is_point_disabled(2))
 </code></pre>
-<h2>func connect_points(source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, weight: f32 (opt), bidirectional: <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
+<h2>func connect_points(source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, weight: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt), bidirectional: <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h2>
 <hr />
 <p>Connects the two given points.</p>
 <h3>Parameters</h3>
@@ -204,7 +204,7 @@ assert(dijkstra_map.get_direction_at_point(0) == 0)
 assert(dijkstra_map.get_direction_at_point(1) == 0)
 assert(dijkstra_map.get_direction_at_point(2) == -1)
 </code></pre>
-<h2>func get_cost_at_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; f32</h2>
+<h2>func get_cost_at_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a></h2>
 <hr />
 <p>Returns the cost of the shortest path from this point to the target.</p>
 <p>If there is no path, the cost is <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants"><code>INF</code></a>.</p>
@@ -354,7 +354,7 @@ var computed_direction_map = dijkstra_map.get_direction_map()
 for id in computed_direction_map.keys():
     assert(computed_direction_map[id] == direction_map[id])
 </code></pre>
-<h2>func get_all_points_with_cost_between(min_cost: f32, max_cost: f32) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></h2>
+<h2>func get_all_points_with_cost_between(min_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a>, max_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></h2>
 <hr />
 <p>Returns an array of all the points whose cost is between <code>min_cost</code> and
 <code>max_cost</code>.</p>
@@ -376,7 +376,7 @@ starting point.</p>
 be empty.</p>
 <h4>Note</h4>
 <p>The starting point itself is not included.</p>
-<h2>func add_square_grid(bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), orthogonal_cost: f32 (opt), diagonal_cost: f32 (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h2>
+<h2>func add_square_grid(bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), orthogonal_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt), diagonal_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h2>
 <hr />
 <p>Adds a square grid of connected points.</p>
 <h3>Parameters</h3>
@@ -397,7 +397,7 @@ are disabled.</li>
 <h3>Returns</h3>
 <p>This function returns a Dictionary where keys are coordinates of points
 (<a href="https://docs.godotengine.org/en/stable/classes/class_vector2.html"><code>Vector2</code></a>) and values are their corresponding point IDs.</p>
-<h2>func add_hexagonal_grid(bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), weight: f32 (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h2>
+<h2>func add_hexagonal_grid(bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), weight: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h2>
 <hr />
 <p>Adds a hexagonal grid of connected points.</p>
 <h3>Parameters</h3>

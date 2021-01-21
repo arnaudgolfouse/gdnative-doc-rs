@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-
 use super::Backend;
 use crate::config::UserConfig;
+use pulldown_cmark::{Event, Tag};
+use std::collections::HashMap;
 
 /// Configuration options for [Generator](super::Generator).
 pub struct Config {
@@ -21,6 +21,7 @@ pub const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_cl
 const RUST_TO_GODOT: &[(&str, &str)] = &[
     ("i32", "int"),
     ("i64", "int"),
+    ("f32", "float"),
     ("f64", "float"),
     ("VariantArray", "Array"),
     ("Int32Array", "PoolIntArray"),
@@ -88,6 +89,47 @@ impl Config {
             name
         } else {
             name
+        }
+    }
+
+    /// Resolve a name to the class it must link to.
+    pub(super) fn resolve(&self, link: &str) -> Option<String> {
+        if let Some(link) = self.overrides.get(link).cloned() {
+            return Some(link);
+        }
+        if let Ok(link) = syn::parse_str::<syn::Path>(link) {
+            let mut base = match link.segments.last() {
+                None => return None,
+                Some(base) => base.ident.to_string(),
+            };
+            if let Some(path) = self.overrides.get(&base).cloned() {
+                Some(path)
+            } else {
+                base = match self.rust_to_godot.get(&base).cloned() {
+                    Some(base) => base,
+                    None => base,
+                };
+                if let Some(path) = self.godot_classes.get(&base).cloned() {
+                    Some(path)
+                } else {
+                    None
+                }
+            }
+        } else {
+            None
+        }
+    }
+
+    pub(super) fn resolve_event(&self, event: &mut Event) {
+        match event {
+            Event::Start(Tag::Link(_, dest, _)) | Event::End(Tag::Link(_, dest, _)) => {
+                match self.resolve(&dest) {
+                    Some(new_dest) => *dest = new_dest.into(),
+                    None => {}
+                }
+            }
+            Event::Start(Tag::Heading(n)) | Event::End(Tag::Heading(n)) => *n += 2,
+            _ => {}
         }
     }
 }

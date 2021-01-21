@@ -461,26 +461,26 @@ impl Interface {
     /// [`Int32Array`]).
     /// - `optional_params: `[`Dictionary`] : Specifies optional arguments. \
     /// Valid arguments are :
-    ///   - `"input_is_destination" -> bool` (default : [`true`]) : \
+    ///   - `"input_is_destination": `[`bool`] (default : [`true`]) : \
     ///     Wether or not the `origin` points are seen as destination.
-    ///   - `"maximum_cost" -> float`
+    ///   - `"maximum_cost": `[`float`]
     ///         (default : [`INF`]) : \
     ///     Specifies maximum cost. Once all shortest paths no longer than
     ///     maximum cost are found, algorithm terminates. All points with cost
     ///     bigger than this are treated as inaccessible.
-    ///   - `"initial_costs" -> float Array` (default : empty) : \
+    ///   - `"initial_costs": `[`float`] [`Array`] (default : empty) : \
     ///     Specifies initial costs for given origins. Values are paired with
     ///     corresponding indices in the origin argument. Every unspecified
     ///     cost is defaulted to `0.0`. \
     ///     Can be used to weigh the origins with a preference.
-    ///   - `"terrain_weights" -> Dictionary` (default : empty) : \
+    ///   - `"terrain_weights"": `[`Dictionary`] (default : empty) : \
     ///     Specifies weights of terrain types. Keys are terrain type IDs and
     ///     values are floats. Unspecified terrains will have
     ///     [infinite](INF) weight. \
     ///     Note that `-1` correspond to the default terrain (which have a
     ///     weight of `1.0`), and will thus be ignored if it appears in the
     ///     keys.
-    ///   - `"termination_points" -> int OR int Array` (default : empty) : \
+    ///   - `"termination_points"": `[`int`] OR [`int`] [`Array`] (default : empty) : \
     ///     A set of points that stop the computation if they are reached by
     ///     the algorithm.
     ///
@@ -490,12 +490,7 @@ impl Interface {
     ///
     /// `1` is returned if :
     /// - One of the keys in `optional_params` is invalid.
-    /// - `origin` is neither an [`I64`], a [`Int32Array`] or a [`VariantArray`].
-    ///
-    /// [`Int32Array`]: gdnative::core_types::VariantType::Int32Array
-    /// [`I64`]: gdnative::core_types::VariantType::I64
-    /// [`VariantArray`]: gdnative::core_types::VariantType::VariantArray
-    /// [`PoolIntArray`]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html#class-poolintarray
+    /// - `origin` is neither an [`int`], a [`PoolIntArray`] or a [`Array`].
     ///
     /// # Example
     /// ```gdscript
