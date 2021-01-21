@@ -5,8 +5,10 @@ use std::collections::HashMap;
 
 /// Configuration options for [Generator](super::Generator).
 pub struct Config {
-    /// Link to godot classes' documentation
-    pub(crate) godot_classes: HashMap<String, String>,
+    /// Link to godot items' documentation
+    ///
+    /// Contains the link to godot classes, but also `true`, `INF`, `Err`...
+    pub(crate) godot_items: HashMap<String, String>,
     /// Mapping from Rust types to gdscript types
     pub(crate) rust_to_godot: HashMap<String, String>,
     /// User-defined overrides
@@ -17,6 +19,17 @@ pub struct Config {
 }
 
 pub const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classes");
+
+pub const GODOT_CONSTANTS: &[(&str, &str, &str)] = &[
+    ("true", "class_bool", ""),
+    ("false", "class_bool", ""),
+    ("PI", "class_@gdscript", "constants"),
+    ("TAU", "class_@gdscript", "constants"),
+    ("INF", "class_@gdscript", "constants"),
+    ("NAN", "class_@gdscript", "constants"),
+    ("FAILED", "class_@globalscope", "enum-globalscope-error"),
+    ("OK", "class_@globalscope", "class-globalscope-error"),
+];
 
 const RUST_TO_GODOT: &[(&str, &str)] = &[
     ("i32", "int"),
@@ -29,10 +42,10 @@ const RUST_TO_GODOT: &[(&str, &str)] = &[
 ];
 
 impl Config {
-    fn godot_classes() -> HashMap<String, String> {
-        let mut godot_classes = HashMap::new();
+    fn godot_items() -> HashMap<String, String> {
+        let mut godot_items = HashMap::new();
         for class in GODOT_CLASSES {
-            godot_classes.insert(
+            godot_items.insert(
                 class.to_string(),
                 format!(
                     "https://docs.godotengine.org/en/stable/classes/class_{}.html",
@@ -40,7 +53,19 @@ impl Config {
                 ),
             );
         }
-        godot_classes
+
+        for (name, links_to, section) in GODOT_CONSTANTS {
+            let mut link = format!(
+                "https://docs.godotengine.org/en/stable/classes/{}.html",
+                links_to
+            );
+            if !section.is_empty() {
+                link.push('#');
+                link.push_str(section)
+            }
+            godot_items.insert(name.to_string(), link);
+        }
+        godot_items
     }
 
     fn rust_to_godot() -> HashMap<String, String> {
@@ -85,7 +110,7 @@ impl Config {
         };
 
         Self {
-            godot_classes: Self::godot_classes(),
+            godot_items: Self::godot_items(),
             rust_to_godot: Self::rust_to_godot(),
             overrides,
             markdown_options,
@@ -106,26 +131,31 @@ impl Config {
         if let Some(link) = self.overrides.get(link).cloned() {
             return Some(link);
         }
-        if let Ok(link) = syn::parse_str::<syn::Path>(link) {
-            let mut base = match link.segments.last() {
+        let temporary;
+        let base = if let Ok(link) = syn::parse_str::<syn::Path>(link) {
+            match link.segments.last() {
                 None => return None,
-                Some(base) => base.ident.to_string(),
-            };
-            if let Some(path) = self.overrides.get(&base).cloned() {
-                Some(path)
-            } else {
-                base = match self.rust_to_godot.get(&base).cloned() {
-                    Some(base) => base,
-                    None => base,
-                };
-                if let Some(path) = self.godot_classes.get(&base).cloned() {
-                    Some(path)
-                } else {
-                    None
+                Some(base) => {
+                    temporary = base.ident.to_string();
+                    &temporary
                 }
             }
         } else {
-            None
+            link
+        };
+
+        if let Some(path) = self.overrides.get(base).cloned() {
+            Some(path)
+        } else {
+            let base = match self.rust_to_godot.get(base) {
+                Some(base) => base.as_str(),
+                None => base,
+            };
+            if let Some(path) = self.godot_items.get(base).cloned() {
+                Some(path)
+            } else {
+                None
+            }
         }
     }
 

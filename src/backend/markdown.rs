@@ -135,29 +135,27 @@ impl super::Callbacks for MarkdownCallbacks {
                     Tag::Strikethrough => s.push_str("~~"),
                     Tag::Link(link_type, dest, title) => {
                         s.push(']');
-                        match link_type {
+                        let closing_character = match link_type {
                             LinkType::Shortcut => {
-                                s.push('[');
                                 if let Some(mut shortcut) = self.shortcut_link.take() {
                                     self.add_shortcut_link(&mut shortcut, &dest);
-                                    s.push_str(&shortcut)
                                 }
+                                None
                             }
                             _ => {
                                 s.push('(');
-                                s.push_str(&dest)
+                                s.push_str(&dest);
+                                Some(')')
                             }
-                        }
+                        };
 
                         if !title.is_empty() {
                             s.push_str(" \"");
                             s.push_str(&title);
                             s.push('"');
                         }
-                        if link_type == LinkType::Shortcut {
-                            s.push(']');
-                        } else {
-                            s.push(')');
+                        if let Some(closing) = closing_character {
+                            s.push(closing);
                         }
                     }
                     Tag::Image(_, _, _) => {}

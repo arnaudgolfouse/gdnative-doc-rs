@@ -20,7 +20,7 @@
 <p>If <code>source_instance</code> is a <code>dijkstra map</code>, it is cloned into
 <code>self</code>.</p>
 <h3>Errors</h3>
-<p>This function returns <code>1</code> if <code>source_instance</code> is not a DijkstraMap.</p>
+<p>This function returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error"><code>FAILED</code></a> if <code>source_instance</code> is not a DijkstraMap.</p>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 # fill dijkstra_map
@@ -42,7 +42,7 @@ assert(dijkstra_map.get_available_point_id() == 2)
 <p>If <code>terrain_type</code> not specified, <code>-1</code> is used.</p>
 <h3>Errors</h3>
 <p>If a point with the given id already exists, the map is unchanged and
-<code>1</code> is returned.</p>
+<a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error"><code>FAILED</code></a> is returned.</p>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0) # terrain_type is -1
@@ -53,7 +53,7 @@ dijkstra_map.add_point(1, 0) # terrain_type is 0
 <p>Set the terrain type for <code>point_id</code>.</p>
 <p>If <code>terrain_id</code> is not specified, <code>-1</code> is used.</p>
 <h3>Errors</h3>
-<p>If the given id does not exists in the map, <code>1</code> is returned.</p>
+<p>If the given id does not exists in the map, <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error"><code>FAILED</code></a> is returned.</p>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0, 2)
@@ -80,7 +80,7 @@ assert(dijkstra_map.get_terrain_for_point(2) == -1)
 <hr />
 <p>Removes a point from the map.</p>
 <h3>Errors</h3>
-<p>Returns <code>1</code> if the point does not exists in the map.</p>
+<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error"><code>FAILED</code></a> if the point does not exists in the map.</p>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -94,7 +94,7 @@ assert(dijkstra_map.remove_point(0) == 1)
 <hr />
 <p>Disable the given point for pathfinding.</p>
 <h3>Errors</h3>
-<p>Returns <code>1</code> if the point does not exists in the map.</p>
+<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error"><code>FAILED</code></a> if the point does not exists in the map.</p>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -105,7 +105,7 @@ assert(dijkstra_map.disable_point(1) == 1)
 <hr />
 <p>Enable the given point for pathfinding.</p>
 <h3>Errors</h3>
-<p>Returns <code>1</code> if the point does not exists in the map.</p>
+<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error"><code>FAILED</code></a> if the point does not exists in the map.</p>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -137,7 +137,7 @@ assert(!dijkstra_map.is_point_disabled(2))
 made. Defaults to <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html"><code>true</code></a>.</li>
 </ul>
 <h3>Errors</h3>
-<p>Return <code>1</code> if one of the points does not exists in the map.</p>
+<p>Return <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error"><code>FAILED</code></a> if one of the points does not exists in the map.</p>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -161,7 +161,7 @@ assert(dijkstra_map.connect_points(1, 3) == 1) # 3 does not exists in the map
 connection from target to source.</li>
 </ul>
 <h3>Errors</h3>
-<p>Returns <code>1</code> if one of the points does not exist.</p>
+<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error"><code>FAILED</code></a> if one of the points does not exist.</p>
 <h3>Example</h3>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -262,7 +262,7 @@ the algorithm.</li>
 </li>
 </ul>
 <h3>Errors</h3>
-<p><code>1</code> is returned if :</p>
+<p><a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error"><code>FAILED</code></a> is returned if :</p>
 <ul>
 <li>One of the keys in <code>optional_params</code> is invalid.</li>
 <li><code>origin</code> is neither an <a href="https://docs.godotengine.org/en/stable/classes/class_int.html"><code>int</code></a>, a <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html"><code>PoolIntArray</code></a> or a <a href="https://docs.godotengine.org/en/stable/classes/class_array.html"><code>Array</code></a>.</li>

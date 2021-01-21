@@ -90,7 +90,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// This function returns `1` if `source_instance` is not a DijkstraMap.
+    /// This function returns [`FAILED`] if `source_instance` is not a DijkstraMap.
     ///
     /// # Example
     /// ```gdscript
@@ -141,7 +141,7 @@ impl Interface {
     /// # Errors
     ///
     /// If a point with the given id already exists, the map is unchanged and
-    /// `1` is returned.
+    /// [`FAILED`] is returned.
     ///
     /// # Example
     /// ```gdscript
@@ -167,7 +167,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// If the given id does not exists in the map, `1` is returned.
+    /// If the given id does not exists in the map, [`FAILED`] is returned.
     ///
     /// # Example
     /// ```gdscript
@@ -222,7 +222,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// Returns `1` if the point does not exists in the map.
+    /// Returns [`FAILED`] if the point does not exists in the map.
     ///
     /// # Example
     /// ```gdscript
@@ -247,7 +247,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// Returns `1` if the point does not exists in the map.
+    /// Returns [`FAILED`] if the point does not exists in the map.
     ///
     /// # Example
     /// ```gdscript
@@ -266,7 +266,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// Returns `1` if the point does not exists in the map.
+    /// Returns [`FAILED`] if the point does not exists in the map.
     ///
     /// # Example
     /// ```gdscript
@@ -311,7 +311,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// Return `1` if one of the points does not exists in the map.
+    /// Return [`FAILED`] if one of the points does not exists in the map.
     ///
     /// # Example
     /// ```gdscript
@@ -354,7 +354,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// Returns `1` if one of the points does not exist.
+    /// Returns [`FAILED`] if one of the points does not exist.
     ///
     /// # Example
     /// ```gdscript
@@ -488,7 +488,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// `1` is returned if :
+    /// [`FAILED`] is returned if :
     /// - One of the keys in `optional_params` is invalid.
     /// - `origin` is neither an [`int`], a [`PoolIntArray`] or a [`Array`].
     ///
