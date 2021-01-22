@@ -4,6 +4,9 @@ use pulldown_cmark::{Event, Tag};
 use std::{collections::HashMap, path::PathBuf};
 
 /// Configuration options for [Generator](super::Generator).
+///
+/// It can be built within code, or generated via an instance of
+/// [`UserConfig`].
 pub struct Config {
     /// Link to godot items' documentation
     ///
@@ -12,15 +15,23 @@ pub struct Config {
     /// Mapping from Rust types to gdscript types
     pub(crate) rust_to_godot: HashMap<String, String>,
     /// User-defined overrides
-    pub(crate) overrides: HashMap<String, String>,
+    pub(crate) url_overrides: HashMap<String, String>,
     /// Markdown options
     pub(crate) markdown_options: pulldown_cmark::Options,
+    /// Backends and their output directory
     pub backends: HashMap<Backend, PathBuf>,
 }
 
-pub const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classes");
+/// Url for the godot documentation
+const GODOT_DOCUMENTATION_URL: &str = "https://docs.godotengine.org/en/stable/classes";
 
-pub const GODOT_CONSTANTS: &[(&str, &str, &str)] = &[
+/// List of godot classes, like `Array`, `int`, `Transform2D`...
+const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classes");
+
+/// List of some godot constants and information about where they sould link to.
+///
+/// link for constant: `<godot_doc_url>/<constant.1>.html#<constant.2>`
+const GODOT_CONSTANTS: &[(&str, &str, &str)] = &[
     ("true", "class_bool", ""),
     ("false", "class_bool", ""),
     ("PI", "class_@gdscript", "constants"),
@@ -31,6 +42,7 @@ pub const GODOT_CONSTANTS: &[(&str, &str, &str)] = &[
     ("OK", "class_@globalscope", "class-globalscope-error"),
 ];
 
+/// Mapping from Rust to Godot types.
 const RUST_TO_GODOT: &[(&str, &str)] = &[
     ("i32", "int"),
     ("i64", "int"),
@@ -41,6 +53,18 @@ const RUST_TO_GODOT: &[(&str, &str)] = &[
     ("Float32Array", "PoolRealArray"),
 ];
 
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            godot_items: Self::godot_items(),
+            rust_to_godot: Self::rust_to_godot(),
+            url_overrides: HashMap::new(),
+            markdown_options: pulldown_cmark::Options::empty(),
+            backends: HashMap::new(),
+        }
+    }
+}
+
 impl Config {
     fn godot_items() -> HashMap<String, String> {
         let mut godot_items = HashMap::new();
@@ -48,17 +72,15 @@ impl Config {
             godot_items.insert(
                 class.to_string(),
                 format!(
-                    "https://docs.godotengine.org/en/stable/classes/class_{}.html",
+                    "{}/class_{}.html",
+                    GODOT_DOCUMENTATION_URL,
                     class.to_lowercase()
                 ),
             );
         }
 
         for (name, links_to, section) in GODOT_CONSTANTS {
-            let mut link = format!(
-                "https://docs.godotengine.org/en/stable/classes/{}.html",
-                links_to
-            );
+            let mut link = format!("{}/{}.html", GODOT_DOCUMENTATION_URL, links_to);
             if !section.is_empty() {
                 link.push('#');
                 link.push_str(section)
@@ -79,35 +101,30 @@ impl Config {
     pub fn from_user_config(user_config: UserConfig) -> Self {
         let markdown_options = user_config
             .markdown_options()
-            .unwrap_or(pulldown_cmark::Options::ENABLE_STRIKETHROUGH);
-        let overrides = user_config.overrides.unwrap_or(HashMap::new());
-        let backends = if let Some(backends) = user_config.backends {
-            let mut b = HashMap::new();
-            for (backend, path) in backends {
-                match backend.as_str() {
-                    "markdown" => {
-                        if b.get(&Backend::Markdown).is_some() {
-                            log::warn!("Backend 'markdown' is already specified")
-                        } else {
-                            b.insert(Backend::Markdown, path);
-                        }
-                    }
-                    "html" => {
-                        if b.get(&Backend::Html).is_some() {
-                            log::warn!("Backend 'html' is already specified")
-                        } else {
-                            b.insert(Backend::Html, path);
-                        }
-                    }
-                    _ => {
-                        log::error!("unknown backend: {}", backend);
+            .unwrap_or(pulldown_cmark::Options::empty());
+        let url_overrides = user_config.url_overrides.unwrap_or(HashMap::new());
+        let mut backends = HashMap::new();
+        for (backend, path) in user_config.backends {
+            match backend.as_str() {
+                "markdown" => {
+                    if backends.get(&Backend::Markdown).is_some() {
+                        log::warn!("Backend 'markdown' is already specified")
+                    } else {
+                        backends.insert(Backend::Markdown, path);
                     }
                 }
+                "html" => {
+                    if backends.get(&Backend::Html).is_some() {
+                        log::warn!("Backend 'html' is already specified")
+                    } else {
+                        backends.insert(Backend::Html, path);
+                    }
+                }
+                _ => {
+                    log::error!("unknown backend: {}", backend);
+                }
             }
-            b
-        } else {
-            HashMap::new()
-        };
+        }
         if backends.is_empty() {
             log::error!("You need to enable at least one backend !");
             log::info!("Valid backends are: 'markdown', 'html'");
@@ -117,7 +134,7 @@ impl Config {
         Self {
             godot_items: Self::godot_items(),
             rust_to_godot: Self::rust_to_godot(),
-            overrides,
+            url_overrides,
             markdown_options,
             backends,
         }
@@ -133,7 +150,7 @@ impl Config {
 
     /// Resolve a name to the class it must link to.
     pub(super) fn resolve(&self, link: &str) -> Option<String> {
-        if let Some(link) = self.overrides.get(link).cloned() {
+        if let Some(link) = self.url_overrides.get(link).cloned() {
             return Some(link);
         }
         let temporary;
@@ -149,7 +166,7 @@ impl Config {
             link
         };
 
-        if let Some(path) = self.overrides.get(base).cloned() {
+        if let Some(path) = self.url_overrides.get(base).cloned() {
             Some(path)
         } else {
             let base = match self.rust_to_godot.get(base) {

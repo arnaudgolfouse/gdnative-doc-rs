@@ -3,18 +3,8 @@
 //! This allows a (rough) building of the crate's module tree, using
 //! [`Package::from_root_file`].
 
-use std::{collections::HashMap, fmt, fs, io, path::PathBuf};
-
-/// Error encountered while trying to build the crate's tree
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    /// IO error (usually caused by non-existent or non-readable files).
-    #[error("Error at {0}: {1}")]
-    Io(PathBuf, io::Error),
-    /// [`syn`] parsing error.
-    #[error("{0}")]
-    Syn(#[from] syn::Error),
-}
+use crate::{Error, Result};
+use std::{collections::HashMap, fmt, fs, path::PathBuf};
 
 /// Handle for a [`Module`].
 pub type ModuleId = u32;
@@ -82,7 +72,7 @@ pub struct Package {
 impl Package {
     /// Try to build the crate tree with the file at the given `path` as
     /// root module.
-    pub fn from_root_file(path: PathBuf) -> Result<Self, Error> {
+    pub fn from_root_file(path: PathBuf) -> Result<Self> {
         let mut builder = PackageBuilder::default();
         let file = match fs::read_to_string(&path) {
             Ok(content) => syn::parse_file(&content)?,
@@ -145,6 +135,15 @@ impl PackageBuilder {
         id
     }
 
+    /// Add a module to the builder, and explore its submodules.
+    ///
+    /// # Parameters
+    /// - `parent`: id of the parent module
+    /// - `path`: file this module resides in
+    /// - `internal_path`: path of this module inside its file
+    /// - `items`: content of the module
+    /// - `attributes`: attributes of the module if it is a file module
+    /// - `visibility`: visibility of the module
     fn add_module(
         &mut self,
         parent: ModuleId,
@@ -153,7 +152,7 @@ impl PackageBuilder {
         items: Vec<syn::Item>,
         attributes: Option<Vec<syn::Attribute>>,
         visibility: syn::Visibility,
-    ) -> Result<ModuleId, Error> {
+    ) -> Result<ModuleId> {
         let id = self.next_id();
         if internal_path.len() == 1 {
             self.files_to_ids.insert(path.clone(), id);
@@ -175,78 +174,76 @@ impl PackageBuilder {
         Ok(id)
     }
 
+    /// Discover submodules and add them to the builder
+    ///
+    /// # Parameters
+    /// - `items`: items to search for modules
+    /// - `parent`: id of the module that contains the `items`
+    /// - `path`: file the `items` were found in
+    /// - `internal_path`: module path of `parent` inside its file
     fn explore_submodules(
         &mut self,
         items: &[syn::Item],
         parent: ModuleId,
         path: &PathBuf,
         internal_path: &[String],
-    ) -> Result<Vec<ModuleId>, Error> {
+    ) -> Result<Vec<ModuleId>> {
         let mut submodules = Vec::new();
         for item in items {
-            match item {
-                syn::Item::Mod(syn::ItemMod {
-                    vis,
-                    ident,
-                    content,
-                    ..
-                }) => {
-                    let mut internal_path = internal_path.to_owned();
-                    internal_path.push(ident.to_string());
-                    let visibility = vis.clone();
-                    let mut path = path.clone();
-                    submodules.push(match content {
-                        Some((_, items)) => self.add_module(
+            if let syn::Item::Mod(syn::ItemMod {
+                vis,
+                ident,
+                content,
+                ..
+            }) = item
+            {
+                let mut internal_path = internal_path.to_owned();
+                internal_path.push(ident.to_string());
+                let visibility = vis.clone();
+                let mut path = path.clone();
+                submodules.push(match content {
+                    Some((_, items)) => self.add_module(
+                        parent,
+                        path,
+                        internal_path,
+                        items.clone(),
+                        None,
+                        visibility,
+                    ),
+                    None => {
+                        if let Some(last) = path.file_name() {
+                            let last = last.to_str();
+                            if last == Some("mod.rs") || last == Some("lib.rs") {
+                                path.pop();
+                            } else {
+                                path.set_extension("");
+                            }
+                        } else {
+                            continue;
+                        }
+                        for module in internal_path.iter().skip(1) {
+                            path.push(module);
+                        }
+                        let path_mod_rs = path.join("mod.rs");
+                        if path_mod_rs.exists() {
+                            path = path_mod_rs;
+                        } else {
+                            path.set_extension("rs");
+                        }
+                        let file = match fs::read_to_string(&path) {
+                            Ok(content) => syn::parse_file(&content)?,
+                            Err(io_error) => return Err(Error::Io(path, io_error)),
+                        };
+                        self.add_module(
                             parent,
                             path,
-                            internal_path,
-                            items.clone(),
-                            None,
+                            vec![ident.to_string()],
+                            file.items,
+                            Some(file.attrs),
                             visibility,
-                        ),
-                        // lib.rs
-                        // a.rs
-                        // a
-                        //   c.rs
-                        // b
-                        //   mod.rs
-                        //   d.rs
-                        None => {
-                            if let Some(last) = path.file_name() {
-                                let last = last.to_str();
-                                if last == Some("mod.rs") || last == Some("lib.rs") {
-                                    path.pop();
-                                } else {
-                                    path.set_extension("");
-                                }
-                            } else {
-                                continue;
-                            }
-                            for module in internal_path.iter().skip(1) {
-                                path.push(module);
-                            }
-                            let path_mod_rs = path.join("mod.rs");
-                            if path_mod_rs.exists() {
-                                path = path_mod_rs;
-                            } else {
-                                path.set_extension("rs");
-                            }
-                            let file = match fs::read_to_string(&path) {
-                                Ok(content) => syn::parse_file(&content)?,
-                                Err(io_error) => return Err(Error::Io(path, io_error)),
-                            };
-                            self.add_module(
-                                parent,
-                                path,
-                                vec![ident.to_string()], // TODO: NOPE
-                                file.items,
-                                Some(file.attrs),
-                                visibility,
-                            )
-                        }
-                    }?)
-                }
-                _ => {}
+                        )
+                    }
+                }?)
             }
         }
         Ok(submodules)

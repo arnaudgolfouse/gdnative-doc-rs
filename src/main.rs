@@ -14,7 +14,8 @@ fn main() {
         Some(path) => PathBuf::from(path),
         None => PathBuf::from("./config.toml"),
     };
-    let config = config::UserConfig::read_from(&path).unwrap();
+    let config = fs::read_to_string(&path).unwrap();
+    let config = config::UserConfig::read_from(&config).unwrap();
     std::env::set_current_dir(path.parent().unwrap()).unwrap();
     let root_file = match &config.root_file {
         Some(path) => path.clone(),

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use pulldown_cmark::{CodeBlockKind, Event, LinkType, Tag};
 
+/// Implementation of [`Callbacks`] for markdown.
 #[derive(Default)]
 pub struct MarkdownCallbacks {
     /// The same name can be used for multiple shortcut links, because they
@@ -218,6 +219,15 @@ impl MarkdownCallbacks {
         }
     }
 
+    /// Tries to add the `shortcut` to the list.
+    ///
+    /// - If it is not present, add it as-is.
+    /// - If it is already present with the same `link`, at index:
+    ///   - `0`: does nothing.
+    ///   - `> 0`: change `shortcut` to `shortcut-index`.
+    /// - If it is already present, but none of the `n` links associated
+    /// with it correspond to `link`, add `link` to its list and change
+    /// `shortcut` to `shortcut-n`.
     fn add_shortcut_link(&mut self, shortcut: &mut String, link: &str) {
         if let Some(links) = self.links.get_mut(shortcut) {
             if let Some((index, _)) = links.iter().enumerate().find(|(_, l)| l == &link) {
@@ -238,12 +248,14 @@ impl MarkdownCallbacks {
     }
 }
 
+/// Push `level * "  "` into `s`.
 fn indent(s: &mut String, level: u32) {
     for _ in 0..level {
         s.push_str("  ")
     }
 }
 
+/// Remove trailing whitespace.
 fn trim(s: &mut String) {
     while let Some(c) = s.pop() {
         if !c.is_whitespace() {

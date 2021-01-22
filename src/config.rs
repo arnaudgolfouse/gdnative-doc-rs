@@ -1,30 +1,45 @@
+//! User configuration settings.
+
+use crate::Result;
 use serde::Deserialize;
-use std::{
-    collections::HashMap,
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::{collections::HashMap, path::PathBuf};
 
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error("{0}")]
-    Io(#[from] io::Error),
-    #[error("{0}")]
-    Toml(#[from] toml::de::Error),
-}
-
+/// Structure that holds user configuration settings.
+///
+/// Should be obtained via a `toml` [configuration file](UserConfig::read_from).
 #[derive(Deserialize)]
 pub struct UserConfig {
-    pub(crate) overrides: Option<HashMap<String, String>>,
+    /// List of enabled backends, with their associated output directory.
+    ///
+    /// # Valid backends
+    /// - markdown
+    /// - html
+    pub backends: HashMap<String, PathBuf>,
+    /// Root file of the crate.
+    ///
+    /// # Default
+    /// Determined via `cargo` (TODO)
     pub root_file: Option<PathBuf>,
-    pub(crate) backends: Option<HashMap<String, PathBuf>>,
-    pub(crate) markdown_options: Option<Vec<String>>,
+    /// List of items for which the linking url should be overriden.
+    pub url_overrides: Option<HashMap<String, String>>,
+    /// Optional markdown options.
+    ///
+    /// # Valid options
+    /// - FOOTNOTES
+    /// - SMART_PUNCTUATION
+    /// - STRIKETHROUGH
+    /// - TABLES
+    /// - TASKLISTS
+    ///
+    /// # Default
+    /// No option enabled.
+    pub markdown_options: Option<Vec<String>>,
 }
 
 impl UserConfig {
-    pub fn read_from(path: &Path) -> Result<Self, io::Error> {
-        let config_file = fs::read_to_string(path)?;
-        Ok(toml::from_str(&config_file)?)
+    /// Read `UserConfig` from the given `toml` configuration file.
+    pub fn read_from(config: &str) -> Result<Self> {
+        Ok(toml::from_str(config)?)
     }
 
     pub(crate) fn markdown_options(&self) -> Option<pulldown_cmark::Options> {

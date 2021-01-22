@@ -1,7 +1,6 @@
-//! Collect exported items in [`Modules`] to be processed.
-//!
-//! [`Modules`]: crate::files::Package
+//! Collect exported items in a [`Package`](crate::files::Package) to be processed.
 
+use crate::Result;
 use std::collections::HashMap;
 
 /// Attribute in a function parameter.
@@ -76,7 +75,7 @@ pub struct Documentation {
     pub root_documentation: String,
     /// Classes, organized by name.
     ///
-    /// TODO: the name of the class is repeated all over the place.
+    /// FIXME: the name of the class is repeated all over the place.
     ///       It may be better to use identifiers
     pub classes: HashMap<String, GdnativeClass>,
 }
@@ -98,7 +97,7 @@ impl Documentation {
         &mut self,
         items: &[syn::Item],
         root_module: Option<&[syn::Attribute]>,
-    ) -> syn::Result<()> {
+    ) -> Result<()> {
         if let Some(attrs) = root_module {
             self.root_documentation = get_docs(attrs);
         }
