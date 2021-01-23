@@ -9,33 +9,33 @@ The map must first be filled by using e.g. `add_point`, `connect_points`,
 
 And then you must call `recalculate` on it.
 
-## func new() -> Self
+### func new() -> Self
 ________
 Create a new empty `DijkstraMap`.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 ```
-## func clear() -> void
+### func clear() -> void
 ________
 Clear the underlying `DijkstraMap`.
 
-### Example
+#### Example
 
 ```gdscript
 dijkstra_map.clear()
 ```
-## func duplicate_graph_from(source_instance: [Variant]) -> [int]
+### func duplicate_graph_from(source_instance: [Variant]) -> [int]
 ________
 If `source_instance` is a `dijkstra map`, it is cloned into
 `self`.
 
-### Errors
+#### Errors
 This function returns [`FAILED`] if `source_instance` is not a DijkstraMap.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -43,11 +43,11 @@ var dijkstra_map = DijkstraMap.new()
 var dijkstra_map_copy = DijkstraMap.new()
 dijkstra_map_copy.duplicate_graph_from(dijkstra_map)
 ```
-## func get_available_point_id() -> [int]
+### func get_available_point_id() -> [int]
 ________
 Returns the first positive available id.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -55,33 +55,33 @@ dijkstra_map.add_point(0)
 dijkstra_map.add_point(1)
 assert(dijkstra_map.get_available_point_id() == 2)
 ```
-## func add_point(point_id: [int], terrain_type: [int] (opt)) -> [int]
+### func add_point(point_id: [int], terrain_type: [int] (opt)) -> [int]
 ________
 Add a new point with the given `terrain_type`.
 
 If `terrain_type` not specified, `-1` is used.
 
-### Errors
+#### Errors
 If a point with the given id already exists, the map is unchanged and
 [`FAILED`] is returned.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0) # terrain_type is -1
 dijkstra_map.add_point(1, 0) # terrain_type is 0
 ```
-## func set_terrain_for_point(point_id: [int], terrain_id: [int] (opt)) -> [int]
+### func set_terrain_for_point(point_id: [int], terrain_id: [int] (opt)) -> [int]
 ________
 Set the terrain type for `point_id`.
 
 If `terrain_id` is not specified, `-1` is used.
 
-### Errors
+#### Errors
 If the given id does not exists in the map, [`FAILED`] is returned.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -91,14 +91,14 @@ assert(dijkstra_map.get_terrain_for_point(0) == 1)
 dijkstra_map.set_terrain_for_point(0)
 assert(dijkstra_map.get_terrain_for_point(0) == -1)
 ```
-## func get_terrain_for_point(point_id: [int]) -> [int]
+### func get_terrain_for_point(point_id: [int]) -> [int]
 ________
 Get the terrain type for the given point.
 
 This function returns `-1` if no point with the given id exists in the
 map.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -109,14 +109,14 @@ assert(dijkstra_map.get_terrain_for_point(1) == -1)
 # `2` is not in the map, so this returns `-1`
 assert(dijkstra_map.get_terrain_for_point(2) == -1)
 ```
-## func remove_point(point_id: [int]) -> [int]
+### func remove_point(point_id: [int]) -> [int]
 ________
 Removes a point from the map.
 
-### Errors
+#### Errors
 Returns [`FAILED`] if the point does not exists in the map.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -124,18 +124,18 @@ dijkstra_map.add_point(0)
 assert(dijkstra_map.remove_point(0) == 0)
 assert(dijkstra_map.remove_point(0) == 1)
 ```
-## func has_point(point_id: [int]) -> [bool]
+### func has_point(point_id: [int]) -> [bool]
 ________
 Returns [`true`] if the map contains the given point.
 
-## func disable_point(point_id: [int]) -> [int]
+### func disable_point(point_id: [int]) -> [int]
 ________
 Disable the given point for pathfinding.
 
-### Errors
+#### Errors
 Returns [`FAILED`] if the point does not exists in the map.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -143,14 +143,14 @@ dijkstra_map.add_point(0)
 assert(dijkstra_map.disable_point(0) == 0)
 assert(dijkstra_map.disable_point(1) == 1)
 ```
-## func enable_point(point_id: [int]) -> [int]
+### func enable_point(point_id: [int]) -> [int]
 ________
 Enable the given point for pathfinding.
 
-### Errors
+#### Errors
 Returns [`FAILED`] if the point does not exists in the map.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -158,12 +158,12 @@ dijkstra_map.add_point(0)
 assert(dijkstra_map.enable_point(0) == 0)
 assert(dijkstra_map.enable_point(1) == 1)
 ```
-## func is_point_disabled(point_id: [int]) -> [bool]
+### func is_point_disabled(point_id: [int]) -> [bool]
 ________
 Returns [`true`] if the point exists and is disabled, otherwise returns
 [`false`].
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -174,20 +174,20 @@ assert(dijkstra_map.is_point_disabled(0))
 assert(!dijkstra_map.is_point_disabled(1))
 assert(!dijkstra_map.is_point_disabled(2))
 ```
-## func connect_points(source: [int], target: [int], weight: [float] (opt), bidirectional: [bool] (opt)) -> [int]
+### func connect_points(source: [int], target: [int], weight: [float] (opt), bidirectional: [bool] (opt)) -> [int]
 ________
 Connects the two given points.
 
-### Parameters
+#### Parameters
 - `source` : source point of the connection.
 - `target` : target point of the connection.
 - `weight` : weight of the connection. Defaults to `1.0`.
 - `bidirectional` : wether or not the reciprocal connection should be
 made. Defaults to [`true`].
-### Errors
+#### Errors
 Return [`FAILED`] if one of the points does not exists in the map.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -201,19 +201,19 @@ dijkstra_map.connect_points(1, 2, 1.0, false)
 #    2.0     1.0
 assert(dijkstra_map.connect_points(1, 3) == 1) # 3 does not exists in the map
 ```
-## func remove_connection(source: [int], target: [int], bidirectional: [bool] (opt)) -> [int]
+### func remove_connection(source: [int], target: [int], bidirectional: [bool] (opt)) -> [int]
 ________
 Remove a connection between the two given points.
 
-### Parameters
+#### Parameters
 - `source` : source point of the connection.
 - `target` : target point of the connection.
 - `bidirectional` (default : [`true`]) : if [`true`], also removes
 connection from target to source.
-### Errors
+#### Errors
 Returns [`FAILED`] if one of the points does not exist.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -227,12 +227,12 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.remove_connection(0, 1, false)
 assert(dijkstra_map.has_connection(1, 0))
 ```
-## func has_connection(source: [int], target: [int]) -> [bool]
+### func has_connection(source: [int], target: [int]) -> [bool]
 ________
 Returns [`true`] if there is a connection from `source` to `target`
 (and they both exist).
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -243,15 +243,15 @@ assert(dijkstra_map.has_connection(0, 1))
 assert(!dijkstra_map.has_connection(1, 0))
 assert(!dijkstra_map.has_connection(0, 2))
 ```
-## func get_direction_at_point(point_id: [int]) -> [int]
+### func get_direction_at_point(point_id: [int]) -> [int]
 ________
 Given a point, returns the id of the next point along the shortest path
 toward the target.
 
-### Errors
+#### Errors
 This function return `-1` if there is no path from the point to the target.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -264,13 +264,13 @@ assert(dijkstra_map.get_direction_at_point(0) == 0)
 assert(dijkstra_map.get_direction_at_point(1) == 0)
 assert(dijkstra_map.get_direction_at_point(2) == -1)
 ```
-## func get_cost_at_point(point_id: [int]) -> [float]
+### func get_cost_at_point(point_id: [int]) -> [float]
 ________
 Returns the cost of the shortest path from this point to the target.
 
 If there is no path, the cost is [`INF`].
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -283,7 +283,7 @@ assert(dijkstra_map.get_cost_at_point(0) == 0.0)
 assert(dijkstra_map.get_cost_at_point(1) == 1.0)
 assert(dijkstra_map.get_cost_at_point(2) == INF)
 ```
-## func recalculate(origin: [Variant], optional_params: [Dictionary] (opt)) -> [int]
+### func recalculate(origin: [Variant], optional_params: [Dictionary] (opt)) -> [int]
 ________
 Recalculates cost map and direction map information for each point,
 overriding previous results.
@@ -291,7 +291,7 @@ overriding previous results.
 This is the central function of the library, the one that actually uses
 Dijkstra's algorithm.
 
-### Parameters
+#### Parameters
 - `origin` : ID of the origin point, or array of IDs (preferably
 [`Int32Array`]).
 - `optional_params: `[`Dictionary`] : Specifies optional arguments. 
@@ -328,12 +328,12 @@ keys.
     A set of points that stop the computation if they are reached by
 the algorithm.
 Note that keys of incorrect types are ignored with a warning.
-### Errors
+#### Errors
 [`FAILED`] is returned if :
 
 - One of the keys in `optional_params` is invalid.
 - `origin` is neither an [`int`], a [`PoolIntArray`] or a [`Array`].
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -355,7 +355,7 @@ assert(dijkstra_map.get_direction_at_point(1) == 0)
 # 2 is too far from 0, so because we set "maximum_cost" to 2.0, it is innaccessible.
 assert(dijkstra_map.get_direction_at_point(2) == -1)
 ```
-## func get_direction_at_points(points: [PoolIntArray]) -> [PoolIntArray]
+### func get_direction_at_points(points: [PoolIntArray]) -> [PoolIntArray]
 ________
 For each point in the given array, returns the id of the next point
 along the shortest path toward the target.
@@ -363,7 +363,7 @@ along the shortest path toward the target.
 If a point does not exists, or there is no path from it to the target,
 the corresponding point will be `-1`.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -374,7 +374,7 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.recalculate(0)
 assert(Array(dijkstra_map.get_direction_at_points(PoolIntArray([0, 1, 2]))) == [0, 0, -1])
 ```
-## func get_cost_at_points(points: [PoolIntArray]) -> [PoolRealArray]
+### func get_cost_at_points(points: [PoolIntArray]) -> [PoolRealArray]
 ________
 For each point in the given array, returns the cost of the shortest
 path from this point to the target.
@@ -382,7 +382,7 @@ path from this point to the target.
 If there is no path from a point to the target, the cost is
 [`INF`].
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -393,14 +393,14 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.recalculate(0)
 assert(Array(dijkstra_map.get_cost_at_points(PoolIntArray([0, 1, 2]))) == [0.0, 1.0, INF])
 ```
-## func get_cost_map() -> [Dictionary]
+### func get_cost_map() -> [Dictionary]
 ________
 Returns the entire Dijktra map of costs in form of a Dictionary.
 
 Keys are points' IDs, and values are costs. Inaccessible points are not
 present in the dictionary.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -414,7 +414,7 @@ var computed_cost_map = dijkstra_map.get_cost_map()
 for id in computed_cost_map.keys():
     assert(computed_cost_map[id] == cost_map[id])
 ```
-## func get_direction_map() -> [Dictionary]
+### func get_direction_map() -> [Dictionary]
 ________
 Returns the entire Dijkstra map of directions in form of a
 [`Dictionary`].
@@ -422,10 +422,10 @@ Returns the entire Dijkstra map of directions in form of a
 Keys are points' IDs, and values are the next point along the shortest
 path.
 
-#### Note
+##### Note
 Unreacheable points are not present in the map.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -439,14 +439,14 @@ var computed_direction_map = dijkstra_map.get_direction_map()
 for id in computed_direction_map.keys():
     assert(computed_direction_map[id] == direction_map[id])
 ```
-## func get_all_points_with_cost_between(min_cost: [float], max_cost: [float]) -> [PoolIntArray]
+### func get_all_points_with_cost_between(min_cost: [float], max_cost: [float]) -> [PoolIntArray]
 ________
 Returns an array of all the points whose cost is between `min_cost` and
 `max_cost`.
 
 The array will be sorted by cost.
 
-### Example
+#### Example
 
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
@@ -457,7 +457,7 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.recalculate(0)
 assert(Array(dijkstra_map.get_all_points_with_cost_between(0.5, 1.5)) == [1])
 ```
-## func get_shortest_path_from_point(point_id: [int]) -> [PoolIntArray]
+### func get_shortest_path_from_point(point_id: [int]) -> [PoolIntArray]
 ________
 Returns an [array] of points describing the shortest path from a
 starting point.
@@ -465,14 +465,14 @@ starting point.
 If the starting point is a target or is inaccessible, the [array] will
 be empty.
 
-#### Note
+##### Note
 The starting point itself is not included.
 
-## func add_square_grid(bounds: [Variant], terrain_type: [int] (opt), orthogonal_cost: [float] (opt), diagonal_cost: [float] (opt)) -> [Dictionary]
+### func add_square_grid(bounds: [Variant], terrain_type: [int] (opt), orthogonal_cost: [float] (opt), diagonal_cost: [float] (opt)) -> [Dictionary]
 ________
 Adds a square grid of connected points.
 
-### Parameters
+#### Parameters
 - `bounds` : Dimensions of the grid. At the moment, only [`Rect2`] is
 supported.
 - `terrain_type` (default : `-1`) : Terrain to use for all points of
@@ -487,30 +487,30 @@ connections.
 
   If `diagonal_cost` is [`INF`] or [`NAN`], diagonal connections
 are disabled.
-### Returns
+#### Returns
 This function returns a Dictionary where keys are coordinates of points
 ([`Vector2`]) and values are their corresponding point IDs.
 
-## func add_hexagonal_grid(bounds: [Variant], terrain_type: [int] (opt), weight: [float] (opt)) -> [Dictionary]
+### func add_hexagonal_grid(bounds: [Variant], terrain_type: [int] (opt), weight: [float] (opt)) -> [Dictionary]
 ________
 Adds a hexagonal grid of connected points.
 
-### Parameters
+#### Parameters
 - `bounds` : Dimensions of the grid.
 - `terrain_type` (default : `-1`) : specifies terrain to be used.
 - `weight` (default : `1.0`) : specifies cost of connections.
-### Returns
+#### Returns
 This function returns a [`Dictionary`] where keys are coordinates of
 points ([`Vector2`]) and values are their corresponding point IDs.
 
-### Note
+#### Note
 Hexgrid is in the "pointy" orentation by default (see example below).
 
 To switch to "flat" orientation, swap `width` and `height`, and switch
 `x` and `y` coordinates of the keys in the return [`Dictionary`].
 ([`Transform2D`] may be convenient there)
 
-### Example
+#### Example
 This is what `add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)` would produce:
 
 

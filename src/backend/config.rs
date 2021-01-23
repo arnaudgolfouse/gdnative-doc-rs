@@ -231,7 +231,7 @@ impl Config {
                     None => {}
                 }
             }
-            Event::Start(Tag::Heading(n)) | Event::End(Tag::Heading(n)) => *n += 2,
+            Event::Start(Tag::Heading(n)) | Event::End(Tag::Heading(n)) => *n += 3,
             _ => {}
         }
     }

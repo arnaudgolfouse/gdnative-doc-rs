@@ -197,7 +197,7 @@ impl<'a> Generator<'a> {
 
     /// Encode the documentation for `method`.
     fn generate_method(mut encode: impl FnMut(Vec<Event>), config: &Config, method: &Method) {
-        encode(vec![Event::Start(Tag::Heading(2))]);
+        encode(vec![Event::Start(Tag::Heading(3))]);
         let mut method_section = String::from("func ");
         method_section.push_str(&method.name);
         method_section.push('(');
@@ -253,13 +253,13 @@ impl<'a> Generator<'a> {
                     Event::Start(link.clone()),
                     Event::Text(CowStr::Borrowed(return_type)),
                     Event::End(link),
-                    Event::End(Tag::Heading(2)),
+                    Event::End(Tag::Heading(3)),
                 ]
             }
             None => {
                 vec![
                     Event::Text(CowStr::Borrowed(return_type)),
-                    Event::End(Tag::Heading(2)),
+                    Event::End(Tag::Heading(3)),
                 ]
             }
         };
