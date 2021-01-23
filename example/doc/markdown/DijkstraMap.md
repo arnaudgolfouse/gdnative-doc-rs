@@ -1,4 +1,7 @@
 # DijkstraMap
+**Inherit:** [Reference]
+
+## Description
 Interface exported to Godot
 
 The map must first be filled by using e.g. `add_point`, `connect_points`,
@@ -528,6 +531,7 @@ This is what `add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)` would produce:
 [Dictionary]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html
 [PoolIntArray]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
 [PoolRealArray]: https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html
+[Reference]: https://docs.godotengine.org/en/stable/classes/class_reference.html
 [Variant]: https://docs.godotengine.org/en/stable/classes/class_variant.html
 [`Array`]: https://docs.godotengine.org/en/stable/classes/class_array.html
 [`Dictionary`]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html

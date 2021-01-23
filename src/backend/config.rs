@@ -182,6 +182,7 @@ impl Config {
                 }
             }
             replace(&mut name);
+            replace(&mut class.inherit);
             renamed_classes.insert(name, class);
         }
         documentation.classes = renamed_classes;

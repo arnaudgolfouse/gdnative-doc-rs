@@ -4,7 +4,7 @@ mod markdown;
 pub use config::Config;
 pub use markdown::MarkdownCallbacks;
 
-use crate::documentation::{Documentation, Type};
+use crate::documentation::{Documentation, Method, Type};
 use pulldown_cmark::{CowStr, Event, LinkType, Parser, Tag};
 
 /// Generate a callback to resolve broken links.
@@ -129,129 +129,154 @@ impl<'a> Generator<'a> {
 
     /// Generate pairs of (class_name, file_content).
     pub fn generate_files(&mut self) -> Vec<(String, String)> {
-        // FIXME: this is kind of a mess, need to cleanup
         let mut results = Vec::new();
         for (name, class) in &self.documentation.classes {
             let mut class_file = String::new();
-
-            self.callbacks.encode(
-                &mut class_file,
-                vec![
-                    Event::Start(Tag::Heading(1)),
-                    Event::Text(CowStr::Borrowed(&name)),
-                    Event::End(Tag::Heading(1)),
-                ],
-            );
+            let inherit_link = self.config.resolve(&class.inherit);
+            let mut events = vec![
+                Event::Start(Tag::Heading(1)),
+                Event::Text(CowStr::Borrowed(&name)),
+                Event::End(Tag::Heading(1)),
+                Event::Start(Tag::Paragraph),
+                Event::Start(Tag::Strong),
+                Event::Text(CowStr::Borrowed("Inherit:")),
+                Event::End(Tag::Strong),
+                Event::Text(CowStr::Borrowed(" ")),
+            ];
+            if let Some(inherit_link) = inherit_link.as_ref() {
+                events.extend(vec![
+                    Event::Start(Tag::Link(
+                        LinkType::Shortcut,
+                        CowStr::Borrowed(&inherit_link),
+                        CowStr::Borrowed(""),
+                    )),
+                    Event::Text(CowStr::Borrowed(&class.inherit)),
+                    Event::End(Tag::Link(
+                        LinkType::Shortcut,
+                        CowStr::Borrowed(&inherit_link),
+                        CowStr::Borrowed(""),
+                    )),
+                ])
+            } else {
+                events.push(Event::Text(CowStr::Borrowed(&class.inherit)))
+            }
+            events.extend(vec![
+                Event::End(Tag::Paragraph),
+                Event::Start(Tag::Heading(2)),
+                Event::Text(CowStr::Borrowed("Description")),
+                Event::End(Tag::Heading(2)),
+            ]);
+            self.callbacks.encode(&mut class_file, events);
             let config = self.config;
             let mut broken_link_callback = broken_link_callback!(config);
-            let class_iterator = EventIterator {
+            let class_documentation = EventIterator {
                 context: config,
                 parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                     &class.documentation,
-                    self.config.markdown_options,
+                    config.markdown_options,
                     Some(&mut broken_link_callback),
                 ),
             };
 
             self.callbacks
-                .encode(&mut class_file, class_iterator.into_iter().collect());
+                .encode(&mut class_file, class_documentation.into_iter().collect());
             for method in &class.methods {
-                self.callbacks
-                    .encode(&mut class_file, vec![Event::Start(Tag::Heading(2))]);
-                let mut function_section = String::from("func ");
-                function_section.push_str(&method.name);
-                function_section.push('(');
-                for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
-                    function_section.push_str(&name);
-                    function_section.push_str(": ");
-                    self.callbacks.encode(
-                        &mut class_file,
-                        vec![Event::Text(CowStr::Borrowed(&function_section))],
-                    );
-                    function_section.clear();
-                    let (typ, optional) = match typ {
-                        Type::Option(typ) => (typ.as_str(), true),
-                        Type::Named(typ) => (typ.as_str(), false),
-                        Type::Unit => ("void", false),
-                    };
-                    match self.config.resolve(typ) {
-                        Some(link) => {
-                            let link = Tag::Link(
-                                LinkType::Shortcut,
-                                CowStr::Borrowed(&link),
-                                CowStr::Borrowed(""),
-                            );
-                            self.callbacks.encode(
-                                &mut class_file,
-                                vec![
-                                    Event::Start(link.clone()),
-                                    Event::Text(CowStr::Borrowed(typ)),
-                                    Event::End(link),
-                                ],
-                            );
-                        }
-                        None => function_section.push_str(typ),
-                    }
-                    if optional {
-                        function_section.push_str(" (opt)");
-                    }
-                    if index + 1 != method.parameters.len() {
-                        function_section.push_str(", ");
-                    }
-                }
-                function_section.push_str(") -> ");
-                self.callbacks.encode(
-                    &mut class_file,
-                    vec![Event::Text(CowStr::Borrowed(&function_section))],
-                );
-
-                let return_type = match &method.return_type {
-                    Type::Option(typ) | Type::Named(typ) => typ.as_str(),
-                    Type::Unit => "void",
-                };
-                let resolve_return = self.config.resolve(return_type);
-                let return_events = match resolve_return.as_ref().map(|return_link| {
-                    Tag::Link(
-                        LinkType::Shortcut,
-                        CowStr::Borrowed(&return_link),
-                        CowStr::Borrowed(""),
-                    )
-                }) {
-                    Some(link) => {
-                        vec![
-                            Event::Start(link.clone()),
-                            Event::Text(CowStr::Borrowed(return_type)),
-                            Event::End(link),
-                            Event::End(Tag::Heading(2)),
-                        ]
-                    }
-                    None => {
-                        vec![
-                            Event::Text(CowStr::Borrowed(return_type)),
-                            Event::End(Tag::Heading(2)),
-                        ]
-                    }
-                };
-
-                self.callbacks.encode(&mut class_file, return_events);
-                self.callbacks.encode(&mut class_file, vec![Event::Rule]);
-                let config = self.config;
-                let mut broken_link_callback = broken_link_callback!(config);
-                let method_iterator = EventIterator {
-                    context: config,
-                    parser: pulldown_cmark::Parser::new_with_broken_link_callback(
-                        &method.documentation,
-                        self.config.markdown_options,
-                        Some(&mut broken_link_callback),
-                    ),
-                };
-                self.callbacks
-                    .encode(&mut class_file, method_iterator.into_iter().collect());
+                //self.generate_method(&mut class_file, method);
+                let callbacks = &mut self.callbacks;
+                Self::generate_method(
+                    |events| callbacks.encode(&mut class_file, events),
+                    config,
+                    method,
+                )
             }
             self.callbacks.finish_encoding(&mut class_file);
             results.push((name.clone(), class_file))
         }
         results
+    }
+
+    /// Encode the documentation for `method`.
+    fn generate_method(mut encode: impl FnMut(Vec<Event>), config: &Config, method: &Method) {
+        encode(vec![Event::Start(Tag::Heading(2))]);
+        let mut method_section = String::from("func ");
+        method_section.push_str(&method.name);
+        method_section.push('(');
+        for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
+            method_section.push_str(&name);
+            method_section.push_str(": ");
+            encode(vec![Event::Text(CowStr::Borrowed(&method_section))]);
+            method_section.clear();
+            let (typ, optional) = match typ {
+                Type::Option(typ) => (typ.as_str(), true),
+                Type::Named(typ) => (typ.as_str(), false),
+                Type::Unit => ("void", false),
+            };
+            match config.resolve(typ) {
+                Some(link) => {
+                    let link = Tag::Link(
+                        LinkType::Shortcut,
+                        CowStr::Borrowed(&link),
+                        CowStr::Borrowed(""),
+                    );
+                    encode(vec![
+                        Event::Start(link.clone()),
+                        Event::Text(CowStr::Borrowed(typ)),
+                        Event::End(link),
+                    ]);
+                }
+                None => method_section.push_str(typ),
+            }
+            if optional {
+                method_section.push_str(" (opt)");
+            }
+            if index + 1 != method.parameters.len() {
+                method_section.push_str(", ");
+            }
+        }
+        method_section.push_str(") -> ");
+        encode(vec![Event::Text(CowStr::Borrowed(&method_section))]);
+
+        let return_type = match &method.return_type {
+            Type::Option(typ) | Type::Named(typ) => typ.as_str(),
+            Type::Unit => "void",
+        };
+        let resolve_return = config.resolve(return_type);
+        let return_events = match resolve_return.as_ref().map(|return_link| {
+            Tag::Link(
+                LinkType::Shortcut,
+                CowStr::Borrowed(&return_link),
+                CowStr::Borrowed(""),
+            )
+        }) {
+            Some(link) => {
+                vec![
+                    Event::Start(link.clone()),
+                    Event::Text(CowStr::Borrowed(return_type)),
+                    Event::End(link),
+                    Event::End(Tag::Heading(2)),
+                ]
+            }
+            None => {
+                vec![
+                    Event::Text(CowStr::Borrowed(return_type)),
+                    Event::End(Tag::Heading(2)),
+                ]
+            }
+        };
+
+        encode(return_events);
+        encode(vec![Event::Rule]);
+        let config = config;
+        let mut broken_link_callback = broken_link_callback!(config);
+        let method_iterator = EventIterator {
+            context: config,
+            parser: pulldown_cmark::Parser::new_with_broken_link_callback(
+                &method.documentation,
+                config.markdown_options,
+                Some(&mut broken_link_callback),
+            ),
+        };
+        encode(method_iterator.into_iter().collect());
     }
 }
 
