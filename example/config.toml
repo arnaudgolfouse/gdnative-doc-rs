@@ -1,3 +1,4 @@
 root_file = "./lib.rs"
 markdown_options = ["STRIKETHROUGH"]
 backends = { "markdown" = "./doc/markdown", "html" = "./doc/html" }
+rename_classes = { Interface = "DijkstraMap" }

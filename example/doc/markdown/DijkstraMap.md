@@ -1,4 +1,4 @@
-# Interface
+# DijkstraMap
 Interface exported to Godot
 
 The map must first be filled by using e.g. `add_point`, `connect_points`,

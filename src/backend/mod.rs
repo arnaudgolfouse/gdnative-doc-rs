@@ -170,8 +170,8 @@ impl<'a> Generator<'a> {
                     );
                     function_section.clear();
                     let (typ, optional) = match typ {
-                        Type::Option(typ) => (self.config.godot_name(typ.as_str()), true),
-                        Type::Named(typ) => (self.config.godot_name(typ.as_str()), false),
+                        Type::Option(typ) => (typ.as_str(), true),
+                        Type::Named(typ) => (typ.as_str(), false),
                         Type::Unit => ("void", false),
                     };
                     match self.config.resolve(typ) {
@@ -185,7 +185,7 @@ impl<'a> Generator<'a> {
                                 &mut class_file,
                                 vec![
                                     Event::Start(link.clone()),
-                                    Event::Text(CowStr::Borrowed(self.config.godot_name(typ))),
+                                    Event::Text(CowStr::Borrowed(typ)),
                                     Event::End(link),
                                 ],
                             );
@@ -206,7 +206,7 @@ impl<'a> Generator<'a> {
                 );
 
                 let return_type = match &method.return_type {
-                    Type::Option(typ) | Type::Named(typ) => self.config.godot_name(typ.as_str()),
+                    Type::Option(typ) | Type::Named(typ) => typ.as_str(),
                     Type::Unit => "void",
                 };
                 let resolve_return = self.config.resolve(return_type);
@@ -220,14 +220,14 @@ impl<'a> Generator<'a> {
                     Some(link) => {
                         vec![
                             Event::Start(link.clone()),
-                            Event::Text(CowStr::Borrowed(self.config.godot_name(return_type))),
+                            Event::Text(CowStr::Borrowed(return_type)),
                             Event::End(link),
                             Event::End(Tag::Heading(2)),
                         ]
                     }
                     None => {
                         vec![
-                            Event::Text(CowStr::Borrowed(self.config.godot_name(return_type))),
+                            Event::Text(CowStr::Borrowed(return_type)),
                             Event::End(Tag::Heading(2)),
                         ]
                     }

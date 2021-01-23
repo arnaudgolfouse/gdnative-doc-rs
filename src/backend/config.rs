@@ -1,5 +1,8 @@
 use super::Backend;
-use crate::config::UserConfig;
+use crate::{
+    config::UserConfig,
+    documentation::{self, Documentation},
+};
 use pulldown_cmark::{Event, Tag};
 use std::{collections::HashMap, path::PathBuf};
 
@@ -12,10 +15,12 @@ pub struct Config {
     ///
     /// Contains the link to godot classes, but also `true`, `INF`, `Err`...
     pub(crate) godot_items: HashMap<String, String>,
-    /// Mapping from Rust types to gdscript types
+    /// Mapping from Rust to Godot types
     pub(crate) rust_to_godot: HashMap<String, String>,
     /// User-defined overrides
     pub(crate) url_overrides: HashMap<String, String>,
+    /// User-defined Rust to Godot mapping
+    pub(crate) rename_classes: HashMap<String, String>,
     /// Markdown options
     pub(crate) markdown_options: pulldown_cmark::Options,
     /// Backends and their output directory
@@ -30,7 +35,7 @@ const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classe
 
 /// List of some godot constants and information about where they sould link to.
 ///
-/// link for constant: `<godot_doc_url>/<constant.1>.html#<constant.2>`
+/// link for `<constant.0>`: `<godot_doc_url>/<constant.1>.html#<constant.2>`
 const GODOT_CONSTANTS: &[(&str, &str, &str)] = &[
     ("true", "class_bool", ""),
     ("false", "class_bool", ""),
@@ -59,6 +64,7 @@ impl Default for Config {
             godot_items: Self::godot_items(),
             rust_to_godot: Self::rust_to_godot(),
             url_overrides: HashMap::new(),
+            rename_classes: HashMap::new(),
             markdown_options: pulldown_cmark::Options::empty(),
             backends: HashMap::new(),
         }
@@ -102,7 +108,8 @@ impl Config {
         let markdown_options = user_config
             .markdown_options()
             .unwrap_or(pulldown_cmark::Options::empty());
-        let url_overrides = user_config.url_overrides.unwrap_or(HashMap::new());
+        let url_overrides = user_config.url_overrides.unwrap_or_default();
+        let name_overrides = user_config.rename_classes.unwrap_or_default();
         let mut backends = HashMap::new();
         for (backend, path) in user_config.backends {
             match backend.as_str() {
@@ -135,20 +142,54 @@ impl Config {
             godot_items: Self::godot_items(),
             rust_to_godot: Self::rust_to_godot(),
             url_overrides,
+            rename_classes: name_overrides,
             markdown_options,
             backends,
         }
     }
 
-    pub(crate) fn godot_name<'a>(&'a self, name: &'a str) -> &'a str {
-        if let Some(name) = self.rust_to_godot.get(name) {
-            name
-        } else {
-            name
+    /// Convert all type names from Rust to Godot.
+    ///
+    /// This will convert `i32` to `int`, `Int32Array` to `PoolIntArray`...
+    ///
+    /// See [`UserConfig::rename_classes`] for user-defined renaming.
+    pub fn rename_classes(&self, documentation: &mut Documentation) {
+        let replace = |name: &mut String| {
+            if let Some(rename) = self.rename_classes.get(name) {
+                *name = rename.clone();
+            } else if let Some(rename) = self.rust_to_godot.get(name) {
+                *name = rename.clone();
+            }
+        };
+
+        let mut renamed_classes = HashMap::new();
+        let classes = std::mem::take(&mut documentation.classes);
+        for (mut name, mut class) in classes {
+            for method in &mut class.methods {
+                for (_, typ, _) in &mut method.parameters {
+                    match typ {
+                        documentation::Type::Option(name) | documentation::Type::Named(name) => {
+                            replace(name)
+                        }
+                        documentation::Type::Unit => {}
+                    }
+                }
+                match &mut method.return_type {
+                    documentation::Type::Option(name) | documentation::Type::Named(name) => {
+                        replace(name)
+                    }
+                    documentation::Type::Unit => {}
+                }
+            }
+            replace(&mut name);
+            renamed_classes.insert(name, class);
         }
+        documentation.classes = renamed_classes;
     }
 
     /// Resolve a name to the class it must link to.
+    ///
+    /// `link` must already have been stripped off the enclosing \`.
     pub(super) fn resolve(&self, link: &str) -> Option<String> {
         if let Some(link) = self.url_overrides.get(link).cloned() {
             return Some(link);

@@ -41,6 +41,7 @@ fn main() {
     }
 
     let backend_config = backend::Config::from_user_config(config);
+    backend_config.rename_classes(&mut documentation);
     let backends = backend_config.backends.clone();
     for (backend, output_dir) in backends {
         let extension = backend.extension();

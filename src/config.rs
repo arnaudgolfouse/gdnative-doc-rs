@@ -22,6 +22,11 @@ pub struct UserConfig {
     pub root_file: Option<PathBuf>,
     /// List of items for which the linking url should be overriden.
     pub url_overrides: Option<HashMap<String, String>>,
+    /// Renaming of types when going from Rsut to Godot.
+    ///
+    /// This is useful because GDNative allows defining a `script_class_name` in the
+    /// `.gdns` file.
+    pub rename_classes: Option<HashMap<String, String>>,
     /// Optional markdown options.
     ///
     /// # Valid options
@@ -42,6 +47,8 @@ impl UserConfig {
         Ok(toml::from_str(config)?)
     }
 
+    /// Convert the `String` list of options to `pulldown_cmark::Options`, logging
+    /// warnings on unrecognized options.
     pub(crate) fn markdown_options(&self) -> Option<pulldown_cmark::Options> {
         use pulldown_cmark::Options;
         if let Some(options) = &self.markdown_options {
