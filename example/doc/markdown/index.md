@@ -1,3 +1,4 @@
+
 Implementation of [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra's_algorithm) in Rust.
 
 This internally uses the [dijkstra-map](dijkstra_map) crate.

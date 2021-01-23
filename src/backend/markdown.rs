@@ -1,6 +1,14 @@
 use std::collections::HashMap;
 
-use pulldown_cmark::{CodeBlockKind, Event, LinkType, Tag};
+use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
+
+#[derive(Clone, Copy, PartialEq)]
+enum Nesting {
+    StartListItem,
+    ListItem,
+    Quote,
+    IndentedCode,
+}
 
 /// Implementation of [`Callbacks`] for markdown.
 #[derive(Default)]
@@ -12,61 +20,61 @@ pub struct MarkdownCallbacks {
     /// `name-2`, ...
     links: HashMap<String, Vec<String>>,
     shortcut_link: Option<String>,
+    /// Stack of tables alignment
+    tables_alignements: Vec<Vec<Alignment>>,
+    nesting: Vec<Nesting>,
 }
 
 impl super::Callbacks for MarkdownCallbacks {
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>) {
-        let mut indentation: u32 = 0;
         for event in events {
             match event {
                 Event::Start(tag) => match tag {
-                    Tag::Paragraph => {}
+                    Tag::Paragraph => self.apply_nesting(s),
                     Tag::Heading(level) => {
+                        self.apply_nesting(s);
                         for _ in 0..level {
                             s.push('#');
                         }
                         s.push(' ');
                     }
-                    Tag::BlockQuote => {
-                        log::warn!("BlockQuote: Unsupported at the moment")
-                    }
+                    Tag::BlockQuote => self.nesting.push(Nesting::Quote),
                     Tag::CodeBlock(kind) => match kind {
                         CodeBlockKind::Indented => {
+                            self.apply_nesting(s);
                             trim(s);
-                            s.push_str("\n\n");
-                            indentation += 2;
-                            indent(s, indentation);
+                            self.nesting.push(Nesting::IndentedCode);
+                            self.apply_nesting(s);
                         }
                         CodeBlockKind::Fenced(lang) => {
-                            s.push('\n');
-                            indent(s, indentation);
+                            self.apply_nesting(s);
                             s.push_str("```");
                             s.push_str(&lang);
-                            s.push('\n');
-                            indent(s, indentation);
+                            self.apply_nesting(s);
                         }
                     },
                     Tag::List(_) => {}
                     Tag::Item => {
-                        indentation += 1;
+                        self.apply_nesting(s);
+                        self.nesting.push(Nesting::StartListItem);
                         s.push_str("- ")
                     }
                     Tag::FootnoteDefinition(_) => {
                         log::warn!("FootnoteDefinition: Unsupported at the moment")
                     }
-                    Tag::Table(_) => {
-                        log::warn!("Table: Unsupported at the moment")
+                    Tag::Table(alignment) => {
+                        self.tables_alignements.push(alignment);
                     }
-                    Tag::TableHead => {}
-                    Tag::TableRow => {}
-                    Tag::TableCell => {}
+                    Tag::TableHead => self.apply_nesting(s),
+                    Tag::TableRow => self.apply_nesting(s),
+                    Tag::TableCell => s.push_str("| "),
                     Tag::Emphasis => s.push('*'),
                     Tag::Strong => s.push_str("**"),
                     Tag::Strikethrough => s.push_str("~~"),
                     Tag::Link(link_type, _, _) => {
                         if link_type == LinkType::Shortcut {
                             if self.shortcut_link.is_some() {
-                                log::error!("Nested links will break !")
+                                log::error!("Links are not supposed to be nested")
                             }
                             self.shortcut_link = Some("".to_string());
                         }
@@ -84,51 +92,41 @@ impl super::Callbacks for MarkdownCallbacks {
                     }
                 },
                 Event::End(tag) => match tag {
-                    Tag::Paragraph => {
-                        s.push_str("\n\n");
-                        indent(s, indentation);
-                    }
-                    Tag::Heading(_) => {
-                        s.push('\n');
-                        indent(s, indentation);
-                    }
+                    Tag::Paragraph => self.apply_nesting(s),
+                    Tag::Heading(_) => {}
                     Tag::BlockQuote => {
-                        log::warn!("BlockQuote: Unsupported at the moment")
+                        self.nesting.pop();
                     }
-                    Tag::CodeBlock(kind) => {
-                        match kind {
-                            CodeBlockKind::Indented => {
-                                indentation -= 2;
-                                s.push('\n');
-                                indent(s, indentation);
-                            }
-                            CodeBlockKind::Fenced(_) => {
-                                trim(s);
-                                s.push('\n');
-                                indent(s, indentation);
-                                s.push_str("```");
-                            }
+                    Tag::CodeBlock(kind) => match kind {
+                        CodeBlockKind::Indented => {
+                            self.nesting.pop();
                         }
-                        s.push('\n');
-                        indent(s, indentation);
-                    }
-                    Tag::List(_) => {
-                        while let Some(c) = s.pop() {
-                            if c != ' ' {
-                                s.push(c);
-                                break;
-                            }
+                        CodeBlockKind::Fenced(_) => {
+                            trim(s);
+                            self.apply_nesting(s);
+                            s.push_str("```");
                         }
-                    }
+                    },
+                    Tag::List(_) => {}
                     Tag::Item => {
-                        trim(s);
-                        s.push('\n');
-                        indentation -= 1;
-                        indent(s, indentation);
+                        self.nesting.pop();
                     }
                     Tag::FootnoteDefinition(_) => {}
                     Tag::Table(_) => {}
-                    Tag::TableHead => {}
+                    Tag::TableHead => {
+                        if let Some(alignement) = self.tables_alignements.pop() {
+                            self.apply_nesting(s);
+                            for align in alignement {
+                                s.push_str("| ");
+                                match align {
+                                    Alignment::None => s.push_str("--- "),
+                                    Alignment::Left => s.push_str(":--- "),
+                                    Alignment::Center => s.push_str(":---: "),
+                                    Alignment::Right => s.push_str("---: "),
+                                }
+                            }
+                        }
+                    }
                     Tag::TableRow => {}
                     Tag::TableCell => {}
                     Tag::Emphasis => s.push('*'),
@@ -161,24 +159,31 @@ impl super::Callbacks for MarkdownCallbacks {
                     }
                     Tag::Image(_, _, _) => {}
                 },
-                Event::Text(text) => self.push_str(s, &text),
+                Event::Text(text) => {
+                    self.remove_top_most_start_item();
+                    self.push_str(s, &text)
+                }
                 Event::Code(code) => {
+                    self.remove_top_most_start_item();
                     self.push_str(s, "`");
                     self.push_str(s, &code);
                     self.push_str(s, "`");
                 }
-                Event::Html(html) => s.push_str(&html),
+                Event::Html(html) => {
+                    self.remove_top_most_start_item();
+                    s.push_str(&html)
+                }
                 Event::FootnoteReference(_) => {
                     log::warn!("FootnoteReference: Unsupported at the moment")
                 }
-                Event::SoftBreak => s.push('\n'),
+                Event::SoftBreak => self.apply_nesting(s),
                 Event::HardBreak => {
-                    s.push_str("\n\n");
-                    indent(s, indentation)
+                    s.push_str(" \\");
+                    self.apply_nesting(s)
                 }
                 Event::Rule => {
+                    self.apply_nesting(s);
                     s.push_str("________\n");
-                    indent(s, indentation)
                 }
                 Event::TaskListMarker(checked) => s.push_str(if checked { "[X]" } else { "[ ]" }),
             }
@@ -246,12 +251,32 @@ impl MarkdownCallbacks {
                 .insert(shortcut.to_string(), vec![link.to_string()]);
         }
     }
-}
 
-/// Push `level * "  "` into `s`.
-fn indent(s: &mut String, level: u32) {
-    for _ in 0..level {
-        s.push_str("  ")
+    fn apply_nesting(&mut self, s: &mut String) {
+        if self.remove_top_most_start_item() {
+            return;
+        }
+        s.push('\n');
+        for nesting in &mut self.nesting {
+            match nesting {
+                Nesting::ListItem => s.push_str("  "),
+                Nesting::Quote => s.push_str("> "),
+                Nesting::IndentedCode => s.push_str("    "),
+                Nesting::StartListItem => {
+                    s.push_str("- ");
+                    *nesting = Nesting::ListItem
+                }
+            }
+        }
+    }
+
+    fn remove_top_most_start_item(&mut self) -> bool {
+        if let Some(start_item @ Nesting::StartListItem) = self.nesting.last_mut() {
+            *start_item = Nesting::ListItem;
+            true
+        } else {
+            false
+        }
     }
 }
 
