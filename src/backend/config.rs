@@ -1,9 +1,9 @@
 use super::Backend;
 use crate::{
     config::UserConfig,
-    documentation::{self, Documentation},
+    documentation::{self, Documentation, Type},
 };
-use pulldown_cmark::{Event, Tag};
+use pulldown_cmark::{CowStr, Event, Tag};
 use std::{collections::HashMap, path::PathBuf};
 
 /// Configuration options for [Generator](super::Generator).
@@ -127,6 +127,13 @@ impl Config {
                         backends.insert(Backend::Html, path);
                     }
                 }
+                "gut" => {
+                    if backends.get(&Backend::Gut).is_some() {
+                        log::warn!("Backend 'gut' is already specified")
+                    } else {
+                        backends.insert(Backend::Gut, path);
+                    }
+                }
                 _ => {
                     log::error!("unknown backend: {}", backend);
                 }
@@ -234,5 +241,35 @@ impl Config {
             Event::Start(Tag::Heading(n)) | Event::End(Tag::Heading(n)) => *n += 3,
             _ => {}
         }
+    }
+
+    pub(super) fn encode_type<'b>(&'b self, typ: &'b Type) -> Vec<Event<'b>> {
+        let (type_name, optional) = match typ {
+            Type::Option(typ) => (typ.as_str(), true),
+            Type::Named(typ) => (typ.as_str(), false),
+            Type::Unit => ("void", false),
+        };
+        let mut events = match self.resolve(type_name).map(|return_link| {
+            Tag::Link(
+                pulldown_cmark::LinkType::Shortcut,
+                CowStr::Borrowed(&return_link),
+                CowStr::Borrowed(""),
+            )
+        }) {
+            Some(link) => {
+                vec![
+                    Event::Start(link.clone()),
+                    Event::Text(CowStr::Borrowed(type_name)),
+                    Event::End(link),
+                ]
+            }
+            None => {
+                vec![Event::Text(CowStr::Borrowed(type_name))]
+            }
+        };
+        if optional {
+            events.push(Event::Text(CowStr::Borrowed(" (opt)")))
+        }
+        events
     }
 }

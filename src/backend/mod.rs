@@ -1,10 +1,12 @@
 mod config;
+mod gut;
 mod markdown;
 
 pub use config::Config;
+pub use gut::GutCallbacks;
 pub use markdown::MarkdownCallbacks;
 
-use crate::documentation::{Documentation, Method, Type};
+use crate::documentation::{Documentation, GdnativeClass, Method};
 use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Parser, Tag};
 
 /// Generate a callback to resolve broken links.
@@ -33,6 +35,7 @@ macro_rules! broken_link_callback {
 pub enum Backend {
     Markdown,
     Html,
+    Gut,
 }
 
 impl Backend {
@@ -41,17 +44,61 @@ impl Backend {
         match self {
             Self::Markdown => "md",
             Self::Html => "html",
+            Self::Gut => "gd",
         }
     }
 }
 
 /// Callbacks to encode markdown input in a given format.
 pub trait Callbacks {
-    fn start_encoding(&mut self, s: &mut String, config: &Config, documentation: &Documentation);
+    /// Called before each class.
+    fn start_class(&mut self, _s: &mut String, _config: &Config, _class: &GdnativeClass) {}
+    /// Called before each method.
+    fn start_method(&mut self, _s: &mut String, _config: &Config, _method: &Method) {}
     /// Encode the stream of `events` in `s`.
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>);
     /// Called at the end of the processing for a given file.
-    fn finish_encoding(&mut self, s: &mut String);
+    fn finish_encoding(&mut self, _s: &mut String) {}
+}
+
+impl dyn Callbacks {
+    /// Default start_method implementation, implemented on `dyn Callbacks` to avoid
+    /// code duplication.
+    ///
+    /// This will create a level 3 section that looks like:
+    ///
+    /// `func name(arg1: type, ...) -> type`
+    ///
+    /// With appropriate linking, and a link to this named `func-name`
+    fn start_method_default(&mut self, s: &mut String, config: &Config, method: &Method) {
+        let link = &format!("<a id=\"func-{}\"></a>", method.name);
+        self.encode(
+            s,
+            vec![
+                Event::Start(Tag::Heading(3)),
+                Event::Html(CowStr::Borrowed(link)),
+            ],
+        );
+        let mut method_section = String::from("func ");
+        method_section.push_str(&method.name);
+        method_section.push('(');
+        for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
+            method_section.push_str(&name);
+            method_section.push_str(": ");
+            self.encode(s, vec![Event::Text(CowStr::Borrowed(&method_section))]);
+            method_section.clear();
+            self.encode(s, config.encode_type(typ));
+            if index + 1 != method.parameters.len() {
+                method_section.push_str(", ");
+            }
+        }
+        method_section.push_str(") -> ");
+        let mut last_events = vec![Event::Text(CowStr::Borrowed(&method_section))];
+        last_events.extend(config.encode_type(&method.return_type));
+        last_events.push(Event::End(Tag::Heading(3)));
+        last_events.push(Event::Rule);
+        self.encode(s, last_events);
+    }
 }
 
 /// Implementation of [`Callbacks`] for html.
@@ -59,17 +106,13 @@ pub trait Callbacks {
 pub struct HtmlCallbacks {}
 
 impl Callbacks for HtmlCallbacks {
-    fn start_encoding(
-        &mut self,
-        _s: &mut String,
-        _config: &Config,
-        _documentation: &Documentation,
-    ) {
+    fn start_method(&mut self, s: &mut String, config: &Config, method: &Method) {
+        (self as &mut dyn Callbacks).start_method_default(s, config, method)
     }
+
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>) {
         pulldown_cmark::html::push_html(s, events.into_iter())
     }
-    fn finish_encoding(&mut self, _s: &mut String) {}
 }
 
 /// Generate files given an encoding
@@ -140,10 +183,8 @@ impl<'a> Generator<'a> {
         let mut results = Vec::new();
         for (name, class) in &self.documentation.classes {
             let mut class_file = String::new();
-
-            self.callbacks
-                .start_encoding(&mut class_file, &self.config, &self.documentation);
             let callbacks = &mut self.callbacks;
+            callbacks.start_class(&mut class_file, self.config, class);
             let mut encode = |events| callbacks.encode(&mut class_file, events);
             let inherit_link = self.config.resolve(&class.inherit);
 
@@ -214,12 +255,12 @@ impl<'a> Generator<'a> {
             encode(std::mem::take(&mut events));
 
             for method in &class.methods {
-                let link = Self::link(method);
+                let link = format!("#func-{}", method.name);
                 encode(vec![
                     Event::Start(Tag::TableRow),
                     Event::Start(Tag::TableCell),
                 ]);
-                encode(Self::encode_type(config, &method.return_type));
+                encode(config.encode_type(&method.return_type));
                 encode(vec![
                     Event::End(Tag::TableCell),
                     Event::Start(Tag::TableCell),
@@ -238,7 +279,7 @@ impl<'a> Generator<'a> {
                 ]);
                 for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
                     encode(vec![Event::Text(format!("{}: ", name).into())]);
-                    encode(Self::encode_type(config, typ));
+                    encode(config.encode_type(typ));
                     if index + 1 != method.parameters.len() {
                         encode(vec![Event::Text(CowStr::Borrowed(", "))]);
                     }
@@ -262,7 +303,7 @@ impl<'a> Generator<'a> {
 
             // Methods
             for method in &class.methods {
-                //self.generate_method(&mut class_file, method);
+                self.callbacks.start_method(&mut class_file, config, method);
                 let callbacks = &mut self.callbacks;
                 Self::generate_method(
                     |events| callbacks.encode(&mut class_file, events),
@@ -278,30 +319,6 @@ impl<'a> Generator<'a> {
 
     /// Encode the documentation for `method`.
     fn generate_method(mut encode: impl FnMut(Vec<Event>), config: &Config, method: &Method) {
-        let link = &format!("<a id=\"func-{}\"></a>", method.name);
-        encode(vec![
-            Event::Start(Tag::Heading(3)),
-            Event::Html(CowStr::Borrowed(link)),
-        ]);
-        let mut method_section = String::from("func ");
-        method_section.push_str(&method.name);
-        method_section.push('(');
-        for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
-            method_section.push_str(&name);
-            method_section.push_str(": ");
-            encode(vec![Event::Text(CowStr::Borrowed(&method_section))]);
-            method_section.clear();
-            encode(Self::encode_type(config, typ));
-            if index + 1 != method.parameters.len() {
-                method_section.push_str(", ");
-            }
-        }
-        method_section.push_str(") -> ");
-        encode(vec![Event::Text(CowStr::Borrowed(&method_section))]);
-
-        encode(Self::encode_type(config, &method.return_type));
-
-        encode(vec![Event::End(Tag::Heading(3)), Event::Rule]);
         let config = config;
         let mut broken_link_callback = broken_link_callback!(config);
         let method_iterator = EventIterator {
@@ -313,43 +330,6 @@ impl<'a> Generator<'a> {
             ),
         };
         encode(method_iterator.into_iter().collect());
-    }
-
-    /// Encode a type with it's link.
-    fn encode_type<'b>(config: &'b Config, typ: &'b Type) -> Vec<Event<'b>> {
-        let (type_name, optional) = match typ {
-            Type::Option(typ) => (typ.as_str(), true),
-            Type::Named(typ) => (typ.as_str(), false),
-            Type::Unit => ("void", false),
-        };
-        let mut events = match config.resolve(type_name).map(|return_link| {
-            Tag::Link(
-                LinkType::Shortcut,
-                CowStr::Borrowed(&return_link),
-                CowStr::Borrowed(""),
-            )
-        }) {
-            Some(link) => {
-                vec![
-                    Event::Start(link.clone()),
-                    Event::Text(CowStr::Borrowed(type_name)),
-                    Event::End(link),
-                ]
-            }
-            None => {
-                vec![Event::Text(CowStr::Borrowed(type_name))]
-            }
-        };
-        if optional {
-            events.push(Event::Text(CowStr::Borrowed(" (opt)")))
-        }
-        events
-    }
-
-    /// Returns a suitable markdown representation of this method to link to if the
-    /// method were to be put in a section title.
-    fn link(method: &Method) -> String {
-        format!("#func-{}", method.name)
     }
 }
 

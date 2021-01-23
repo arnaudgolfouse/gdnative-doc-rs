@@ -1,4 +1,4 @@
-use super::{Config, Documentation};
+use super::{Callbacks, Config};
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
 use std::collections::HashMap;
 
@@ -29,13 +29,9 @@ pub struct MarkdownCallbacks {
     nesting: Vec<Nesting>,
 }
 
-impl super::Callbacks for MarkdownCallbacks {
-    fn start_encoding(
-        &mut self,
-        _s: &mut String,
-        _config: &Config,
-        _documentation: &Documentation,
-    ) {
+impl Callbacks for MarkdownCallbacks {
+    fn start_method(&mut self, s: &mut String, config: &Config, method: &super::Method) {
+        (self as &mut dyn Callbacks).start_method_default(s, config, method)
     }
 
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>) {

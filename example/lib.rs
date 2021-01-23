@@ -77,6 +77,7 @@ impl Interface {
     ///
     /// # Example
     /// ```gdscript
+    /// var dijkstra_map = DijkstraMap.new()
     /// dijkstra_map.clear()
     /// ```
     pub fn clear(&mut self, _owner: &Reference) {
@@ -288,7 +289,7 @@ impl Interface {
     /// var dijkstra_map = DijkstraMap.new()
     /// dijkstra_map.add_point(0)
     /// dijkstra_map.add_point(1)
-    /// dijkstra_map.disable(0)
+    /// dijkstra_map.disable_point(0)
     /// assert(dijkstra_map.is_point_disabled(0))
     /// assert(!dijkstra_map.is_point_disabled(1))
     /// assert(!dijkstra_map.is_point_disabled(2))

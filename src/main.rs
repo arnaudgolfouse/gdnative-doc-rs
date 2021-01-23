@@ -1,6 +1,8 @@
+use godot_doc_rs::{
+    backend::{self, Backend},
+    config, documentation, files,
+};
 use std::{fs, path::PathBuf};
-
-use godot_doc_rs::{backend, config, documentation, files};
 
 fn main() {
     simplelog::TermLogger::init(
@@ -49,19 +51,23 @@ fn main() {
             &backend_config,
             &documentation,
             match backend {
-                backend::Backend::Markdown => Box::new(backend::MarkdownCallbacks::default()),
-                backend::Backend::Html => Box::new(backend::HtmlCallbacks::default()),
+                Backend::Markdown => Box::new(backend::MarkdownCallbacks::default()),
+                Backend::Html => Box::new(backend::HtmlCallbacks::default()),
+                Backend::Gut => Box::new(backend::GutCallbacks::default()),
             },
         );
         let files = generator.generate_files();
         let root_file = generator.generate_root_file(backend);
         fs::create_dir_all(&output_dir).unwrap();
 
-        fs::write(
-            output_dir.join("index").with_extension(extension),
-            root_file,
-        )
-        .unwrap();
+        if backend != Backend::Gut {
+            fs::write(
+                output_dir.join("index").with_extension(extension),
+                root_file,
+            )
+            .unwrap();
+        }
+
         for (name, content) in files {
             fs::write(output_dir.join(name).with_extension(extension), content).unwrap();
         }

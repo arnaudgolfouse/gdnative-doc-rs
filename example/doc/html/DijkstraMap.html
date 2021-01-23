@@ -45,7 +45,8 @@
 <hr />
 <p>Clear the underlying <code>DijkstraMap</code>.</p>
 <h4>Example</h4>
-<pre><code class="language-gdscript">dijkstra_map.clear()
+<pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
+dijkstra_map.clear()
 </code></pre>
 <h3><a id="func-duplicate_graph_from"></a>func duplicate_graph_from(source_instance: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
 <hr />
@@ -152,7 +153,7 @@ assert(dijkstra_map.enable_point(1) == 1)
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
 dijkstra_map.add_point(1)
-dijkstra_map.disable(0)
+dijkstra_map.disable_point(0)
 assert(dijkstra_map.is_point_disabled(0))
 assert(!dijkstra_map.is_point_disabled(1))
 assert(!dijkstra_map.is_point_disabled(2))
