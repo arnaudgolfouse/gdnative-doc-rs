@@ -193,7 +193,10 @@ impl Callbacks for MarkdownCallbacks {
                     self.apply_nesting(s);
                     s.push_str("________\n");
                 }
-                Event::TaskListMarker(checked) => s.push_str(if checked { "[X]" } else { "[ ]" }),
+                Event::TaskListMarker(checked) => {
+                    self.remove_top_most_start_item();
+                    s.push_str(if checked { "[X] " } else { "[ ] " })
+                }
             }
         }
     }
