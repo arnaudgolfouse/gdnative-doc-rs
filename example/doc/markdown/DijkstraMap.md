@@ -10,6 +10,36 @@ The map must first be filled by using e.g. `add_point`, `connect_points`,
 
 And then you must call `recalculate` on it.
 
+## Methods
+| returns| method
+| :--- | :--- 
+| Self| [new](#func-new---Self "new")(  )
+| void| [clear](#func-clear---void "clear")(  )
+| [int]| [duplicate_graph_from](#func-duplicate_graph_fromsource_instance-Variant---int "duplicate_graph_from")( source_instance: [Variant] )
+| [int]| [get_available_point_id](#func-get_available_point_id---int "get_available_point_id")(  )
+| [int]| [add_point](#func-add_pointpoint_id-int-terrain_type-int-opt---int "add_point")( point_id: [int], terrain_type: [int] (opt) )
+| [int]| [set_terrain_for_point](#func-set_terrain_for_pointpoint_id-int-terrain_id-int-opt---int "set_terrain_for_point")( point_id: [int], terrain_id: [int] (opt) )
+| [int]| [get_terrain_for_point](#func-get_terrain_for_pointpoint_id-int---int "get_terrain_for_point")( point_id: [int] )
+| [int]| [remove_point](#func-remove_pointpoint_id-int---int "remove_point")( point_id: [int] )
+| [bool]| [has_point](#func-has_pointpoint_id-int---bool "has_point")( point_id: [int] )
+| [int]| [disable_point](#func-disable_pointpoint_id-int---int "disable_point")( point_id: [int] )
+| [int]| [enable_point](#func-enable_pointpoint_id-int---int "enable_point")( point_id: [int] )
+| [bool]| [is_point_disabled](#func-is_point_disabledpoint_id-int---bool "is_point_disabled")( point_id: [int] )
+| [int]| [connect_points](#func-connect_pointssource-int-target-int-weight-float-opt-bidirectional-bool-opt---int "connect_points")( source: [int], target: [int], weight: [float] (opt), bidirectional: [bool] (opt) )
+| [int]| [remove_connection](#func-remove_connectionsource-int-target-int-bidirectional-bool-opt---int "remove_connection")( source: [int], target: [int], bidirectional: [bool] (opt) )
+| [bool]| [has_connection](#func-has_connectionsource-int-target-int---bool "has_connection")( source: [int], target: [int] )
+| [int]| [get_direction_at_point](#func-get_direction_at_pointpoint_id-int---int "get_direction_at_point")( point_id: [int] )
+| [float]| [get_cost_at_point](#func-get_cost_at_pointpoint_id-int---float "get_cost_at_point")( point_id: [int] )
+| [int]| [recalculate](#func-recalculateorigin-Variant-optional_params-Dictionary-opt---int "recalculate")( origin: [Variant], optional_params: [Dictionary] (opt) )
+| [PoolIntArray]| [get_direction_at_points](#func-get_direction_at_pointspoints-PoolIntArray---PoolIntArray "get_direction_at_points")( points: [PoolIntArray] )
+| [PoolRealArray]| [get_cost_at_points](#func-get_cost_at_pointspoints-PoolIntArray---PoolRealArray "get_cost_at_points")( points: [PoolIntArray] )
+| [Dictionary]| [get_cost_map](#func-get_cost_map---Dictionary "get_cost_map")(  )
+| [Dictionary]| [get_direction_map](#func-get_direction_map---Dictionary "get_direction_map")(  )
+| [PoolIntArray]| [get_all_points_with_cost_between](#func-get_all_points_with_cost_betweenmin_cost-float-max_cost-float---PoolIntArray "get_all_points_with_cost_between")( min_cost: [float], max_cost: [float] )
+| [PoolIntArray]| [get_shortest_path_from_point](#func-get_shortest_path_from_pointpoint_id-int---PoolIntArray "get_shortest_path_from_point")( point_id: [int] )
+| [Dictionary]| [add_square_grid](#func-add_square_gridbounds-Variant-terrain_type-int-opt-orthogonal_cost-float-opt-diagonal_cost-float-opt---Dictionary "add_square_grid")( bounds: [Variant], terrain_type: [int] (opt), orthogonal_cost: [float] (opt), diagonal_cost: [float] (opt) )
+| [Dictionary]| [add_hexagonal_grid](#func-add_hexagonal_gridbounds-Variant-terrain_type-int-opt-weight-float-opt---Dictionary "add_hexagonal_grid")( bounds: [Variant], terrain_type: [int] (opt), weight: [float] (opt) )
+## Methods Descriptions
 ### func new() -> Self
 ________
 

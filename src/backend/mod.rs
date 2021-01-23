@@ -5,7 +5,7 @@ pub use config::Config;
 pub use markdown::MarkdownCallbacks;
 
 use crate::documentation::{Documentation, Method, Type};
-use pulldown_cmark::{CowStr, Event, LinkType, Parser, Tag};
+use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Parser, Tag};
 
 /// Generate a callback to resolve broken links.
 ///
@@ -132,7 +132,11 @@ impl<'a> Generator<'a> {
         let mut results = Vec::new();
         for (name, class) in &self.documentation.classes {
             let mut class_file = String::new();
+            let callbacks = &mut self.callbacks;
+            let mut encode = |events| callbacks.encode(&mut class_file, events);
             let inherit_link = self.config.resolve(&class.inherit);
+
+            // Name of the class + inherit
             let mut events = vec![
                 Event::Start(Tag::Heading(1)),
                 Event::Text(CowStr::Borrowed(&name)),
@@ -166,7 +170,9 @@ impl<'a> Generator<'a> {
                 Event::Text(CowStr::Borrowed("Description")),
                 Event::End(Tag::Heading(2)),
             ]);
-            self.callbacks.encode(&mut class_file, events);
+            encode(events);
+
+            // Class description
             let config = self.config;
             let mut broken_link_callback = broken_link_callback!(config);
             let class_documentation = EventIterator {
@@ -177,9 +183,73 @@ impl<'a> Generator<'a> {
                     Some(&mut broken_link_callback),
                 ),
             };
+            encode(class_documentation.into_iter().collect());
 
-            self.callbacks
-                .encode(&mut class_file, class_documentation.into_iter().collect());
+            // Methods table
+            let mut events = vec![
+                Event::Start(Tag::Heading(2)),
+                Event::Text(CowStr::Borrowed("Methods")),
+                Event::End(Tag::Heading(2)),
+                Event::Start(Tag::Table(vec![Alignment::Left, Alignment::Left])),
+                Event::Start(Tag::TableHead),
+                Event::Start(Tag::TableCell),
+                Event::Text(CowStr::Borrowed("returns")),
+                Event::End(Tag::TableCell),
+                Event::Start(Tag::TableCell),
+                Event::Text(CowStr::Borrowed("method")),
+                Event::End(Tag::TableCell),
+                Event::End(Tag::TableHead),
+            ];
+            encode(std::mem::take(&mut events));
+
+            for method in &class.methods {
+                let link = Self::link(method);
+                encode(vec![
+                    Event::Start(Tag::TableRow),
+                    Event::Start(Tag::TableCell),
+                ]);
+                encode(Self::encode_type(config, &method.return_type));
+                encode(vec![
+                    Event::End(Tag::TableCell),
+                    Event::Start(Tag::TableCell),
+                ]);
+
+                let link = Tag::Link(
+                    LinkType::Reference,
+                    link.into(),
+                    method.name.as_str().into(),
+                );
+                encode(vec![
+                    Event::Start(link.clone()),
+                    Event::Text(CowStr::Borrowed(&method.name)),
+                    Event::End(link),
+                    Event::Text(CowStr::Borrowed("( ")),
+                ]);
+                for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
+                    encode(vec![Event::Text(format!("{}: ", name).into())]);
+                    encode(Self::encode_type(config, typ));
+                    if index + 1 != method.parameters.len() {
+                        encode(vec![Event::Text(CowStr::Borrowed(", "))]);
+                    }
+                }
+
+                encode(vec![
+                    Event::Text(CowStr::Borrowed(" )")),
+                    Event::End(Tag::TableCell),
+                    Event::End(Tag::TableRow),
+                ]);
+            }
+
+            events.extend(vec![
+                Event::End(Tag::Table(vec![Alignment::Left, Alignment::Left])),
+                Event::Start(Tag::Heading(2)),
+                Event::Text(CowStr::Borrowed("Methods Descriptions")),
+                Event::End(Tag::Heading(2)),
+            ]);
+
+            encode(events);
+
+            // Methods
             for method in &class.methods {
                 //self.generate_method(&mut class_file, method);
                 let callbacks = &mut self.callbacks;
@@ -206,29 +276,7 @@ impl<'a> Generator<'a> {
             method_section.push_str(": ");
             encode(vec![Event::Text(CowStr::Borrowed(&method_section))]);
             method_section.clear();
-            let (typ, optional) = match typ {
-                Type::Option(typ) => (typ.as_str(), true),
-                Type::Named(typ) => (typ.as_str(), false),
-                Type::Unit => ("void", false),
-            };
-            match config.resolve(typ) {
-                Some(link) => {
-                    let link = Tag::Link(
-                        LinkType::Shortcut,
-                        CowStr::Borrowed(&link),
-                        CowStr::Borrowed(""),
-                    );
-                    encode(vec![
-                        Event::Start(link.clone()),
-                        Event::Text(CowStr::Borrowed(typ)),
-                        Event::End(link),
-                    ]);
-                }
-                None => method_section.push_str(typ),
-            }
-            if optional {
-                method_section.push_str(" (opt)");
-            }
+            encode(Self::encode_type(config, typ));
             if index + 1 != method.parameters.len() {
                 method_section.push_str(", ");
             }
@@ -236,36 +284,9 @@ impl<'a> Generator<'a> {
         method_section.push_str(") -> ");
         encode(vec![Event::Text(CowStr::Borrowed(&method_section))]);
 
-        let return_type = match &method.return_type {
-            Type::Option(typ) | Type::Named(typ) => typ.as_str(),
-            Type::Unit => "void",
-        };
-        let resolve_return = config.resolve(return_type);
-        let return_events = match resolve_return.as_ref().map(|return_link| {
-            Tag::Link(
-                LinkType::Shortcut,
-                CowStr::Borrowed(&return_link),
-                CowStr::Borrowed(""),
-            )
-        }) {
-            Some(link) => {
-                vec![
-                    Event::Start(link.clone()),
-                    Event::Text(CowStr::Borrowed(return_type)),
-                    Event::End(link),
-                    Event::End(Tag::Heading(3)),
-                ]
-            }
-            None => {
-                vec![
-                    Event::Text(CowStr::Borrowed(return_type)),
-                    Event::End(Tag::Heading(3)),
-                ]
-            }
-        };
+        encode(Self::encode_type(config, &method.return_type));
 
-        encode(return_events);
-        encode(vec![Event::Rule]);
+        encode(vec![Event::End(Tag::Heading(3)), Event::Rule]);
         let config = config;
         let mut broken_link_callback = broken_link_callback!(config);
         let method_iterator = EventIterator {
@@ -277,6 +298,67 @@ impl<'a> Generator<'a> {
             ),
         };
         encode(method_iterator.into_iter().collect());
+    }
+
+    /// Encode a type with it's link.
+    fn encode_type<'b>(config: &'b Config, typ: &'b Type) -> Vec<Event<'b>> {
+        let (type_name, optional) = match typ {
+            Type::Option(typ) => (typ.as_str(), true),
+            Type::Named(typ) => (typ.as_str(), false),
+            Type::Unit => ("void", false),
+        };
+        let mut events = match config.resolve(type_name).map(|return_link| {
+            Tag::Link(
+                LinkType::Shortcut,
+                CowStr::Borrowed(&return_link),
+                CowStr::Borrowed(""),
+            )
+        }) {
+            Some(link) => {
+                vec![
+                    Event::Start(link.clone()),
+                    Event::Text(CowStr::Borrowed(type_name)),
+                    Event::End(link),
+                ]
+            }
+            None => {
+                vec![Event::Text(CowStr::Borrowed(type_name))]
+            }
+        };
+        if optional {
+            events.push(Event::Text(CowStr::Borrowed(" (opt)")))
+        }
+        events
+    }
+
+    /// Returns a suitable markdown representation of this method to link to if the
+    /// method were to be put in a section title.
+    fn link(method: &Method) -> String {
+        let mut link = String::from("#func-");
+        link.push_str(&method.name);
+        for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
+            let (type_name, optional) = match typ {
+                Type::Option(typ) => (typ.as_str(), true),
+                Type::Named(typ) => (typ.as_str(), false),
+                Type::Unit => ("void", false),
+            };
+            link.push_str(name);
+            link.push('-');
+            link.push_str(type_name);
+            if optional {
+                link.push_str("-opt");
+            }
+            if index + 1 != method.parameters.len() {
+                link.push('-');
+            }
+        }
+        link.push_str("---");
+        let return_type = match &method.return_type {
+            Type::Option(typ) | Type::Named(typ) => typ.as_str(),
+            Type::Unit => "void",
+        };
+        link.push_str(return_type);
+        link
     }
 }
 

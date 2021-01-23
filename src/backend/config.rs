@@ -191,8 +191,8 @@ impl Config {
     /// Resolve a name to the class it must link to.
     ///
     /// `link` must already have been stripped off the enclosing \`.
-    pub(super) fn resolve(&self, link: &str) -> Option<String> {
-        if let Some(link) = self.url_overrides.get(link).cloned() {
+    pub(super) fn resolve(&self, link: &str) -> Option<&str> {
+        if let Some(link) = self.url_overrides.get(link) {
             return Some(link);
         }
         let temporary;
@@ -208,14 +208,14 @@ impl Config {
             link
         };
 
-        if let Some(path) = self.url_overrides.get(base).cloned() {
+        if let Some(path) = self.url_overrides.get(base) {
             Some(path)
         } else {
             let base = match self.rust_to_godot.get(base) {
                 Some(base) => base.as_str(),
                 None => base,
             };
-            if let Some(path) = self.godot_items.get(base).cloned() {
+            if let Some(path) = self.godot_items.get(base) {
                 Some(path)
             } else {
                 None
@@ -227,7 +227,7 @@ impl Config {
         match event {
             Event::Start(Tag::Link(_, dest, _)) | Event::End(Tag::Link(_, dest, _)) => {
                 match self.resolve(&dest) {
-                    Some(new_dest) => *dest = new_dest.into(),
+                    Some(new_dest) => *dest = new_dest.to_string().into(),
                     None => {}
                 }
             }
