@@ -47,6 +47,7 @@ impl Backend {
 
 /// Callbacks to encode markdown input in a given format.
 pub trait Callbacks {
+    fn start_encoding(&mut self, s: &mut String, config: &Config, documentation: &Documentation);
     /// Encode the stream of `events` in `s`.
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>);
     /// Called at the end of the processing for a given file.
@@ -58,6 +59,13 @@ pub trait Callbacks {
 pub struct HtmlCallbacks {}
 
 impl Callbacks for HtmlCallbacks {
+    fn start_encoding(
+        &mut self,
+        _s: &mut String,
+        _config: &Config,
+        _documentation: &Documentation,
+    ) {
+    }
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>) {
         pulldown_cmark::html::push_html(s, events.into_iter())
     }
@@ -132,6 +140,9 @@ impl<'a> Generator<'a> {
         let mut results = Vec::new();
         for (name, class) in &self.documentation.classes {
             let mut class_file = String::new();
+
+            self.callbacks
+                .start_encoding(&mut class_file, &self.config, &self.documentation);
             let callbacks = &mut self.callbacks;
             let mut encode = |events| callbacks.encode(&mut class_file, events);
             let inherit_link = self.config.resolve(&class.inherit);
@@ -267,7 +278,11 @@ impl<'a> Generator<'a> {
 
     /// Encode the documentation for `method`.
     fn generate_method(mut encode: impl FnMut(Vec<Event>), config: &Config, method: &Method) {
-        encode(vec![Event::Start(Tag::Heading(3))]);
+        let link = &format!("<a id=\"func-{}\"></a>", method.name);
+        encode(vec![
+            Event::Start(Tag::Heading(3)),
+            Event::Html(CowStr::Borrowed(link)),
+        ]);
         let mut method_section = String::from("func ");
         method_section.push_str(&method.name);
         method_section.push('(');
@@ -334,31 +349,7 @@ impl<'a> Generator<'a> {
     /// Returns a suitable markdown representation of this method to link to if the
     /// method were to be put in a section title.
     fn link(method: &Method) -> String {
-        let mut link = String::from("#func-");
-        link.push_str(&method.name);
-        for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
-            let (type_name, optional) = match typ {
-                Type::Option(typ) => (typ.as_str(), true),
-                Type::Named(typ) => (typ.as_str(), false),
-                Type::Unit => ("void", false),
-            };
-            link.push_str(name);
-            link.push('-');
-            link.push_str(type_name);
-            if optional {
-                link.push_str("-opt");
-            }
-            if index + 1 != method.parameters.len() {
-                link.push('-');
-            }
-        }
-        link.push_str("---");
-        let return_type = match &method.return_type {
-            Type::Option(typ) | Type::Named(typ) => typ.as_str(),
-            Type::Unit => "void",
-        };
-        link.push_str(return_type);
-        link
+        format!("#func-{}", method.name)
     }
 }
 

@@ -13,34 +13,34 @@ And then you must call `recalculate` on it.
 ## Methods
 | returns| method
 | :--- | :--- 
-| Self| [new](#func-new---Self "new")(  )
-| void| [clear](#func-clear---void "clear")(  )
-| [int]| [duplicate_graph_from](#func-duplicate_graph_fromsource_instance-Variant---int "duplicate_graph_from")( source_instance: [Variant] )
-| [int]| [get_available_point_id](#func-get_available_point_id---int "get_available_point_id")(  )
-| [int]| [add_point](#func-add_pointpoint_id-int-terrain_type-int-opt---int "add_point")( point_id: [int], terrain_type: [int] (opt) )
-| [int]| [set_terrain_for_point](#func-set_terrain_for_pointpoint_id-int-terrain_id-int-opt---int "set_terrain_for_point")( point_id: [int], terrain_id: [int] (opt) )
-| [int]| [get_terrain_for_point](#func-get_terrain_for_pointpoint_id-int---int "get_terrain_for_point")( point_id: [int] )
-| [int]| [remove_point](#func-remove_pointpoint_id-int---int "remove_point")( point_id: [int] )
-| [bool]| [has_point](#func-has_pointpoint_id-int---bool "has_point")( point_id: [int] )
-| [int]| [disable_point](#func-disable_pointpoint_id-int---int "disable_point")( point_id: [int] )
-| [int]| [enable_point](#func-enable_pointpoint_id-int---int "enable_point")( point_id: [int] )
-| [bool]| [is_point_disabled](#func-is_point_disabledpoint_id-int---bool "is_point_disabled")( point_id: [int] )
-| [int]| [connect_points](#func-connect_pointssource-int-target-int-weight-float-opt-bidirectional-bool-opt---int "connect_points")( source: [int], target: [int], weight: [float] (opt), bidirectional: [bool] (opt) )
-| [int]| [remove_connection](#func-remove_connectionsource-int-target-int-bidirectional-bool-opt---int "remove_connection")( source: [int], target: [int], bidirectional: [bool] (opt) )
-| [bool]| [has_connection](#func-has_connectionsource-int-target-int---bool "has_connection")( source: [int], target: [int] )
-| [int]| [get_direction_at_point](#func-get_direction_at_pointpoint_id-int---int "get_direction_at_point")( point_id: [int] )
-| [float]| [get_cost_at_point](#func-get_cost_at_pointpoint_id-int---float "get_cost_at_point")( point_id: [int] )
-| [int]| [recalculate](#func-recalculateorigin-Variant-optional_params-Dictionary-opt---int "recalculate")( origin: [Variant], optional_params: [Dictionary] (opt) )
-| [PoolIntArray]| [get_direction_at_points](#func-get_direction_at_pointspoints-PoolIntArray---PoolIntArray "get_direction_at_points")( points: [PoolIntArray] )
-| [PoolRealArray]| [get_cost_at_points](#func-get_cost_at_pointspoints-PoolIntArray---PoolRealArray "get_cost_at_points")( points: [PoolIntArray] )
-| [Dictionary]| [get_cost_map](#func-get_cost_map---Dictionary "get_cost_map")(  )
-| [Dictionary]| [get_direction_map](#func-get_direction_map---Dictionary "get_direction_map")(  )
-| [PoolIntArray]| [get_all_points_with_cost_between](#func-get_all_points_with_cost_betweenmin_cost-float-max_cost-float---PoolIntArray "get_all_points_with_cost_between")( min_cost: [float], max_cost: [float] )
-| [PoolIntArray]| [get_shortest_path_from_point](#func-get_shortest_path_from_pointpoint_id-int---PoolIntArray "get_shortest_path_from_point")( point_id: [int] )
-| [Dictionary]| [add_square_grid](#func-add_square_gridbounds-Variant-terrain_type-int-opt-orthogonal_cost-float-opt-diagonal_cost-float-opt---Dictionary "add_square_grid")( bounds: [Variant], terrain_type: [int] (opt), orthogonal_cost: [float] (opt), diagonal_cost: [float] (opt) )
-| [Dictionary]| [add_hexagonal_grid](#func-add_hexagonal_gridbounds-Variant-terrain_type-int-opt-weight-float-opt---Dictionary "add_hexagonal_grid")( bounds: [Variant], terrain_type: [int] (opt), weight: [float] (opt) )
+| Self| [new](#func-new "new")(  )
+| void| [clear](#func-clear "clear")(  )
+| [int]| [duplicate_graph_from](#func-duplicate_graph_from "duplicate_graph_from")( source_instance: [Variant] )
+| [int]| [get_available_point_id](#func-get_available_point_id "get_available_point_id")(  )
+| [int]| [add_point](#func-add_point "add_point")( point_id: [int], terrain_type: [int] (opt) )
+| [int]| [set_terrain_for_point](#func-set_terrain_for_point "set_terrain_for_point")( point_id: [int], terrain_id: [int] (opt) )
+| [int]| [get_terrain_for_point](#func-get_terrain_for_point "get_terrain_for_point")( point_id: [int] )
+| [int]| [remove_point](#func-remove_point "remove_point")( point_id: [int] )
+| [bool]| [has_point](#func-has_point "has_point")( point_id: [int] )
+| [int]| [disable_point](#func-disable_point "disable_point")( point_id: [int] )
+| [int]| [enable_point](#func-enable_point "enable_point")( point_id: [int] )
+| [bool]| [is_point_disabled](#func-is_point_disabled "is_point_disabled")( point_id: [int] )
+| [int]| [connect_points](#func-connect_points "connect_points")( source: [int], target: [int], weight: [float] (opt), bidirectional: [bool] (opt) )
+| [int]| [remove_connection](#func-remove_connection "remove_connection")( source: [int], target: [int], bidirectional: [bool] (opt) )
+| [bool]| [has_connection](#func-has_connection "has_connection")( source: [int], target: [int] )
+| [int]| [get_direction_at_point](#func-get_direction_at_point "get_direction_at_point")( point_id: [int] )
+| [float]| [get_cost_at_point](#func-get_cost_at_point "get_cost_at_point")( point_id: [int] )
+| [int]| [recalculate](#func-recalculate "recalculate")( origin: [Variant], optional_params: [Dictionary] (opt) )
+| [PoolIntArray]| [get_direction_at_points](#func-get_direction_at_points "get_direction_at_points")( points: [PoolIntArray] )
+| [PoolRealArray]| [get_cost_at_points](#func-get_cost_at_points "get_cost_at_points")( points: [PoolIntArray] )
+| [Dictionary]| [get_cost_map](#func-get_cost_map "get_cost_map")(  )
+| [Dictionary]| [get_direction_map](#func-get_direction_map "get_direction_map")(  )
+| [PoolIntArray]| [get_all_points_with_cost_between](#func-get_all_points_with_cost_between "get_all_points_with_cost_between")( min_cost: [float], max_cost: [float] )
+| [PoolIntArray]| [get_shortest_path_from_point](#func-get_shortest_path_from_point "get_shortest_path_from_point")( point_id: [int] )
+| [Dictionary]| [add_square_grid](#func-add_square_grid "add_square_grid")( bounds: [Variant], terrain_type: [int] (opt), orthogonal_cost: [float] (opt), diagonal_cost: [float] (opt) )
+| [Dictionary]| [add_hexagonal_grid](#func-add_hexagonal_grid "add_hexagonal_grid")( bounds: [Variant], terrain_type: [int] (opt), weight: [float] (opt) )
 ## Methods Descriptions
-### func new() -> Self
+### <a id="func-new"></a>func new() -> Self
 ________
 
 Create a new empty `DijkstraMap`.
@@ -49,7 +49,7 @@ Create a new empty `DijkstraMap`.
 ```gdscript
 var dijkstra_map = DijkstraMap.new()
 ```
-### func clear() -> void
+### <a id="func-clear"></a>func clear() -> void
 ________
 
 Clear the underlying `DijkstraMap`.
@@ -58,7 +58,7 @@ Clear the underlying `DijkstraMap`.
 ```gdscript
 dijkstra_map.clear()
 ```
-### func duplicate_graph_from(source_instance: [Variant]) -> [int]
+### <a id="func-duplicate_graph_from"></a>func duplicate_graph_from(source_instance: [Variant]) -> [int]
 ________
 
 If `source_instance` is a `dijkstra map`, it is cloned into
@@ -74,7 +74,7 @@ var dijkstra_map = DijkstraMap.new()
 var dijkstra_map_copy = DijkstraMap.new()
 dijkstra_map_copy.duplicate_graph_from(dijkstra_map)
 ```
-### func get_available_point_id() -> [int]
+### <a id="func-get_available_point_id"></a>func get_available_point_id() -> [int]
 ________
 
 Returns the first positive available id.
@@ -86,7 +86,7 @@ dijkstra_map.add_point(0)
 dijkstra_map.add_point(1)
 assert(dijkstra_map.get_available_point_id() == 2)
 ```
-### func add_point(point_id: [int], terrain_type: [int] (opt)) -> [int]
+### <a id="func-add_point"></a>func add_point(point_id: [int], terrain_type: [int] (opt)) -> [int]
 ________
 
 Add a new point with the given `terrain_type`.
@@ -103,7 +103,7 @@ var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0) # terrain_type is -1
 dijkstra_map.add_point(1, 0) # terrain_type is 0
 ```
-### func set_terrain_for_point(point_id: [int], terrain_id: [int] (opt)) -> [int]
+### <a id="func-set_terrain_for_point"></a>func set_terrain_for_point(point_id: [int], terrain_id: [int] (opt)) -> [int]
 ________
 
 Set the terrain type for `point_id`.
@@ -122,7 +122,7 @@ assert(dijkstra_map.get_terrain_for_point(0) == 1)
 dijkstra_map.set_terrain_for_point(0)
 assert(dijkstra_map.get_terrain_for_point(0) == -1)
 ```
-### func get_terrain_for_point(point_id: [int]) -> [int]
+### <a id="func-get_terrain_for_point"></a>func get_terrain_for_point(point_id: [int]) -> [int]
 ________
 
 Get the terrain type for the given point.
@@ -140,7 +140,7 @@ assert(dijkstra_map.get_terrain_for_point(1) == -1)
 # `2` is not in the map, so this returns `-1`
 assert(dijkstra_map.get_terrain_for_point(2) == -1)
 ```
-### func remove_point(point_id: [int]) -> [int]
+### <a id="func-remove_point"></a>func remove_point(point_id: [int]) -> [int]
 ________
 
 Removes a point from the map.
@@ -155,12 +155,12 @@ dijkstra_map.add_point(0)
 assert(dijkstra_map.remove_point(0) == 0)
 assert(dijkstra_map.remove_point(0) == 1)
 ```
-### func has_point(point_id: [int]) -> [bool]
+### <a id="func-has_point"></a>func has_point(point_id: [int]) -> [bool]
 ________
 
 Returns [`true`] if the map contains the given point.
 
-### func disable_point(point_id: [int]) -> [int]
+### <a id="func-disable_point"></a>func disable_point(point_id: [int]) -> [int]
 ________
 
 Disable the given point for pathfinding.
@@ -175,7 +175,7 @@ dijkstra_map.add_point(0)
 assert(dijkstra_map.disable_point(0) == 0)
 assert(dijkstra_map.disable_point(1) == 1)
 ```
-### func enable_point(point_id: [int]) -> [int]
+### <a id="func-enable_point"></a>func enable_point(point_id: [int]) -> [int]
 ________
 
 Enable the given point for pathfinding.
@@ -190,7 +190,7 @@ dijkstra_map.add_point(0)
 assert(dijkstra_map.enable_point(0) == 0)
 assert(dijkstra_map.enable_point(1) == 1)
 ```
-### func is_point_disabled(point_id: [int]) -> [bool]
+### <a id="func-is_point_disabled"></a>func is_point_disabled(point_id: [int]) -> [bool]
 ________
 
 Returns [`true`] if the point exists and is disabled, otherwise returns
@@ -206,7 +206,7 @@ assert(dijkstra_map.is_point_disabled(0))
 assert(!dijkstra_map.is_point_disabled(1))
 assert(!dijkstra_map.is_point_disabled(2))
 ```
-### func connect_points(source: [int], target: [int], weight: [float] (opt), bidirectional: [bool] (opt)) -> [int]
+### <a id="func-connect_points"></a>func connect_points(source: [int], target: [int], weight: [float] (opt), bidirectional: [bool] (opt)) -> [int]
 ________
 
 Connects the two given points.
@@ -233,7 +233,7 @@ dijkstra_map.connect_points(1, 2, 1.0, false)
 #    2.0     1.0
 assert(dijkstra_map.connect_points(1, 3) == 1) # 3 does not exists in the map
 ```
-### func remove_connection(source: [int], target: [int], bidirectional: [bool] (opt)) -> [int]
+### <a id="func-remove_connection"></a>func remove_connection(source: [int], target: [int], bidirectional: [bool] (opt)) -> [int]
 ________
 
 Remove a connection between the two given points.
@@ -259,7 +259,7 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.remove_connection(0, 1, false)
 assert(dijkstra_map.has_connection(1, 0))
 ```
-### func has_connection(source: [int], target: [int]) -> [bool]
+### <a id="func-has_connection"></a>func has_connection(source: [int], target: [int]) -> [bool]
 ________
 
 Returns [`true`] if there is a connection from `source` to `target`
@@ -275,7 +275,7 @@ assert(dijkstra_map.has_connection(0, 1))
 assert(!dijkstra_map.has_connection(1, 0))
 assert(!dijkstra_map.has_connection(0, 2))
 ```
-### func get_direction_at_point(point_id: [int]) -> [int]
+### <a id="func-get_direction_at_point"></a>func get_direction_at_point(point_id: [int]) -> [int]
 ________
 
 Given a point, returns the id of the next point along the shortest path
@@ -296,7 +296,7 @@ assert(dijkstra_map.get_direction_at_point(0) == 0)
 assert(dijkstra_map.get_direction_at_point(1) == 0)
 assert(dijkstra_map.get_direction_at_point(2) == -1)
 ```
-### func get_cost_at_point(point_id: [int]) -> [float]
+### <a id="func-get_cost_at_point"></a>func get_cost_at_point(point_id: [int]) -> [float]
 ________
 
 Returns the cost of the shortest path from this point to the target.
@@ -315,7 +315,7 @@ assert(dijkstra_map.get_cost_at_point(0) == 0.0)
 assert(dijkstra_map.get_cost_at_point(1) == 1.0)
 assert(dijkstra_map.get_cost_at_point(2) == INF)
 ```
-### func recalculate(origin: [Variant], optional_params: [Dictionary] (opt)) -> [int]
+### <a id="func-recalculate"></a>func recalculate(origin: [Variant], optional_params: [Dictionary] (opt)) -> [int]
 ________
 
 Recalculates cost map and direction map information for each point,
@@ -381,7 +381,7 @@ assert(dijkstra_map.get_direction_at_point(1) == 0)
 # 2 is too far from 0, so because we set "maximum_cost" to 2.0, it is innaccessible.
 assert(dijkstra_map.get_direction_at_point(2) == -1)
 ```
-### func get_direction_at_points(points: [PoolIntArray]) -> [PoolIntArray]
+### <a id="func-get_direction_at_points"></a>func get_direction_at_points(points: [PoolIntArray]) -> [PoolIntArray]
 ________
 
 For each point in the given array, returns the id of the next point
@@ -400,7 +400,7 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.recalculate(0)
 assert(Array(dijkstra_map.get_direction_at_points(PoolIntArray([0, 1, 2]))) == [0, 0, -1])
 ```
-### func get_cost_at_points(points: [PoolIntArray]) -> [PoolRealArray]
+### <a id="func-get_cost_at_points"></a>func get_cost_at_points(points: [PoolIntArray]) -> [PoolRealArray]
 ________
 
 For each point in the given array, returns the cost of the shortest
@@ -419,7 +419,7 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.recalculate(0)
 assert(Array(dijkstra_map.get_cost_at_points(PoolIntArray([0, 1, 2]))) == [0.0, 1.0, INF])
 ```
-### func get_cost_map() -> [Dictionary]
+### <a id="func-get_cost_map"></a>func get_cost_map() -> [Dictionary]
 ________
 
 Returns the entire Dijktra map of costs in form of a Dictionary.
@@ -440,7 +440,7 @@ var computed_cost_map = dijkstra_map.get_cost_map()
 for id in computed_cost_map.keys():
     assert(computed_cost_map[id] == cost_map[id])
 ```
-### func get_direction_map() -> [Dictionary]
+### <a id="func-get_direction_map"></a>func get_direction_map() -> [Dictionary]
 ________
 
 Returns the entire Dijkstra map of directions in form of a
@@ -465,7 +465,7 @@ var computed_direction_map = dijkstra_map.get_direction_map()
 for id in computed_direction_map.keys():
     assert(computed_direction_map[id] == direction_map[id])
 ```
-### func get_all_points_with_cost_between(min_cost: [float], max_cost: [float]) -> [PoolIntArray]
+### <a id="func-get_all_points_with_cost_between"></a>func get_all_points_with_cost_between(min_cost: [float], max_cost: [float]) -> [PoolIntArray]
 ________
 
 Returns an array of all the points whose cost is between `min_cost` and
@@ -483,7 +483,7 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.recalculate(0)
 assert(Array(dijkstra_map.get_all_points_with_cost_between(0.5, 1.5)) == [1])
 ```
-### func get_shortest_path_from_point(point_id: [int]) -> [PoolIntArray]
+### <a id="func-get_shortest_path_from_point"></a>func get_shortest_path_from_point(point_id: [int]) -> [PoolIntArray]
 ________
 
 Returns an [array] of points describing the shortest path from a
@@ -495,7 +495,7 @@ be empty.
 ##### Note
 The starting point itself is not included.
 
-### func add_square_grid(bounds: [Variant], terrain_type: [int] (opt), orthogonal_cost: [float] (opt), diagonal_cost: [float] (opt)) -> [Dictionary]
+### <a id="func-add_square_grid"></a>func add_square_grid(bounds: [Variant], terrain_type: [int] (opt), orthogonal_cost: [float] (opt), diagonal_cost: [float] (opt)) -> [Dictionary]
 ________
 
 Adds a square grid of connected points.
@@ -517,7 +517,7 @@ Adds a square grid of connected points.
 This function returns a Dictionary where keys are coordinates of points
 ([`Vector2`]) and values are their corresponding point IDs.
 
-### func add_hexagonal_grid(bounds: [Variant], terrain_type: [int] (opt), weight: [float] (opt)) -> [Dictionary]
+### <a id="func-add_hexagonal_grid"></a>func add_hexagonal_grid(bounds: [Variant], terrain_type: [int] (opt), weight: [float] (opt)) -> [Dictionary]
 ________
 
 Adds a hexagonal grid of connected points.

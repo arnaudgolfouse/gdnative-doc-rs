@@ -1,12 +1,16 @@
-use std::collections::HashMap;
-
+use super::{Config, Documentation};
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
+use std::collections::HashMap;
 
 #[derive(Clone, Copy, PartialEq)]
 enum Nesting {
+    /// First item after the `"- "`
     StartListItem,
+    /// Member of a list item
     ListItem,
+    /// Quoted text: `"> "`
     Quote,
+    /// Indented code: add 4 spaces
     IndentedCode,
 }
 
@@ -26,6 +30,14 @@ pub struct MarkdownCallbacks {
 }
 
 impl super::Callbacks for MarkdownCallbacks {
+    fn start_encoding(
+        &mut self,
+        _s: &mut String,
+        _config: &Config,
+        _documentation: &Documentation,
+    ) {
+    }
+
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>) {
         for event in events {
             match event {
@@ -252,6 +264,9 @@ impl MarkdownCallbacks {
         }
     }
 
+    /// - If the last item in `self.nesting` is `Nesting::StartListItem`, replace it
+    /// with `Nesting::ListItem` and returns.
+    /// - Else, push a new line in `s` with indentation given by `self.nesting`.
     fn apply_nesting(&mut self, s: &mut String) {
         if self.remove_top_most_start_item() {
             return;
@@ -270,6 +285,8 @@ impl MarkdownCallbacks {
         }
     }
 
+    /// If the last item in `self.nesting` is `Nesting::StartListItem`, replace it
+    /// with `Nesting::ListItem` and returns `true`.
     fn remove_top_most_start_item(&mut self) -> bool {
         if let Some(start_item @ Nesting::StartListItem) = self.nesting.last_mut() {
             *start_item = Nesting::ListItem;
