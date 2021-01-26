@@ -1,17 +1,17 @@
 use clap::{App, Arg};
-use gdnative_doc::{init_logger, Backend, Builder};
+use gdnative_doc::{Backend, Builder};
 use std::path::PathBuf;
 
 fn real_main() -> gdnative_doc::Result<()> {
     let matches = make_app().get_matches();
-    init_logger(match matches.occurrences_of("verbosity") {
+    let log_level = match matches.occurrences_of("verbosity") {
         0 => gdnative_doc::LevelFilter::Info,
         1 => gdnative_doc::LevelFilter::Debug,
         _ => gdnative_doc::LevelFilter::Trace,
-    });
+    };
 
     let config_path = PathBuf::from(matches.value_of("config").unwrap());
-    let mut builder = Builder::from_user_config(config_path)?;
+    let mut builder = Builder::from_user_config(config_path)?.log_level(log_level);
     if let Some(output_dir) = matches.value_of("markdown") {
         builder = builder.add_backend(Backend::Markdown {
             output_dir: PathBuf::from(output_dir),

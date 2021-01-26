@@ -32,7 +32,7 @@ pub enum Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Initialize the logger with the specified logging level.
-pub fn init_logger(level: LevelFilter) {
+fn init_logger(level: LevelFilter) {
     simplelog::TermLogger::init(
         level,
         simplelog::Config::default(),
@@ -46,6 +46,7 @@ pub struct Builder {
     config: backend::Config,
     documentation: documentation::Documentation,
     backends: Vec<(Backend, Box<dyn Callbacks>)>,
+    log_level: LevelFilter,
 }
 
 impl Builder {
@@ -96,7 +97,16 @@ impl Builder {
             config,
             documentation,
             backends: Vec::new(),
+            log_level: LevelFilter::Info,
         }
+    }
+
+    /// Set the logging level.
+    ///
+    /// Defaults to [`LevelFilter::Info`].
+    pub fn log_level(mut self, log_level: LevelFilter) -> Self {
+        self.log_level = log_level;
+        self
     }
 
     /// Add a new backend to the builder.
@@ -111,6 +121,7 @@ impl Builder {
     }
 
     pub fn build(self) -> Result<()> {
+        init_logger(self.log_level);
         for (backend, callbacks) in self.backends {
             let extension = backend.extension();
             let mut generator =
