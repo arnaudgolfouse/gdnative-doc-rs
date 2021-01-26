@@ -6,10 +6,10 @@ use crate::{
 use pulldown_cmark::{CowStr, Event, Tag};
 use std::collections::HashMap;
 
-/// Configuration options for [Generator](super::Generator).
+/// Configuration options for [Builder](crate::Builder).
 ///
 /// It can be built within code, or generated via an instance of
-/// [`UserConfig`].
+/// [`ConfigFile`].
 pub struct Config {
     /// Link to godot items' documentation
     ///
@@ -125,7 +125,7 @@ impl Config {
     ///
     /// This will convert `i32` to `int`, `Int32Array` to `PoolIntArray`...
     ///
-    /// See [`UserConfig::rename_classes`] for user-defined renaming.
+    /// See [`ConfigFile::rename_classes`] for user-defined renaming.
     pub fn rename_classes(&self, documentation: &mut Documentation) {
         let replace = |name: &mut String| {
             if let Some(rename) = self.rename_classes.get(name) {

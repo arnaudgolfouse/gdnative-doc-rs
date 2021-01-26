@@ -1,10 +1,14 @@
 use clap::{App, Arg};
-use gdnative_doc::{backend::Backend, init_logger, Builder};
+use gdnative_doc::{init_logger, Backend, Builder};
 use std::path::PathBuf;
 
 fn real_main() -> gdnative_doc::Result<()> {
-    init_logger();
     let matches = make_app().get_matches();
+    init_logger(match matches.occurrences_of("verbosity") {
+        0 => gdnative_doc::LevelFilter::Info,
+        1 => gdnative_doc::LevelFilter::Debug,
+        _ => gdnative_doc::LevelFilter::Trace,
+    });
 
     let config_path = PathBuf::from(matches.value_of("config").unwrap());
     let mut builder = Builder::from_user_config(config_path)?;
@@ -33,6 +37,7 @@ fn main() -> Result<(), String> {
 fn make_app() -> App<'static, 'static> {
     App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
+        .version_short("V")
         .author(env!("CARGO_PKG_AUTHORS"))
         .arg(
             Arg::with_name("config")
@@ -58,5 +63,12 @@ fn make_app() -> App<'static, 'static> {
                 .long("gut")
                 .value_name("DIRECTORY")
                 .help("Directory in which to put the gut output"),
+        )
+        .arg(
+            Arg::with_name("verbosity")
+                .long("verbose")
+                .short("v")
+                .multiple(true)
+                .help("Use verbose output (-vv very verbose)"),
         )
 }

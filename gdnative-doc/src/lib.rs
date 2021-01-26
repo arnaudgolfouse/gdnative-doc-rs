@@ -1,12 +1,19 @@
 //! Generating documentation for gdnative.
 
-use backend::{Backend, Callbacks};
+#![warn(clippy::unreachable_pub)]
+
+use backend::Callbacks;
 use std::{fs, path::PathBuf};
 
-pub mod backend;
-pub mod config;
-pub mod documentation;
-pub mod files;
+mod backend;
+mod config;
+mod documentation;
+mod files;
+
+pub use backend::{Backend, Config};
+pub use config::ConfigFile;
+pub use documentation::Documentation;
+pub use simplelog::LevelFilter;
 
 /// Type of errors emitted by this library.
 #[derive(Debug, thiserror::Error)]
@@ -24,9 +31,10 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-pub fn init_logger() {
+/// Initialize the logger with the specified logging level.
+pub fn init_logger(level: LevelFilter) {
     simplelog::TermLogger::init(
-        simplelog::LevelFilter::Info,
+        level,
         simplelog::Config::default(),
         simplelog::TerminalMode::Stderr,
     )

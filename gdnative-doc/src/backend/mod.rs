@@ -5,8 +5,8 @@ mod markdown;
 use std::path::PathBuf;
 
 pub use config::Config;
-pub use gut::GutCallbacks;
-pub use markdown::MarkdownCallbacks;
+pub(super) use gut::GutCallbacks;
+pub(super) use markdown::MarkdownCallbacks;
 
 use crate::documentation::{Documentation, GdnativeClass, Method};
 use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Parser, Tag};
@@ -52,7 +52,7 @@ impl Backend {
 }
 
 /// Callbacks to encode markdown input in a given format.
-pub trait Callbacks {
+pub(crate) trait Callbacks {
     /// Called before each class.
     fn start_class(&mut self, _s: &mut String, _config: &Config, _class: &GdnativeClass) {}
     /// Called before each method.
@@ -118,7 +118,7 @@ impl Callbacks for HtmlCallbacks {
 }
 
 /// Generate files given an encoding
-pub struct Generator<'a> {
+pub(crate) struct Generator<'a> {
     /// Configuration, mainly used to resolve links.
     config: &'a Config,
     /// Encoding functions.
@@ -128,7 +128,7 @@ pub struct Generator<'a> {
 }
 
 impl<'a> Generator<'a> {
-    pub fn new(
+    pub(crate) fn new(
         config: &'a Config,
         documentation: &'a Documentation,
         callbacks: Box<dyn Callbacks>,
@@ -141,7 +141,7 @@ impl<'a> Generator<'a> {
     }
 
     /// Generate the root documentation file of the crate.
-    pub fn generate_root_file(&mut self, extension: &str) -> String {
+    pub(crate) fn generate_root_file(&mut self, extension: &str) -> String {
         let mut root_file = String::new();
         let config = self.config;
         let mut broken_link_callback = broken_link_callback!(config);

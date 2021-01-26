@@ -6,7 +6,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 /// Structure that holds user configuration settings.
 ///
-/// Should be obtained via a `toml` [configuration file](UserConfig::read_from).
+/// Should be obtained via a `toml` [configuration file](ConfigFile::read_from).
 #[derive(Deserialize)]
 pub struct ConfigFile {
     /// Root file of the crate.
@@ -16,7 +16,7 @@ pub struct ConfigFile {
     pub root_file: Option<PathBuf>,
     /// List of items for which the linking url should be overriden.
     pub url_overrides: Option<HashMap<String, String>>,
-    /// Renaming of types when going from Rsut to Godot.
+    /// Renaming of types when going from Rust to Godot.
     ///
     /// This is useful because GDNative allows defining a `script_class_name` in the
     /// `.gdns` file.
@@ -36,7 +36,7 @@ pub struct ConfigFile {
 }
 
 impl ConfigFile {
-    /// Read `UserConfig` from the given `toml` configuration file.
+    /// Read `ConfigFile` from the given `toml` configuration file.
     pub fn read_from(config: &str) -> Result<Self> {
         Ok(toml::from_str(config)?)
     }
