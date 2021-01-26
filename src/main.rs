@@ -1,75 +1,62 @@
-use godot_doc_rs::{
-    backend::{self, Backend},
-    config, documentation, files,
-};
-use std::{fs, path::PathBuf};
+use clap::{App, Arg};
+use gdnative_doc::{backend::Backend, init_logger, Builder};
+use std::path::PathBuf;
 
-fn main() {
-    simplelog::TermLogger::init(
-        simplelog::LevelFilter::Info,
-        simplelog::Config::default(),
-        simplelog::TerminalMode::Stderr,
-    )
-    .unwrap();
+fn real_main() -> gdnative_doc::Result<()> {
+    init_logger();
+    let matches = make_app().get_matches();
 
-    let path = match std::env::args_os().nth(1) {
-        Some(path) => PathBuf::from(path),
-        None => PathBuf::from("./config.toml"),
-    };
-    let config = fs::read_to_string(&path).unwrap();
-    let config = config::UserConfig::read_from(&config).unwrap();
-    std::env::set_current_dir(path.parent().unwrap()).unwrap();
-    let root_file = match &config.root_file {
-        Some(path) => path.clone(),
-        None => {
-            PathBuf::from("./src/lib.rs") // TODO: determine the root file via cargo
-        }
-    };
-    let package = files::Package::from_root_file(root_file).unwrap();
-
-    let mut documentation = documentation::Documentation::new();
-    for (module_id, module) in package.modules {
-        let root_module = if module_id == package.root_module {
-            match module.attributes.as_ref() {
-                Some(attrs) => Some(attrs.as_slice()),
-                None => None,
-            }
-        } else {
-            None
-        };
-        documentation
-            .parse_from_module(&module.items, root_module)
-            .unwrap();
+    let config_path = PathBuf::from(matches.value_of("config").unwrap());
+    let mut builder = Builder::from_user_config(config_path)?;
+    if let Some(output_dir) = matches.value_of("markdown") {
+        builder = builder.add_backend(Backend::Markdown {
+            output_dir: PathBuf::from(output_dir),
+        })
     }
-
-    let backend_config = backend::Config::from_user_config(config);
-    backend_config.rename_classes(&mut documentation);
-    let backends = backend_config.backends.clone();
-    for (backend, output_dir) in backends {
-        let extension = backend.extension();
-        let mut generator = backend::Generator::new(
-            &backend_config,
-            &documentation,
-            match backend {
-                Backend::Markdown => Box::new(backend::MarkdownCallbacks::default()),
-                Backend::Html => Box::new(backend::HtmlCallbacks::default()),
-                Backend::Gut => Box::new(backend::GutCallbacks::default()),
-            },
-        );
-        let files = generator.generate_files();
-        let root_file = generator.generate_root_file(backend);
-        fs::create_dir_all(&output_dir).unwrap();
-
-        if backend != Backend::Gut {
-            fs::write(
-                output_dir.join("index").with_extension(extension),
-                root_file,
-            )
-            .unwrap();
-        }
-
-        for (name, content) in files {
-            fs::write(output_dir.join(name).with_extension(extension), content).unwrap();
-        }
+    if let Some(output_dir) = matches.value_of("html") {
+        builder = builder.add_backend(Backend::Html {
+            output_dir: PathBuf::from(output_dir),
+        })
     }
+    if let Some(output_dir) = matches.value_of("gut") {
+        builder = builder.add_backend(Backend::Gut {
+            output_dir: PathBuf::from(output_dir),
+        })
+    }
+    builder.build()
+}
+
+fn main() -> Result<(), String> {
+    real_main().map_err(|err| format!("{}", err))
+}
+
+fn make_app() -> App<'static, 'static> {
+    App::new(env!("CARGO_PKG_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .arg(
+            Arg::with_name("config")
+                .long("config")
+                .value_name("FILE")
+                .required(true)
+                .help("Configuration file for gdnative-doc"),
+        )
+        .arg(
+            Arg::with_name("markdown")
+                .long("md")
+                .value_name("DIRECTORY")
+                .help("Directory in which to put the markdown output"),
+        )
+        .arg(
+            Arg::with_name("html")
+                .long("html")
+                .value_name("DIRECTORY")
+                .help("Directory in which to put the html output"),
+        )
+        .arg(
+            Arg::with_name("gut")
+                .long("gut")
+                .value_name("DIRECTORY")
+                .help("Directory in which to put the gut output"),
+        )
 }

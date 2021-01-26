@@ -7,8 +7,8 @@ This is a documentation tool for [gdnative](https://github.com/godot-rust/godot-
 ## Usage
 
 To test on a rust crate:
-1. Create a `config.toml` file, with at least an `output` entry.
-2. Run `cargo run -- <path-to-config.toml>`.
+1. Create a `config.toml` file.
+2. Run `cargo run -- --config <path-to-config.toml> --md <path-to-markdown-output>`.
 
 ## Example
 

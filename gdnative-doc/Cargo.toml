@@ -1,0 +1,18 @@
+[package]
+name = "gdnative-doc"
+version = "0.0.1"
+authors = ["Arnaud Golfouse <arnaud.golfouse@laposte.net>"]
+edition = "2018"
+
+[dependencies]
+log = { version = "0.4", features = ["std"] }
+pulldown-cmark = { version = "0.8", default-features = false }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+simplelog = "0.9"
+syn = { version = "1.0", default-features = false, features = ["parsing", "full"] }
+thiserror = "1.0"
+toml = "0.5"
+
+# Make toml config parsing optional ?
+#[features]
+#default = ["toml"]

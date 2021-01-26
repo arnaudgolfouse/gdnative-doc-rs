@@ -8,13 +8,7 @@ use std::{collections::HashMap, path::PathBuf};
 ///
 /// Should be obtained via a `toml` [configuration file](UserConfig::read_from).
 #[derive(Deserialize)]
-pub struct UserConfig {
-    /// List of enabled backends, with their associated output directory.
-    ///
-    /// # Valid backends
-    /// - markdown
-    /// - html
-    pub backends: HashMap<String, PathBuf>,
+pub struct ConfigFile {
     /// Root file of the crate.
     ///
     /// # Default
@@ -41,7 +35,7 @@ pub struct UserConfig {
     pub markdown_options: Option<Vec<String>>,
 }
 
-impl UserConfig {
+impl ConfigFile {
     /// Read `UserConfig` from the given `toml` configuration file.
     pub fn read_from(config: &str) -> Result<Self> {
         Ok(toml::from_str(config)?)

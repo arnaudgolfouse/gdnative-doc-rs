@@ -1,10 +1,10 @@
 use super::Backend;
 use crate::{
-    config::UserConfig,
+    config::ConfigFile,
     documentation::{self, Documentation, Type},
 };
 use pulldown_cmark::{CowStr, Event, Tag};
-use std::{collections::HashMap, path::PathBuf};
+use std::collections::HashMap;
 
 /// Configuration options for [Generator](super::Generator).
 ///
@@ -23,15 +23,15 @@ pub struct Config {
     pub(crate) rename_classes: HashMap<String, String>,
     /// Markdown options
     pub(crate) markdown_options: pulldown_cmark::Options,
-    /// Backends and their output directory
-    pub backends: HashMap<Backend, PathBuf>,
+    /// Enabled backends
+    pub(crate) backends: Vec<Backend>,
 }
 
 /// Url for the godot documentation
 const GODOT_DOCUMENTATION_URL: &str = "https://docs.godotengine.org/en/stable/classes";
 
 /// List of godot classes, like `Array`, `int`, `Transform2D`...
-const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classes");
+const GODOT_CLASSES: &[&str] = &include!("../../../fetch_godot_classes/godot_classes");
 
 /// List of some godot constants and information about where they sould link to.
 ///
@@ -66,7 +66,7 @@ impl Default for Config {
             url_overrides: HashMap::new(),
             rename_classes: HashMap::new(),
             markdown_options: pulldown_cmark::Options::empty(),
-            backends: HashMap::new(),
+            backends: Vec::new(),
         }
     }
 }
@@ -104,46 +104,12 @@ impl Config {
         rust_to_godot
     }
 
-    pub fn from_user_config(user_config: UserConfig) -> Self {
+    pub fn from_user_config(user_config: ConfigFile) -> Self {
         let markdown_options = user_config
             .markdown_options()
             .unwrap_or(pulldown_cmark::Options::empty());
         let url_overrides = user_config.url_overrides.unwrap_or_default();
         let name_overrides = user_config.rename_classes.unwrap_or_default();
-        let mut backends = HashMap::new();
-        for (backend, path) in user_config.backends {
-            match backend.as_str() {
-                "markdown" => {
-                    if backends.get(&Backend::Markdown).is_some() {
-                        log::warn!("Backend 'markdown' is already specified")
-                    } else {
-                        backends.insert(Backend::Markdown, path);
-                    }
-                }
-                "html" => {
-                    if backends.get(&Backend::Html).is_some() {
-                        log::warn!("Backend 'html' is already specified")
-                    } else {
-                        backends.insert(Backend::Html, path);
-                    }
-                }
-                "gut" => {
-                    if backends.get(&Backend::Gut).is_some() {
-                        log::warn!("Backend 'gut' is already specified")
-                    } else {
-                        backends.insert(Backend::Gut, path);
-                    }
-                }
-                _ => {
-                    log::error!("unknown backend: {}", backend);
-                }
-            }
-        }
-        if backends.is_empty() {
-            log::error!("You need to enable at least one backend !");
-            log::info!("Valid backends are: 'markdown', 'html'");
-            panic!("You need to enable at least one backend !");
-        }
 
         Self {
             godot_items: Self::godot_items(),
@@ -151,7 +117,7 @@ impl Config {
             url_overrides,
             rename_classes: name_overrides,
             markdown_options,
-            backends,
+            backends: Vec::new(),
         }
     }
 
