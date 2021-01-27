@@ -1,4 +1,4 @@
-# godoc-doc-rs
+# gdnative-doc
 
 This is a documentation tool for [gdnative](https://github.com/godot-rust/godot-rust) projects.
 
@@ -10,13 +10,13 @@ There are 2 ways to use this:
 
 ### Command line
 
-By executing `cargo build --release`, you should get an executable at `target/release/godot-doc-rs`. Then, to test it on a rust crate:
+By executing `cargo build --release`, you should get an executable at `target/release/gdnative-doc-cli`. Then, to test it on a rust crate:
 ```
 cd <path-to-my-crate>
-godot-doc-rs --md <path-to-markdown-output>
+gdnative-doc-cli --md <path-to-markdown-output>
 ```
 
-To get more options, run `godot-doc-rs --help`.
+To get more options, run `gdnative-doc-cli --help`.
 
 ### Build script (soon)
 

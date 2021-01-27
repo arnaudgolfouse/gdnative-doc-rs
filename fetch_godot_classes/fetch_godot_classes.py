@@ -13,7 +13,7 @@ from pathlib import Path
 GODOT_REPOSITORY_URL = "https://github.com/godotengine/godot"
 GODOT_REPOSITORY_PATH = "godot"
 CLASSES_PATH = "doc/classes"
-GODOT_CLASSES_FILE = "../gdnative-doc/godot_classes"
+GODOT_CLASSES_FILE = "../godot_classes"
 
 script_path = Path(__file__).absolute().parent
 os.chdir(script_path)

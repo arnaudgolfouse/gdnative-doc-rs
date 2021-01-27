@@ -11,4 +11,4 @@ crate-type = ["cdylib"]
 gdnative = "0.9"
 
 [build-dependencies]
-gdnative-doc = { path = "../../gdnative-doc" }
+gdnative-doc = { path = "../.." }
