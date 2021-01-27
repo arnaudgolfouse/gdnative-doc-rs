@@ -13,4 +13,4 @@ TODO:
 - [ ] Add a way to drive this via build script, and command line
 - [X] Cleanup markdown generation
 # Classes:
-- [Interface](./Interface.md)
+- [DijkstraMap](./DijkstraMap.md)
