@@ -5,3 +5,4 @@
     ```markdown
     [`MyStruct::my_method`]
     ```
+- Add tests !!!
