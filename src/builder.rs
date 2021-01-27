@@ -15,9 +15,9 @@ pub enum Package {
 
 /// A builder for generating godot documentation in various formats.
 pub struct Builder {
-    config: Resolver,
+    resolver: Resolver,
     backends: Vec<(Backend, Box<dyn Callbacks>)>,
-    log_level: LevelFilter,
+    level_filter: LevelFilter,
     /// Configuration file
     user_config: Option<PathBuf>,
     /// Used to disambiguate which crate to use.
@@ -30,9 +30,9 @@ impl Builder {
     /// Create a default `Builder` with no backends.
     pub fn new() -> Self {
         Self {
-            config: Resolver::default(),
+            resolver: Resolver::default(),
             backends: Vec::new(),
-            log_level: LevelFilter::Info,
+            level_filter: LevelFilter::Info,
             user_config: None,
             package: None,
             markdown_options: pulldown_cmark::Options::empty(),
@@ -59,7 +59,7 @@ impl Builder {
     ///
     /// Defaults to [`LevelFilter::Info`].
     pub fn log_level(mut self, log_level: LevelFilter) -> Self {
-        self.log_level = log_level;
+        self.level_filter = log_level;
         self
     }
 
@@ -89,7 +89,7 @@ impl Builder {
     /// This will generate the documentation for each [specified backend](Self::add_backend), creating the
     /// ouput directories if needed.
     pub fn build(mut self) -> Result<()> {
-        init_logger(self.log_level);
+        init_logger(self.level_filter);
 
         if let Some(path) = self.user_config.take() {
             self.load_user_config(path)?
@@ -99,7 +99,7 @@ impl Builder {
         for (backend, callbacks) in self.backends {
             let extension = callbacks.extension();
             let mut generator = backend::Generator::new(
-                &self.config,
+                &self.resolver,
                 &documentation,
                 callbacks,
                 self.markdown_options,
@@ -144,7 +144,7 @@ impl Builder {
         self.markdown_options = user_config
             .markdown_options()
             .unwrap_or(pulldown_cmark::Options::empty());
-        self.config.apply_user_config(user_config);
+        self.resolver.apply_user_config(user_config);
         Ok(())
     }
 
@@ -164,7 +164,7 @@ impl Builder {
         for (module_id, module) in package.modules {
             documentation.parse_from_module(&module, module_id == package.root_module);
         }
-        self.config.rename_classes(&mut documentation);
+        self.resolver.rename_classes(&mut documentation);
         Ok(documentation)
     }
 }
