@@ -10,6 +10,11 @@ The map must first be filled by using e.g. `add_point`, `connect_points`,
 
 And then you must call `recalculate` on it.
 
+## Properties
+| type| property
+| :--- | :--- 
+| [String]| [property](#property-property "property")
+
 ## Methods
 | returns| method
 | :--- | :--- 
@@ -39,6 +44,7 @@ And then you must call `recalculate` on it.
 | [PoolIntArray]| [get_shortest_path_from_point](#func-get_shortest_path_from_point "get_shortest_path_from_point")( point_id: [int] )
 | [Dictionary]| [add_square_grid](#func-add_square_grid "add_square_grid")( bounds: [Variant], terrain_type: [int] (opt), orthogonal_cost: [float] (opt), diagonal_cost: [float] (opt) )
 | [Dictionary]| [add_hexagonal_grid](#func-add_hexagonal_grid "add_hexagonal_grid")( bounds: [Variant], terrain_type: [int] (opt), weight: [float] (opt) )
+
 ## Methods Descriptions
 ### <a id="func-new"></a>func new() -> Self
 ________
@@ -558,6 +564,7 @@ This is what `add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)` would produce:
 [PoolIntArray]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
 [PoolRealArray]: https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html
 [Reference]: https://docs.godotengine.org/en/stable/classes/class_reference.html
+[String]: https://docs.godotengine.org/en/stable/classes/class_string.html
 [Variant]: https://docs.godotengine.org/en/stable/classes/class_variant.html
 [`Array`]: https://docs.godotengine.org/en/stable/classes/class_array.html
 [`Dictionary`]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html

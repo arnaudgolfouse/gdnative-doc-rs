@@ -10,7 +10,7 @@ pub(super) use html::HtmlCallbacks;
 pub(super) use markdown::MarkdownCallbacks;
 pub use resolve::Resolver;
 
-use crate::documentation::{Documentation, GdnativeClass, Method};
+use crate::documentation::{Documentation, GdnativeClass, Method, Property};
 use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Options as MarkdownOptions, Parser, Tag};
 
 /// Generate a callback to resolve broken links.
@@ -19,7 +19,7 @@ use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Options as MarkdownOpti
 /// `pulldown_cmark::Parser::new_with_broken_link_callback` are not yet
 /// refined enough.
 macro_rules! broken_link_callback {
-    ($config:expr) => {
+    ($resolver:expr) => {
         move |broken_link: ::pulldown_cmark::BrokenLink| {
             use ::pulldown_cmark::CowStr;
 
@@ -27,7 +27,7 @@ macro_rules! broken_link_callback {
             if link.starts_with('`') && link.ends_with('`') && link.len() > 1 {
                 link = &link[1..link.len() - 1];
             }
-            $config
+            $resolver
                 .resolve(link)
                 .map(|string| (CowStr::from(string), CowStr::Borrowed("")))
         }
@@ -58,11 +58,15 @@ pub trait Callbacks {
     /// Called before encoding each class.
     ///
     /// **Default**: does nothing
-    fn start_class(&mut self, _s: &mut String, _config: &Resolver, _class: &GdnativeClass) {}
+    fn start_class(&mut self, _s: &mut String, _resolver: &Resolver, _class: &GdnativeClass) {}
     /// Called before encoding each method.
     ///
     /// **Default**: does nothing
-    fn start_method(&mut self, _s: &mut String, _config: &Resolver, _method: &Method) {}
+    fn start_method(&mut self, _s: &mut String, _resolver: &Resolver, _method: &Method) {}
+    /// Called before encoding each property.
+    ///
+    /// **Default**: does nothing
+    fn start_property(&mut self, _s: &mut String, _resolver: &Resolver, _property: &Property) {}
     /// Encode the stream of `events` in `s`.
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>);
     /// Called at the end of the processing for a given file.
@@ -75,12 +79,14 @@ impl dyn Callbacks {
     /// Default start_method implementation, implemented on `dyn Callbacks` to avoid
     /// code duplication.
     ///
-    /// This will create a level 3 section that looks like:
+    /// This will create a level 3 header that looks like (in markdown):
+    /// ```text
+    /// ### <a id="func-name"></a>func name(arg1: type, ...) -> type
+    /// ________
+    /// ```
     ///
-    /// `func name(arg1: type, ...) -> type`
-    ///
-    /// With appropriate linking, and a html link to this named `func-name`
-    pub fn start_method_default(&mut self, s: &mut String, config: &Resolver, method: &Method) {
+    /// With appropriate linking.
+    pub fn start_method_default(&mut self, s: &mut String, property: &Resolver, method: &Method) {
         let link = &format!("<a id=\"func-{}\"></a>", method.name);
         self.encode(
             s,
@@ -89,22 +95,55 @@ impl dyn Callbacks {
                 Event::Html(CowStr::Borrowed(link)),
             ],
         );
-        let mut method_section = String::from("func ");
-        method_section.push_str(&method.name);
-        method_section.push('(');
+        let mut method_header = String::from("func ");
+        method_header.push_str(&method.name);
+        method_header.push('(');
         for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
-            method_section.push_str(&name);
-            method_section.push_str(": ");
-            self.encode(s, vec![Event::Text(CowStr::Borrowed(&method_section))]);
-            method_section.clear();
-            self.encode(s, config.encode_type(typ));
+            method_header.push_str(&name);
+            method_header.push_str(": ");
+            self.encode(s, vec![Event::Text(CowStr::Borrowed(&method_header))]);
+            method_header.clear();
+            self.encode(s, property.encode_type(typ));
             if index + 1 != method.parameters.len() {
-                method_section.push_str(", ");
+                method_header.push_str(", ");
             }
         }
-        method_section.push_str(") -> ");
-        let mut last_events = vec![Event::Text(CowStr::Borrowed(&method_section))];
-        last_events.extend(config.encode_type(&method.return_type));
+        method_header.push_str(") -> ");
+        let mut last_events = vec![Event::Text(CowStr::Borrowed(&method_header))];
+        last_events.extend(property.encode_type(&method.return_type));
+        last_events.push(Event::End(Tag::Heading(3)));
+        last_events.push(Event::Rule);
+        self.encode(s, last_events);
+    }
+
+    /// Default start_property implementation, implemented on `dyn Callbacks` to avoid
+    /// code duplication.
+    ///
+    /// This will create a level 3 header that looks like (in markdown):
+    /// ```text
+    /// ### <a id="property-name"></a> name: type
+    /// ________
+    /// ```
+    ///
+    /// With appropriate linking.
+    pub fn start_property_default(
+        &mut self,
+        s: &mut String,
+        resolver: &Resolver,
+        property: &Property,
+    ) {
+        let link = &format!(
+            "<a id=\"property-{}\"></a> {}: ",
+            property.name, property.name
+        );
+        self.encode(
+            s,
+            vec![
+                Event::Start(Tag::Heading(3)),
+                Event::Html(CowStr::Borrowed(link)),
+            ],
+        );
+        let mut last_events = resolver.encode_type(&property.typ);
         last_events.push(Event::End(Tag::Heading(3)));
         last_events.push(Event::Rule);
         self.encode(s, last_events);
@@ -141,10 +180,10 @@ impl<'a> Generator<'a> {
     /// Generate the root documentation file of the crate.
     pub(crate) fn generate_root_file(&mut self, extension: &str) -> String {
         let mut root_file = String::new();
-        let config = self.resolver;
-        let mut broken_link_callback = broken_link_callback!(config);
+        let resolver = self.resolver;
+        let mut broken_link_callback = broken_link_callback!(resolver);
         let class_iterator = EventIterator {
-            context: config,
+            context: resolver,
             parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                 &self.documentation.root_documentation,
                 self.markdown_options,
@@ -225,10 +264,10 @@ impl<'a> Generator<'a> {
             encode(events);
 
             // Class description
-            let config = self.resolver;
-            let mut broken_link_callback = broken_link_callback!(config);
+            let resolver = self.resolver;
+            let mut broken_link_callback = broken_link_callback!(resolver);
             let class_documentation = EventIterator {
-                context: config,
+                context: resolver,
                 parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                     &class.documentation,
                     self.markdown_options,
@@ -237,77 +276,27 @@ impl<'a> Generator<'a> {
             };
             encode(class_documentation.into_iter().collect());
 
-            // Methods table
-            let mut events = vec![
-                Event::Start(Tag::Heading(2)),
-                Event::Text(CowStr::Borrowed("Methods")),
-                Event::End(Tag::Heading(2)),
-                Event::Start(Tag::Table(vec![Alignment::Left, Alignment::Left])),
-                Event::Start(Tag::TableHead),
-                Event::Start(Tag::TableCell),
-                Event::Text(CowStr::Borrowed("returns")),
-                Event::End(Tag::TableCell),
-                Event::Start(Tag::TableCell),
-                Event::Text(CowStr::Borrowed("method")),
-                Event::End(Tag::TableCell),
-                Event::End(Tag::TableHead),
-            ];
-            encode(std::mem::take(&mut events));
-
-            for method in &class.methods {
-                let link = format!("#func-{}", method.name);
-                encode(vec![
-                    Event::Start(Tag::TableRow),
-                    Event::Start(Tag::TableCell),
-                ]);
-                encode(config.encode_type(&method.return_type));
-                encode(vec![
-                    Event::End(Tag::TableCell),
-                    Event::Start(Tag::TableCell),
-                ]);
-
-                let link = Tag::Link(
-                    LinkType::Reference,
-                    link.into(),
-                    method.name.as_str().into(),
-                );
-                encode(vec![
-                    Event::Start(link.clone()),
-                    Event::Text(CowStr::Borrowed(&method.name)),
-                    Event::End(link),
-                    Event::Text(CowStr::Borrowed("( ")),
-                ]);
-                for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
-                    encode(vec![Event::Text(format!("{}: ", name).into())]);
-                    encode(config.encode_type(typ));
-                    if index + 1 != method.parameters.len() {
-                        encode(vec![Event::Text(CowStr::Borrowed(", "))]);
-                    }
-                }
-
-                encode(vec![
-                    Event::Text(CowStr::Borrowed(" )")),
-                    Event::End(Tag::TableCell),
-                    Event::End(Tag::TableRow),
-                ]);
+            // Properties table
+            if !class.properties.is_empty() {
+                encode(Self::properties_table(&class.properties, resolver))
             }
 
-            events.extend(vec![
-                Event::End(Tag::Table(vec![Alignment::Left, Alignment::Left])),
+            // Methods table
+            encode(Self::methods_table(&class.methods, resolver));
+
+            // Methods descriptions
+            encode(vec![
                 Event::Start(Tag::Heading(2)),
                 Event::Text(CowStr::Borrowed("Methods Descriptions")),
                 Event::End(Tag::Heading(2)),
             ]);
-
-            encode(events);
-
-            // Methods
             for method in &class.methods {
-                self.callbacks.start_method(&mut class_file, config, method);
+                self.callbacks
+                    .start_method(&mut class_file, resolver, method);
                 let callbacks = &mut self.callbacks;
                 Self::generate_method(
                     |events| callbacks.encode(&mut class_file, events),
-                    config,
+                    resolver,
                     method,
                     self.markdown_options,
                 )
@@ -318,17 +307,123 @@ impl<'a> Generator<'a> {
         results
     }
 
+    /// Create a table summarizing the `properties`.
+    fn properties_table<'ev>(
+        properties: &'ev [Property],
+        resolver: &'ev Resolver,
+    ) -> Vec<Event<'ev>> {
+        let mut events = vec![
+            Event::Start(Tag::Heading(2)),
+            Event::Text(CowStr::Borrowed("Properties")),
+            Event::End(Tag::Heading(2)),
+            Event::Start(Tag::Table(vec![Alignment::Left, Alignment::Left])),
+            Event::Start(Tag::TableHead),
+            Event::Start(Tag::TableCell),
+            Event::Text(CowStr::Borrowed("type")),
+            Event::End(Tag::TableCell),
+            Event::Start(Tag::TableCell),
+            Event::Text(CowStr::Borrowed("property")),
+            Event::End(Tag::TableCell),
+            Event::End(Tag::TableHead),
+        ];
+
+        for property in properties {
+            let link = Tag::Link(
+                LinkType::Reference,
+                format!("#property-{}", property.name).into(),
+                property.name.as_str().into(),
+            );
+            events.push(Event::Start(Tag::TableRow));
+            events.push(Event::Start(Tag::TableCell));
+            events.extend(resolver.encode_type(&property.typ));
+            events.extend(vec![
+                Event::End(Tag::TableCell),
+                Event::Start(Tag::TableCell),
+                Event::Start(link.clone()),
+                Event::Text(CowStr::Borrowed(property.name.as_str())),
+                Event::End(link),
+                Event::End(Tag::TableCell),
+                Event::End(Tag::TableRow),
+            ]);
+        }
+
+        events.push(Event::End(Tag::Table(vec![
+            Alignment::Left,
+            Alignment::Left,
+        ])));
+
+        events
+    }
+
+    fn methods_table<'ev>(methods: &'ev [Method], resolver: &'ev Resolver) -> Vec<Event<'ev>> {
+        let mut events = vec![
+            Event::Start(Tag::Heading(2)),
+            Event::Text(CowStr::Borrowed("Methods")),
+            Event::End(Tag::Heading(2)),
+            Event::Start(Tag::Table(vec![Alignment::Left, Alignment::Left])),
+            Event::Start(Tag::TableHead),
+            Event::Start(Tag::TableCell),
+            Event::Text(CowStr::Borrowed("returns")),
+            Event::End(Tag::TableCell),
+            Event::Start(Tag::TableCell),
+            Event::Text(CowStr::Borrowed("method")),
+            Event::End(Tag::TableCell),
+            Event::End(Tag::TableHead),
+        ];
+
+        for method in methods {
+            let link = format!("#func-{}", method.name);
+            events.push(Event::Start(Tag::TableRow));
+            events.push(Event::Start(Tag::TableCell));
+            events.extend(resolver.encode_type(&method.return_type));
+            events.push(Event::End(Tag::TableCell));
+            events.push(Event::Start(Tag::TableCell));
+
+            let link = Tag::Link(
+                LinkType::Reference,
+                link.into(),
+                method.name.as_str().into(),
+            );
+            events.extend(vec![
+                Event::Start(link.clone()),
+                Event::Text(CowStr::Borrowed(&method.name)),
+                Event::End(link),
+                Event::Text(CowStr::Borrowed("( ")),
+            ]);
+            for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
+                events.push(Event::Text(format!("{}: ", name).into()));
+                events.extend(resolver.encode_type(typ));
+                if index + 1 != method.parameters.len() {
+                    events.push(Event::Text(CowStr::Borrowed(", ")));
+                }
+            }
+
+            events.extend(vec![
+                Event::Text(CowStr::Borrowed(" )")),
+                Event::End(Tag::TableCell),
+                Event::End(Tag::TableRow),
+            ]);
+        }
+
+        events.push(Event::End(Tag::Table(vec![
+            Alignment::Left,
+            Alignment::Left,
+        ])));
+
+        events
+    }
+
     /// Encode the documentation for `method`.
     fn generate_method(
         mut encode: impl FnMut(Vec<Event>),
-        config: &Resolver,
+        resolver: &Resolver,
         method: &Method,
         markdown_options: MarkdownOptions,
     ) {
-        let config = config;
-        let mut broken_link_callback = broken_link_callback!(config);
+        let resolver = resolver;
+        let mut broken_link_callback = broken_link_callback!(resolver);
         let method_iterator = EventIterator {
-            context: config,
+            context: resolver,
             parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                 &method.documentation,
                 markdown_options,
@@ -341,12 +436,12 @@ impl<'a> Generator<'a> {
 
 /// Iterate over [events](Event), resolving links and changing the resolved
 /// broken links types.
-struct EventIterator<'config, 'parser> {
-    context: &'config Resolver,
+struct EventIterator<'resolver, 'parser> {
+    context: &'resolver Resolver,
     parser: Parser<'parser>,
 }
 
-impl<'config, 'parser> Iterator for EventIterator<'config, 'parser> {
+impl<'resolver, 'parser> Iterator for EventIterator<'resolver, 'parser> {
     type Item = Event<'parser>;
 
     fn next(&mut self) -> Option<Self::Item> {

@@ -1,4 +1,4 @@
-use super::{Callbacks, Resolver};
+use super::{Callbacks, Method, Property, Resolver};
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
 use std::collections::HashMap;
 
@@ -34,8 +34,12 @@ impl Callbacks for MarkdownCallbacks {
         "md"
     }
 
-    fn start_method(&mut self, s: &mut String, config: &Resolver, method: &super::Method) {
-        (self as &mut dyn Callbacks).start_method_default(s, config, method)
+    fn start_method(&mut self, s: &mut String, resolver: &Resolver, method: &Method) {
+        (self as &mut dyn Callbacks).start_method_default(s, resolver, method)
+    }
+
+    fn start_property(&mut self, s: &mut String, resolver: &Resolver, property: &Property) {
+        (self as &mut dyn Callbacks).start_property_default(s, resolver, property)
     }
 
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>) {
@@ -124,7 +128,7 @@ impl Callbacks for MarkdownCallbacks {
                         self.nesting.pop();
                     }
                     Tag::FootnoteDefinition(_) => {}
-                    Tag::Table(_) => {}
+                    Tag::Table(_) => s.push('\n'),
                     Tag::TableHead => {
                         if let Some(alignement) = self.tables_alignements.pop() {
                             self.apply_nesting(s);

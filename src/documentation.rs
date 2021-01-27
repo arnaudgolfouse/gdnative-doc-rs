@@ -52,6 +52,26 @@ pub struct Method {
     pub documentation: String,
 }
 
+/// Property exported to godot, like
+///
+/// ```rust,ignore
+/// #[derive(NativeClass)]
+/// #[inherit(Resource)]
+/// struct MyResource {
+///     #[property]
+///     name: String,
+/// }
+/// ```
+#[derive(Clone, Debug)]
+pub struct Property {
+    /// Name of the property
+    pub name: String,
+    /// Type of the property
+    pub typ: Type,
+    /// Documentation associated with  the property
+    pub documentation: String,
+}
+
 /// Structure that derive `NativeClass`
 ///
 /// # Note
@@ -64,6 +84,8 @@ pub struct GdnativeClass {
     pub inherit: String,
     /// Documentation associated with the structure.
     pub documentation: String,
+    /// Properties exported by the structure
+    pub properties: Vec<Property>,
     /// Exported methods of this structure
     ///
     /// As per `gdnative`'s documentation, exported methods are
@@ -120,13 +142,15 @@ impl<'ast> Visit<'ast> for Documentation {
                     name: self_type,
                     inherit: String::new(),
                     documentation: String::new(),
+                    properties: Vec::new(),
                     methods: Vec::new(),
                 });
+            if let syn::Fields::Named(fields) = &strukt.fields {
+                class.get_properties(fields)
+            }
             class.inherit = inherit;
             class.documentation = get_docs(&strukt.attrs);
         }
-
-        visit::visit_item_struct(self, strukt)
     }
 
     fn visit_item_impl(&mut self, impl_block: &'ast ItemImpl) {
@@ -146,6 +170,7 @@ impl<'ast> Visit<'ast> for Documentation {
                         name: self_type,
                         inherit: String::new(),
                         documentation: String::new(),
+                        properties: Vec::new(),
                         methods: Vec::new(),
                     });
                 for item in &impl_block.items {
@@ -217,7 +242,7 @@ impl GdnativeClass {
         }
         parameters.next(); // inherit argument
         let parameters = {
-            let mut v = Vec::new();
+            let mut params = Vec::new();
             for arg in parameters {
                 if let syn::FnArg::Typed(syn::PatType { attrs, pat, ty, .. }) = arg {
                     let arg_name = {
@@ -228,7 +253,7 @@ impl GdnativeClass {
                         }
                     };
 
-                    v.push((
+                    params.push((
                         arg_name,
                         get_type_name(*ty.clone()).unwrap_or(Type::Named("{ERROR}".to_string())),
                         if attributes_contains(&attrs, "opt") {
@@ -239,7 +264,7 @@ impl GdnativeClass {
                     ))
                 }
             }
-            v
+            params
         };
 
         self.methods.push(Method {
@@ -254,9 +279,28 @@ impl GdnativeClass {
             documentation: get_docs(&attrs),
         })
     }
+
+    /// Extract `#[property]` fields
+    fn get_properties(&mut self, fields: &syn::FieldsNamed) {
+        for field in &fields.named {
+            if attributes_contains(&field.attrs, "property") {
+                let property = Property {
+                    name: field
+                        .ident
+                        .as_ref()
+                        .map(|ident| ident.to_string())
+                        .unwrap_or_default(),
+                    // FIXME: log unsupported types
+                    typ: get_type_name(field.ty.clone()).unwrap_or(Type::Unit),
+                    documentation: get_docs(&field.attrs),
+                };
+                self.properties.push(property)
+            }
+        }
+    }
 }
 
-/// Returns wether or not `attr` contains `#[attribute]`.
+/// Returns whether or not `attr` contains `#[attribute]`.
 fn attributes_contains(attrs: &[syn::Attribute], attribute: &str) -> bool {
     attrs
         .iter()

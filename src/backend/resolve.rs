@@ -136,6 +136,12 @@ impl Resolver {
                     documentation::Type::Unit => {}
                 }
             }
+            for property in &mut class.properties {
+                match &mut property.typ {
+                    Type::Option(name) | Type::Named(name) => replace(name),
+                    Type::Unit => {}
+                }
+            }
             replace(&mut name);
             replace(&mut class.inherit);
             renamed_classes.insert(name, class);

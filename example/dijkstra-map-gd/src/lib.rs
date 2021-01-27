@@ -19,7 +19,11 @@ const GODOT_ERROR: i64 = 1;
 /// And then you must call `recalculate` on it.
 #[derive(NativeClass)]
 #[inherit(Reference)]
-pub struct Interface {}
+pub struct Interface {
+    /// Dummy property for demonstration purposes
+    #[property]
+    property: String,
+}
 
 /// Change a Rust's [`Result`] to an integer (which is how errors are reported
 /// to Godot).
@@ -59,7 +63,9 @@ impl Interface {
     /// var dijkstra_map = DijkstraMap.new()
     /// ```
     pub fn new(_owner: &Reference) -> Self {
-        Interface {}
+        Interface {
+            property: String::new(),
+        }
     }
 
     #[export]
