@@ -7,15 +7,19 @@ use std::collections::HashMap;
 
 /// Information to resolve links.
 pub struct Resolver {
-    /// Link to godot items' documentation
+    /// Link to godot items' documentation.
     ///
     /// Contains the link to godot classes, but also `true`, `INF`, `Err`...
     pub godot_items: HashMap<String, String>,
-    /// Mapping from Rust to Godot types
+    /// Mapping from Rust to Godot types.
     pub rust_to_godot: HashMap<String, String>,
-    /// User-defined overrides
+    /// User-defined overrides.
+    ///
+    /// These are defined in the [toml configuration file](crate::ConfigFile).
     pub url_overrides: HashMap<String, String>,
-    /// User-defined Rust to Godot mapping
+    /// User-defined Rust to Godot mapping.
+    ///
+    /// These are defined in the [toml configuration file](crate::ConfigFile).
     pub rename_classes: HashMap<String, String>,
 }
 

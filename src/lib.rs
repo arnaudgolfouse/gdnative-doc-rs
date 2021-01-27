@@ -4,7 +4,7 @@
 //! ```rust,no_run
 //! use gdnative_doc::{Backend, Builder, Config, LevelFilter};
 //!
-//! Builder::new(Config::default())
+//! Builder::new()
 //!     .add_backend(Backend::Markdown {
 //!         output_dir: "doc".into(),
 //!     })

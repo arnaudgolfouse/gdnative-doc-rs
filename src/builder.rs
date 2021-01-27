@@ -27,7 +27,7 @@ pub struct Builder {
 }
 
 impl Builder {
-    /// Create a default `Builder`.
+    /// Create a default `Builder` with no backends.
     pub fn new() -> Self {
         Self {
             config: Resolver::default(),
@@ -39,7 +39,7 @@ impl Builder {
         }
     }
 
-    /// Set configuration options in `self` according to the file at `path`.
+    /// Set configuration options according to the file at `path`.
     ///
     /// See the [`ConfigFile`] documentation for information about the configuration file format.
     pub fn user_config(mut self, path: PathBuf) -> Self {
@@ -48,6 +48,8 @@ impl Builder {
     }
 
     /// Specify the crate to document.
+    ///
+    /// This can be either the name of the crate, or directly the path of the root file.
     pub fn package(mut self, package: Package) -> Self {
         self.package = Some(package);
         self
@@ -82,6 +84,10 @@ impl Builder {
         self
     }
 
+    /// Build the documentation.
+    ///
+    /// This will generate the documentation for each [specified backend](Self::add_backend), creating the
+    /// ouput directories if needed.
     pub fn build(mut self) -> Result<()> {
         init_logger(self.log_level);
 
