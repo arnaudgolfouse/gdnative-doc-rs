@@ -7,12 +7,12 @@ use crate::{Error, Result};
 use std::{collections::HashMap, fmt, fs, path::PathBuf};
 
 /// Handle for a [`Module`].
-pub type ModuleId = u32;
+pub(crate) type ModuleId = u32;
 
 /// Representation of a Rust module.
-pub struct Module {
+pub(crate) struct Module {
     /// File in which this module resides.
-    pub file: PathBuf,
+    pub(crate) file: PathBuf,
     /// Path of this module within [`file`](Self::file)'s hierarchy.
     ///
     /// # Examples
@@ -24,7 +24,7 @@ pub struct Module {
     /// ```
     /// Module `b` has internal_path `["crate", "a", "b"]`.
     /// - in `c.rs`, module `c` has internal_path `["c"]`.
-    pub internal_path: Vec<String>,
+    pub(crate) internal_path: Vec<String>,
     /// Visibility of this module.
     ///
     /// # Note
@@ -35,7 +35,8 @@ pub struct Module {
     /// }
     /// ```
     /// `b` has visibility `pub`, even though it is not public.
-    pub visibility: syn::Visibility,
+    #[allow(dead_code)]
+    pub(crate) visibility: syn::Visibility,
     /// Submodules that appear in this module's items, either `mod a;` or
     /// `mod a { ... }`.
     ///
@@ -47,32 +48,32 @@ pub struct Module {
     /// }
     /// ```
     /// Here the module `a` will be completely missed.
-    pub submodules: Vec<ModuleId>,
+    pub(crate) submodules: Vec<ModuleId>,
     /// Parent module of this module.
     ///
     /// If this is the root module, it is its own parent.
-    pub parent: ModuleId,
+    pub(crate) parent: ModuleId,
     /// Items of the module (aka functions, constants, impl blocks...)
-    pub items: Vec<syn::Item>,
+    pub(crate) items: Vec<syn::Item>,
     /// Attributes of this module if it is a file module.
-    pub attributes: Option<Vec<syn::Attribute>>,
+    pub(crate) attributes: Option<Vec<syn::Attribute>>,
 }
 
 /// Representation of a Rust crate's module tree.
 #[derive(Debug)]
-pub struct Package {
+pub(crate) struct Package {
     /// Which module is the root module.
-    pub root_module: ModuleId,
+    pub(crate) root_module: ModuleId,
     /// Map from file to their main module.
-    pub files_to_ids: HashMap<PathBuf, ModuleId>,
+    pub(crate) files_to_ids: HashMap<PathBuf, ModuleId>,
     /// Modules of this crate.
-    pub modules: HashMap<ModuleId, Module>,
+    pub(crate) modules: HashMap<ModuleId, Module>,
 }
 
 impl Package {
     /// Try to build the crate tree with the file at the given `path` as
     /// root module.
-    pub fn from_root_file(path: PathBuf) -> Result<Self> {
+    pub(crate) fn from_root_file(path: PathBuf) -> Result<Self> {
         let mut builder = PackageBuilder::default();
         let file = match fs::read_to_string(&path) {
             Ok(content) => syn::parse_file(&content)?,

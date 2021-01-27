@@ -1,4 +1,4 @@
-//! Collect exported items in a [`Package`](crate::files::Package) to be processed.
+//! Structures representing the documentation of a `gdnative` package.
 
 use crate::Result;
 use std::collections::HashMap;
@@ -70,19 +70,19 @@ pub struct GdnativeClass {
 
 /// Holds the information necessary to build the crate's documentation
 #[derive(Clone, Debug)]
-pub struct Documentation {
+pub(crate) struct Documentation {
     /// Documentation of the root module.
-    pub root_documentation: String,
+    pub(crate) root_documentation: String,
     /// Classes, organized by name.
     ///
     /// FIXME: the name of the class is repeated all over the place.
     ///       It may be better to use identifiers
-    pub classes: HashMap<String, GdnativeClass>,
+    pub(crate) classes: HashMap<String, GdnativeClass>,
 }
 
 impl Documentation {
     /// Create a new, empty `Documentation`
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             root_documentation: String::new(),
             classes: HashMap::new(),
@@ -93,7 +93,7 @@ impl Documentation {
     ///
     /// If `root_module` is [`Some`], its content will be used to fill the
     /// root's module documentation.
-    pub fn parse_from_module(
+    pub(crate) fn parse_from_module(
         &mut self,
         items: &[syn::Item],
         root_module: Option<&[syn::Attribute]>,
@@ -302,13 +302,14 @@ pub(super) fn gdnative_class(strukt: &syn::ItemStruct) -> Option<String> {
     for attr in &strukt.attrs {
         if let Ok(syn::Meta::List(syn::MetaList { path, nested, .. })) = attr.parse_meta() {
             if path.is_ident("inherit") && nested.len() == 1 {
-                if let syn::NestedMeta::Meta(syn::Meta::Path(path)) = nested.first().unwrap() {
+                if let Some(syn::NestedMeta::Meta(syn::Meta::Path(path))) = nested.first() {
+                    // TODO: support path of the form "gdnative::Class"
                     if let Some(class) = path.get_ident() {
                         inherit = Some(class.to_string())
                     }
                 }
             } else if path.is_ident("derive") && nested.len() == 1 {
-                if let syn::NestedMeta::Meta(syn::Meta::Path(path)) = nested.first().unwrap() {
+                if let Some(syn::NestedMeta::Meta(syn::Meta::Path(path))) = nested.first() {
                     if path.is_ident("NativeClass") {
                         implement_native_class = true;
                     }

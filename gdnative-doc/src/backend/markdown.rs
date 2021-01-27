@@ -16,7 +16,7 @@ enum Nesting {
 
 /// Implementation of [`Callbacks`] for markdown.
 #[derive(Default)]
-pub struct MarkdownCallbacks {
+pub(crate) struct MarkdownCallbacks {
     /// The same name can be used for multiple shortcut links, because they
     /// are not all defined in the same place.
     ///
@@ -30,6 +30,10 @@ pub struct MarkdownCallbacks {
 }
 
 impl Callbacks for MarkdownCallbacks {
+    fn extension(&self) -> &'static str {
+        "md"
+    }
+
     fn start_method(&mut self, s: &mut String, config: &Config, method: &super::Method) {
         (self as &mut dyn Callbacks).start_method_default(s, config, method)
     }

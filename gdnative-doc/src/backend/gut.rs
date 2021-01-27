@@ -3,13 +3,17 @@ use pulldown_cmark::{CodeBlockKind, Event, Tag};
 use super::{Callbacks, Method};
 
 #[derive(Default)]
-pub struct GutCallbacks {
+pub(crate) struct GutCallbacks {
     current_method: String,
     current_method_index: u8,
     active: bool,
 }
 
 impl Callbacks for GutCallbacks {
+    fn extension(&self) -> &'static str {
+        "gd"
+    }
+
     fn start_class(
         &mut self,
         s: &mut String,

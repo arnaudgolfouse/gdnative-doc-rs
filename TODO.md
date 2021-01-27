@@ -5,4 +5,4 @@
     ```markdown
     [`MyStruct::my_method`]
     ```
-- Add a way to drive this via build script, and command line
+- Make a *real* example (with a `Cargo.toml` and all)

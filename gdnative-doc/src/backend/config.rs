@@ -126,7 +126,7 @@ impl Config {
     /// This will convert `i32` to `int`, `Int32Array` to `PoolIntArray`...
     ///
     /// See [`ConfigFile::rename_classes`] for user-defined renaming.
-    pub fn rename_classes(&self, documentation: &mut Documentation) {
+    pub(crate) fn rename_classes(&self, documentation: &mut Documentation) {
         let replace = |name: &mut String| {
             if let Some(rename) = self.rename_classes.get(name) {
                 *name = rename.clone();

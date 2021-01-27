@@ -48,7 +48,8 @@ fn make_app() -> App<'static, 'static> {
         )
         .arg(
             Arg::with_name("markdown")
-                .long("md")
+                .long("markdown")
+                .visible_alias("md")
                 .value_name("DIRECTORY")
                 .help("Directory in which to put the markdown output"),
         )
