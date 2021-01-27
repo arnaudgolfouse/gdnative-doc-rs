@@ -17,14 +17,14 @@ impl Callbacks for GutCallbacks {
     fn start_class(
         &mut self,
         s: &mut String,
-        _config: &super::Config,
+        _config: &super::Resolver,
         _class: &super::GdnativeClass,
     ) {
         s.push_str(r#"extends "res://addons/gut/test.gd""#);
         s.push_str("\n\n")
     }
 
-    fn start_method(&mut self, _s: &mut String, _config: &super::Config, method: &Method) {
+    fn start_method(&mut self, _s: &mut String, _config: &super::Resolver, method: &Method) {
         self.current_method = method.name.clone();
         self.current_method_index = 0;
         self.active = false;

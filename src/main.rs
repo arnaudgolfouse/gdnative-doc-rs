@@ -1,17 +1,26 @@
 use clap::{App, Arg};
-use gdnative_doc::{Backend, Builder};
+use gdnative_doc::{Backend, Builder, LevelFilter, Package};
 use std::path::PathBuf;
+
+fn main() {
+    if let Err(err) = real_main() {
+        println!("{}", err)
+    }
+}
 
 fn real_main() -> gdnative_doc::Result<()> {
     let matches = make_app().get_matches();
     let log_level = match matches.occurrences_of("verbosity") {
-        0 => gdnative_doc::LevelFilter::Info,
-        1 => gdnative_doc::LevelFilter::Debug,
-        _ => gdnative_doc::LevelFilter::Trace,
+        0 => LevelFilter::Info,
+        1 => LevelFilter::Debug,
+        _ => LevelFilter::Trace,
     };
 
-    let config_path = PathBuf::from(matches.value_of("config").unwrap());
-    let mut builder = Builder::from_user_config(config_path)?.log_level(log_level);
+    let mut builder = Builder::new().log_level(log_level);
+
+    if let Some(config_path) = matches.value_of("config") {
+        builder = builder.user_config(PathBuf::from(config_path));
+    }
     if let Some(output_dir) = matches.value_of("markdown") {
         builder = builder.add_backend(Backend::Markdown {
             output_dir: PathBuf::from(output_dir),
@@ -27,11 +36,15 @@ fn real_main() -> gdnative_doc::Result<()> {
             output_dir: PathBuf::from(output_dir),
         })
     }
-    builder.build()
-}
 
-fn main() -> Result<(), String> {
-    real_main().map_err(|err| format!("{}", err))
+    if let Some(package_name) = matches.value_of("package") {
+        builder = builder.package(Package::Name(package_name.to_string()))
+    }
+    if let Some(root_file) = matches.value_of("root_file") {
+        builder = builder.package(Package::Root(PathBuf::from(root_file)))
+    }
+
+    builder.build()
 }
 
 fn make_app() -> App<'static, 'static> {
@@ -42,28 +55,46 @@ fn make_app() -> App<'static, 'static> {
         .arg(
             Arg::with_name("config")
                 .long("config")
-                .value_name("FILE")
-                .required(true)
+                .short("c")
+                .value_name("PATH")
                 .help("Configuration file for gdnative-doc"),
         )
         .arg(
             Arg::with_name("markdown")
                 .long("markdown")
                 .visible_alias("md")
-                .value_name("DIRECTORY")
+                .value_name("PATH")
                 .help("Directory in which to put the markdown output"),
         )
         .arg(
             Arg::with_name("html")
                 .long("html")
-                .value_name("DIRECTORY")
+                .value_name("PATH")
                 .help("Directory in which to put the html output"),
         )
         .arg(
             Arg::with_name("gut")
                 .long("gut")
-                .value_name("DIRECTORY")
+                .value_name("PATH")
                 .help("Directory in which to put the gut output"),
+        )
+        .arg(
+            Arg::with_name("package")
+                .long("package")
+                .short("p")
+                .value_name("NAME")
+                .help(
+                    r"Name of the package for which to build the documentation.
+This is useful if you are working within a workspace.",
+                ),
+        )
+        .arg(
+            Arg::with_name("root_file")
+                .long("root_file")
+                .value_name("PATH")
+                .help(
+                    r"Path to the root file of the package for which to build the documentation.",
+                ),
         )
         .arg(
             Arg::with_name("verbosity")

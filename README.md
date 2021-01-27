@@ -2,17 +2,54 @@
 
 This is a documentation tool for [gdnative](https://github.com/godot-rust/godot-rust) projects.
 
-**This is a prototype, most things will not work properly**
+**WARNING:** very unstable at the moment.
 
 ## Usage
 
-To test on a rust crate:
-1. Create a `config.toml` file.
-2. Run `cargo run -- --config <path-to-config.toml> --md <path-to-markdown-output>`.
+There are 2 ways to use this:
+
+### Command line
+
+By executing `cargo build --release`, you should get an executable at `target/release/godot-doc-rs`. Then, to test it on a rust crate:
+```
+cd <path-to-my-crate>
+godot-doc-rs --md <path-to-markdown-output>
+```
+
+To get more options, run `godot-doc-rs --help`.
+
+### Build script (soon)
+
+You can also set
+```
+[build-dependencies]
+gdnative-doc = "*"
+```
+in your `Cargo.toml`, and then use the `Builder` structure to build the documentation:
+```rust
+// build.rs
+use gdnative_doc::{Builder, Backend};
+use std::path::PathBuf;
+
+fn main() {
+    Builder::new()
+        .user_config(PathBuf::from("config.toml"))
+        .add_backend(Backend::Markdown {
+            output_dir: PathBuf::from("doc/markdown"),
+        })
+        .build()
+        .unwrap();
+}
+```
+
+More informations can be found in the [documentation](TODO).
+
+The format of the configuration file can be found [here](configuration_file-format.md).
 
 ## Example
 
-An example of the output can be found in `/example`.
+An example of the output can be found in `example/dijkstra-map`. It can be re-built by 
+simply `cd`ing into the `example/dijkstra-map` directory, and running `cargo build`.
 
 ## Limitations
 

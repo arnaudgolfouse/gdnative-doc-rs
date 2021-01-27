@@ -2,18 +2,13 @@
 
 use crate::Result;
 use serde::Deserialize;
-use std::{collections::HashMap, path::PathBuf};
+use std::collections::HashMap;
 
 /// Structure that holds user configuration settings.
 ///
 /// Should be obtained via a `toml` [configuration file](ConfigFile::read_from).
 #[derive(Deserialize)]
 pub struct ConfigFile {
-    /// Root file of the crate.
-    ///
-    /// # Default
-    /// Determined via `cargo` (TODO)
-    pub root_file: Option<PathBuf>,
     /// List of items for which the linking url should be overriden.
     pub url_overrides: Option<HashMap<String, String>>,
     /// Renaming of types when going from Rust to Godot.

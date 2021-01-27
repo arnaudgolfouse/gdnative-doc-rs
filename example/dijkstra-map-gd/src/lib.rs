@@ -12,13 +12,9 @@
 //! - [ ] Add a way to drive this via build script, and command line
 //! - [X] Cleanup markdown generation
 
-use dijkstra_map::{Cost, DijkstraMap, PointID, Read, TerrainType, Weight};
-use fnv::FnvHashMap;
-use fnv::FnvHashSet;
-use gdnative::prelude::{
-    godot_error, godot_gdnative_init, godot_nativescript_init, godot_warn, methods, Dictionary,
-    Float32Array, Int32Array, NativeClass, Reference, Variant, Vector2,
-};
+#![allow(dead_code, unused_variables)]
+
+use gdnative::prelude::*;
 
 /// Integer representing success in gdscript
 const GODOT_SUCCESS: i64 = 0;
@@ -33,9 +29,7 @@ const GODOT_ERROR: i64 = 1;
 /// And then you must call `recalculate` on it.
 #[derive(NativeClass)]
 #[inherit(Reference)]
-pub struct Interface {
-    dijkstra: DijkstraMap,
-}
+pub struct Interface {}
 
 /// Change a Rust's [`Result`] to an integer (which is how errors are reported
 /// to Godot).
@@ -75,9 +69,7 @@ impl Interface {
     /// var dijkstra_map = DijkstraMap.new()
     /// ```
     pub fn new(_owner: &Reference) -> Self {
-        Interface {
-            dijkstra: DijkstraMap::default(),
-        }
+        Interface {}
     }
 
     #[export]
@@ -88,9 +80,7 @@ impl Interface {
     /// var dijkstra_map = DijkstraMap.new()
     /// dijkstra_map.clear()
     /// ```
-    pub fn clear(&mut self, _owner: &Reference) {
-        self.dijkstra.clear()
-    }
+    pub fn clear(&mut self, _owner: &Reference) {}
 
     #[export]
     /// If `source_instance` is a `dijkstra map`, it is cloned into
@@ -108,23 +98,7 @@ impl Interface {
     /// dijkstra_map_copy.duplicate_graph_from(dijkstra_map)
     /// ```
     pub fn duplicate_graph_from(&mut self, _owner: &Reference, source_instance: Variant) -> i64 {
-        match source_instance
-            .try_to_object::<Reference>()
-            .as_ref()
-            .and_then(|reference| unsafe { reference.assume_safe() }.cast_instance::<Interface>())
-            .and_then(|interface| {
-                interface
-                    .map(|interface, _| {
-                        self.dijkstra = interface.dijkstra.clone();
-                    })
-                    .ok()
-            }) {
-            Some(_) => GODOT_SUCCESS,
-            None => {
-                godot_error!("Failed to convert Variant to DijkstraMap.");
-                GODOT_ERROR
-            }
-        }
+        GODOT_SUCCESS
     }
 
     #[export]
@@ -138,7 +112,7 @@ impl Interface {
     /// assert(dijkstra_map.get_available_point_id() == 2)
     /// ```
     pub fn get_available_point_id(&mut self, _owner: &Reference) -> i32 {
-        self.dijkstra.get_available_id(None).into()
+        0
     }
 
     #[export]
@@ -163,9 +137,7 @@ impl Interface {
         point_id: i32,
         #[opt] terrain_type: Option<i32>,
     ) -> i64 {
-        let terrain_type: TerrainType = terrain_type.unwrap_or(-1).into();
-        let res = self.dijkstra.add_point(point_id.into(), terrain_type);
-        result_to_int(res)
+        result_to_int(Ok(()))
     }
 
     #[export]
@@ -192,12 +164,7 @@ impl Interface {
         point_id: i32,
         terrain_id: Option<i32>,
     ) -> i64 {
-        let terrain_id = terrain_id.unwrap_or(-1);
-        let terrain: TerrainType = terrain_id.into();
-        let res = self
-            .dijkstra
-            .set_terrain_for_point(point_id.into(), terrain);
-        result_to_int(res)
+        result_to_int(Err(()))
     }
 
     #[export]
@@ -217,12 +184,7 @@ impl Interface {
     /// assert(dijkstra_map.get_terrain_for_point(2) == -1)
     /// ```
     pub fn get_terrain_for_point(&mut self, _owner: &Reference, point_id: i32) -> i32 {
-        // TODO : TerrainType::DefaultTerrain also convert into -1, so this function cannot separate points that exists and have a default terrain, and those that do not exist.
-        // We need a different convention here.
-        self.dijkstra
-            .get_terrain_for_point(point_id.into())
-            .unwrap_or(TerrainType::Terrain(-1))
-            .into()
+        0
     }
 
     #[export]
@@ -240,14 +202,13 @@ impl Interface {
     /// assert(dijkstra_map.remove_point(0) == 1)
     /// ```
     pub fn remove_point(&mut self, _owner: &Reference, point_id: i32) -> i64 {
-        let res = self.dijkstra.remove_point(point_id.into());
-        result_to_int(res)
+        result_to_int(Ok(()))
     }
 
     #[export]
     /// Returns [`true`] if the map contains the given point.
     pub fn has_point(&mut self, _owner: &Reference, point_id: i32) -> bool {
-        self.dijkstra.has_point(point_id.into())
+        false
     }
 
     #[export]
@@ -265,8 +226,7 @@ impl Interface {
     /// assert(dijkstra_map.disable_point(1) == 1)
     /// ```
     pub fn disable_point(&mut self, _owner: &Reference, point_id: i32) -> i64 {
-        let res = self.dijkstra.disable_point(point_id.into());
-        result_to_int(res)
+        result_to_int(Ok(()))
     }
 
     #[export]
@@ -284,8 +244,7 @@ impl Interface {
     /// assert(dijkstra_map.enable_point(1) == 1)
     /// ```
     pub fn enable_point(&mut self, _owner: &Reference, point_id: i32) -> i64 {
-        let res = self.dijkstra.enable_point(point_id.into());
-        result_to_int(res)
+        result_to_int(Ok(()))
     }
 
     #[export]
@@ -303,7 +262,7 @@ impl Interface {
     /// assert(!dijkstra_map.is_point_disabled(2))
     /// ```
     pub fn is_point_disabled(&mut self, _owner: &Reference, point_id: i32) -> bool {
-        self.dijkstra.is_point_disabled(point_id.into())
+        false
     }
 
     #[export]
@@ -342,12 +301,7 @@ impl Interface {
         #[opt] weight: Option<f32>,
         #[opt] bidirectional: Option<bool>,
     ) -> i64 {
-        result_to_int(self.dijkstra.connect_points(
-            source.into(),
-            target.into(),
-            weight.map(Weight),
-            bidirectional,
-        ))
+        result_to_int(Ok(()))
     }
 
     #[export]
@@ -384,10 +338,7 @@ impl Interface {
         target: i32,
         #[opt] bidirectional: Option<bool>,
     ) -> i64 {
-        result_to_int(
-            self.dijkstra
-                .remove_connection(source.into(), target.into(), bidirectional),
-        )
+        result_to_int(Ok(()))
     }
 
     #[export]
@@ -405,7 +356,7 @@ impl Interface {
     /// assert(!dijkstra_map.has_connection(0, 2))
     /// ```
     pub fn has_connection(&mut self, _owner: &Reference, source: i32, target: i32) -> bool {
-        self.dijkstra.has_connection(source.into(), target.into())
+        false
     }
 
     #[export]
@@ -429,10 +380,7 @@ impl Interface {
     /// assert(dijkstra_map.get_direction_at_point(2) == -1)
     /// ```
     pub fn get_direction_at_point(&mut self, _owner: &Reference, point_id: i32) -> i32 {
-        self.dijkstra
-            .get_direction_at_point(point_id.into())
-            .unwrap_or(PointID(-1))
-            .into()
+        -1
     }
 
     #[export]
@@ -453,7 +401,7 @@ impl Interface {
     /// assert(dijkstra_map.get_cost_at_point(2) == INF)
     /// ```
     pub fn get_cost_at_point(&mut self, _owner: &Reference, point_id: i32) -> f32 {
-        self.dijkstra.get_cost_at_point(point_id.into()).into()
+        1.0
     }
 
     #[export]
@@ -527,283 +475,6 @@ impl Interface {
         origin: gdnative::core_types::Variant,
         #[opt] optional_params: Option<Dictionary>,
     ) -> i64 {
-        use gdnative::core_types::VariantType;
-
-        const TERRAIN_WEIGHT: &str = "terrain_weights";
-        const TERMINATION_POINTS: &str = "termination_points";
-        const INPUT_IS_DESTINATION: &str = "input_is_destination";
-        const MAXIMUM_COST: &str = "maximum_cost";
-        const INITIAL_COSTS: &str = "initial_costs";
-        const VALID_KEYS: [&str; 5] = [
-            TERRAIN_WEIGHT,
-            TERMINATION_POINTS,
-            INPUT_IS_DESTINATION,
-            MAXIMUM_COST,
-            INITIAL_COSTS,
-        ];
-
-        fn display_type(t: VariantType) -> &'static str {
-            match t {
-                VariantType::Nil => "nil",
-                VariantType::Bool => "bool",
-                VariantType::I64 => "integer",
-                VariantType::F64 => "float",
-                VariantType::GodotString => "string",
-                VariantType::Vector2 => "Vector2",
-                VariantType::Rect2 => "Rect2",
-                VariantType::Vector3 => "Vector3",
-                VariantType::Transform2D => "Transform2D",
-                VariantType::Plane => "Plane",
-                VariantType::Quat => "Quat",
-                VariantType::Aabb => "Aabb",
-                VariantType::Basis => "Basis",
-                VariantType::Transform => "Transform",
-                VariantType::Color => "Color",
-                VariantType::NodePath => "NodePath",
-                VariantType::Rid => "Rid",
-                VariantType::Object => "Object",
-                VariantType::Dictionary => "Dictionary",
-                VariantType::VariantArray => "array",
-                VariantType::ByteArray => "array of bytes",
-                VariantType::Int32Array => "array of integers",
-                VariantType::Float32Array => "array of floats",
-                VariantType::StringArray => "array of strings",
-                VariantType::Vector2Array => "array of Vector2",
-                VariantType::Vector3Array => "array of Vector3",
-                VariantType::ColorArray => "array of Color",
-            }
-        }
-
-        /// Helper function for type warnings
-        ///
-        /// Ensure the style of warning reporting is consistent.
-        fn type_warning(object: &str, expected: VariantType, got: VariantType, line: u32) {
-            godot_warn!(
-                "[{}:{}] {} has incorrect type : expected {}, got {}",
-                file!(),
-                line,
-                object,
-                display_type(expected),
-                display_type(got)
-            );
-        }
-
-        let optional_params = optional_params.unwrap_or_default();
-
-        // verify keys makes sense
-        for k in optional_params.keys().into_iter() {
-            let string: String = k.to_string();
-            if !VALID_KEYS.contains(&string.as_str()) {
-                godot_error!("Invalid Key `{}` in parameter", string);
-                return GODOT_ERROR;
-            }
-        }
-
-        // get origin points
-        let mut res_origins = Vec::<PointID>::new();
-        match origin.get_type() {
-            gdnative::core_types::VariantType::I64 => {
-                res_origins.push((origin.to_i64() as i32).into())
-            }
-            gdnative::core_types::VariantType::Int32Array => {
-                res_origins = origin
-                    .to_int32_array()
-                    .read()
-                    .iter()
-                    .map(|&x| x.into())
-                    .collect();
-            }
-            gdnative::core_types::VariantType::VariantArray => {
-                for i in origin.to_array().iter() {
-                    match i.try_to_i64() {
-                        Some(intval) => res_origins.push(PointID(intval as i32)),
-                        None => type_warning(
-                            "element of 'origin'",
-                            VariantType::I64,
-                            i.get_type(),
-                            line!(),
-                        ),
-                    }
-                }
-            }
-            _ => {
-                godot_error!("Invalid argument type : Expected int or Array of ints");
-                return GODOT_ERROR;
-            }
-        };
-
-        // ===================
-        // Optional parameters
-        // ===================
-        let read: Option<Read> = {
-            // we need to check that the parameter exists first, because
-            // `optional_params.get` will create a `Nil` entry if it does not.
-            if optional_params.contains(INPUT_IS_DESTINATION) {
-                let value = optional_params.get(INPUT_IS_DESTINATION);
-                match value.try_to_bool() {
-                    Some(b) => Some(if b {
-                        Read::InputIsDestination
-                    } else {
-                        Read::InputIsOrigin
-                    }),
-                    None => {
-                        type_warning(
-                            "'input_is_destination' key",
-                            VariantType::Bool,
-                            value.get_type(),
-                            line!(),
-                        );
-                        None
-                    }
-                }
-            } else {
-                None
-            }
-        };
-
-        let max_cost: Option<Cost> = {
-            if optional_params.contains(MAXIMUM_COST) {
-                let value = optional_params.get(MAXIMUM_COST);
-                match value.try_to_f64() {
-                    Some(f) => Some(Cost(f as f32)),
-                    None => {
-                        type_warning(
-                            "'max_cost' key",
-                            VariantType::F64,
-                            value.get_type(),
-                            line!(),
-                        );
-                        None
-                    }
-                }
-            } else {
-                None
-            }
-        };
-
-        let initial_costs: Vec<Cost> = {
-            if optional_params.contains(INITIAL_COSTS) {
-                let mut initial_costs = Vec::<Cost>::new();
-                let value = optional_params.get(INITIAL_COSTS);
-                match value.get_type() {
-                    gdnative::core_types::VariantType::Float32Array => {
-                        for f in value.to_float32_array().read().iter() {
-                            initial_costs.push(Cost(*f))
-                        }
-                    }
-                    gdnative::core_types::VariantType::VariantArray => {
-                        for f in value.to_array().iter() {
-                            initial_costs.push(match f.try_to_f64() {
-                                Some(fval) => Cost(fval as f32),
-                                None => {
-                                    type_warning(
-                                        "element of 'initial_costs'",
-                                        VariantType::F64,
-                                        f.get_type(),
-                                        line!(),
-                                    );
-                                    Cost(0.0)
-                                }
-                            })
-                        }
-                    }
-                    incorrect_type => type_warning(
-                        "'initial_costs' key",
-                        VariantType::Float32Array,
-                        incorrect_type,
-                        line!(),
-                    ),
-                }
-                initial_costs
-            } else {
-                Vec::new()
-            }
-        };
-
-        let mut terrain_weights = FnvHashMap::<TerrainType, Weight>::default();
-        if optional_params.contains(TERRAIN_WEIGHT) {
-            let value = optional_params.get(TERRAIN_WEIGHT);
-            if let Some(dict) = value.try_to_dictionary() {
-                for key in dict.keys() {
-                    if let Some(id) = key.try_to_i64() {
-                        terrain_weights.insert(
-                            TerrainType::from(id as i32),
-                            Weight(dict.get(key).try_to_f64().unwrap_or(1.0) as f32),
-                        );
-                    } else {
-                        type_warning(
-                            "key in 'terrain_weights'",
-                            VariantType::I64,
-                            key.get_type(),
-                            line!(),
-                        );
-                    }
-                }
-            } else {
-                type_warning(
-                    "'terrain_weights' key",
-                    VariantType::Int32Array,
-                    value.get_type(),
-                    line!(),
-                );
-            }
-        }
-
-        if terrain_weights.is_empty() {
-            godot_warn!("no terrain weights specified : all terrains will have infinite cost !")
-        }
-
-        let termination_points = if optional_params.contains(TERMINATION_POINTS) {
-            let value = optional_params.get(TERMINATION_POINTS);
-            match value.get_type() {
-                gdnative::core_types::VariantType::I64 => {
-                    std::iter::once(PointID(value.to_i64() as i32)).collect()
-                }
-                gdnative::core_types::VariantType::Int32Array => value
-                    .to_int32_array()
-                    .read()
-                    .iter()
-                    .map(|&x| PointID::from(x))
-                    .collect(),
-                gdnative::core_types::VariantType::VariantArray => value
-                    .to_array()
-                    .iter()
-                    .filter_map(|i| {
-                        let int = i.try_to_i64();
-                        if int.is_none() {
-                            type_warning(
-                                "value in 'termination_points'",
-                                VariantType::I64,
-                                i.get_type(),
-                                line!(),
-                            );
-                        }
-                        int
-                    })
-                    .map(|ival| PointID(ival as i32))
-                    .collect(),
-                incorrect_type => {
-                    type_warning(
-                        "'termination_points' key",
-                        VariantType::Int32Array,
-                        incorrect_type,
-                        line!(),
-                    );
-                    FnvHashSet::<PointID>::default()
-                }
-            }
-        } else {
-            FnvHashSet::default()
-        };
-
-        self.dijkstra.recalculate(
-            &res_origins,
-            read,
-            max_cost,
-            initial_costs,
-            terrain_weights,
-            termination_points,
-        );
         GODOT_SUCCESS
     }
 
@@ -829,18 +500,7 @@ impl Interface {
         _owner: &Reference,
         points: Int32Array,
     ) -> Int32Array {
-        Int32Array::from_vec(
-            points
-                .read()
-                .iter()
-                .map(|int: &i32| {
-                    self.dijkstra
-                        .get_direction_at_point(PointID::from(*int))
-                        .unwrap_or(PointID(-1))
-                        .into()
-                })
-                .collect(),
-        )
+        Int32Array::default()
     }
 
     #[export]
@@ -865,17 +525,7 @@ impl Interface {
         _owner: &Reference,
         points: gdnative::core_types::Int32Array,
     ) -> gdnative::core_types::Float32Array {
-        Float32Array::from_vec(
-            points
-                .read()
-                .iter()
-                .map(|point: &i32| {
-                    self.dijkstra
-                        .get_cost_at_point(PointID::from(*point))
-                        .into()
-                })
-                .collect(),
-        )
+        Float32Array::default()
     }
 
     #[export]
@@ -898,13 +548,7 @@ impl Interface {
     ///     assert(computed_cost_map[id] == cost_map[id])
     /// ```
     pub fn get_cost_map(&mut self, _owner: &Reference) -> Dictionary {
-        let dict = Dictionary::new();
-        for (&point, info) in self.dijkstra.get_direction_and_cost_map().iter() {
-            let point: i32 = point.into();
-            let cost: f32 = info.cost.into();
-            dict.insert(point, cost);
-        }
-        dict.into_shared()
+        Dictionary::new().into_shared()
     }
 
     #[export]
@@ -932,13 +576,7 @@ impl Interface {
     ///     assert(computed_direction_map[id] == direction_map[id])
     /// ```
     pub fn get_direction_map(&mut self, _owner: &Reference) -> Dictionary {
-        let dict = Dictionary::new();
-        for (&point, info) in self.dijkstra.get_direction_and_cost_map().iter() {
-            let point: i32 = point.into();
-            let direction: i32 = info.direction.into();
-            dict.insert(point, direction);
-        }
-        dict.into_shared()
+        Dictionary::new().into_shared()
     }
 
     #[export]
@@ -963,13 +601,7 @@ impl Interface {
         min_cost: f32,
         max_cost: f32,
     ) -> gdnative::core_types::Int32Array {
-        let res = self
-            .dijkstra
-            .get_all_points_with_cost_between(min_cost.into(), max_cost.into())
-            .iter()
-            .map(|id: &PointID| (*id).into())
-            .collect::<Vec<i32>>();
-        Int32Array::from_vec(res)
+        Int32Array::default()
     }
 
     #[export]
@@ -989,13 +621,7 @@ impl Interface {
         _owner: &Reference,
         point_id: i32,
     ) -> gdnative::core_types::Int32Array {
-        let res = self
-            .dijkstra
-            .get_shortest_path_from_point(point_id.into())
-            .into_iter()
-            .map(|id: PointID| id.into())
-            .collect::<Vec<i32>>();
-        Int32Array::from_vec(res)
+        Int32Array::default()
     }
 
     #[export]
@@ -1028,27 +654,7 @@ impl Interface {
         #[opt] orthogonal_cost: Option<f32>,
         #[opt] diagonal_cost: Option<f32>,
     ) -> Dictionary {
-        let (x_offset, y_offset, width, height) =
-            variant_to_width_and_height(bounds).expect("couldnt use bounds variant");
-        let dict = Dictionary::new();
-        for (&k, &v) in self
-            .dijkstra
-            .add_square_grid(
-                width,
-                height,
-                Some((x_offset, y_offset).into()),
-                terrain_type.unwrap_or(-1).into(),
-                orthogonal_cost.map(Weight),
-                diagonal_cost.map(Weight),
-            )
-            .iter()
-        {
-            dict.insert(
-                Variant::from_vector2(&Vector2::from((k.x as f32, k.y as f32))),
-                i32::from(v),
-            );
-        }
-        dict.into_shared()
+        Dictionary::new().into_shared()
     }
 
     #[export]
@@ -1097,26 +703,7 @@ impl Interface {
         #[opt] terrain_type: Option<i32>,
         #[opt] weight: Option<f32>,
     ) -> Dictionary {
-        let (x_offset, y_offset, width, height) =
-            variant_to_width_and_height(bounds).expect("couldnt use bounds variant");
-        let dict = Dictionary::new();
-        for (&k, &v) in self
-            .dijkstra
-            .add_hexagonal_grid(
-                width,
-                height,
-                Some((x_offset, y_offset).into()),
-                terrain_type.unwrap_or(-1).into(),
-                weight.map(Weight),
-            )
-            .iter()
-        {
-            dict.insert(
-                Variant::from_vector2(&Vector2::from((k.x as f32, k.y as f32))),
-                i32::from(v),
-            );
-        }
-        dict.into_shared()
+        Dictionary::new().into_shared()
     }
 }
 

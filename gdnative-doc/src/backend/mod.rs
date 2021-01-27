@@ -1,17 +1,17 @@
-mod config;
 mod gut;
 mod html;
 mod markdown;
+mod resolve;
 
 use std::path::PathBuf;
 
-pub use config::Config;
 pub(super) use gut::GutCallbacks;
 pub(super) use html::HtmlCallbacks;
 pub(super) use markdown::MarkdownCallbacks;
+pub use resolve::Resolver;
 
 use crate::documentation::{Documentation, GdnativeClass, Method};
-use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Parser, Tag};
+use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Options as MarkdownOptions, Parser, Tag};
 
 /// Generate a callback to resolve broken links.
 ///
@@ -49,11 +49,11 @@ pub trait Callbacks {
     /// Called before each class.
     ///
     /// **Default**: does nothing
-    fn start_class(&mut self, _s: &mut String, _config: &Config, _class: &GdnativeClass) {}
+    fn start_class(&mut self, _s: &mut String, _config: &Resolver, _class: &GdnativeClass) {}
     /// Called before each method.
     ///
     /// **Default**: does nothing
-    fn start_method(&mut self, _s: &mut String, _config: &Config, _method: &Method) {}
+    fn start_method(&mut self, _s: &mut String, _config: &Resolver, _method: &Method) {}
     /// Encode the stream of `events` in `s`.
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>);
     /// Called at the end of the processing for a given file.
@@ -71,7 +71,7 @@ impl dyn Callbacks {
     /// `func name(arg1: type, ...) -> type`
     ///
     /// With appropriate linking, and a html link to this named `func-name`
-    pub fn start_method_default(&mut self, s: &mut String, config: &Config, method: &Method) {
+    pub fn start_method_default(&mut self, s: &mut String, config: &Resolver, method: &Method) {
         let link = &format!("<a id=\"func-{}\"></a>", method.name);
         self.encode(
             s,
@@ -104,37 +104,41 @@ impl dyn Callbacks {
 
 /// Generate files given an encoding
 pub(crate) struct Generator<'a> {
-    /// Configuration, mainly used to resolve links.
-    config: &'a Config,
+    /// Used to resolve links.
+    resolver: &'a Resolver,
     /// Encoding functions.
     callbacks: Box<dyn Callbacks>,
     /// Data to encode.
     documentation: &'a Documentation,
+    /// Markdown options
+    markdown_options: MarkdownOptions,
 }
 
 impl<'a> Generator<'a> {
     pub(crate) fn new(
-        config: &'a Config,
+        resolver: &'a Resolver,
         documentation: &'a Documentation,
         callbacks: Box<dyn Callbacks>,
+        markdown_options: MarkdownOptions,
     ) -> Self {
         Self {
-            config,
+            resolver,
             callbacks,
             documentation,
+            markdown_options,
         }
     }
 
     /// Generate the root documentation file of the crate.
     pub(crate) fn generate_root_file(&mut self, extension: &str) -> String {
         let mut root_file = String::new();
-        let config = self.config;
+        let config = self.resolver;
         let mut broken_link_callback = broken_link_callback!(config);
         let class_iterator = EventIterator {
             context: config,
             parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                 &self.documentation.root_documentation,
-                self.config.markdown_options,
+                self.markdown_options,
                 Some(&mut broken_link_callback),
             ),
         };
@@ -171,9 +175,9 @@ impl<'a> Generator<'a> {
         for (name, class) in &self.documentation.classes {
             let mut class_file = String::new();
             let callbacks = &mut self.callbacks;
-            callbacks.start_class(&mut class_file, self.config, class);
+            callbacks.start_class(&mut class_file, self.resolver, class);
             let mut encode = |events| callbacks.encode(&mut class_file, events);
-            let inherit_link = self.config.resolve(&class.inherit);
+            let inherit_link = self.resolver.resolve(&class.inherit);
 
             // Name of the class + inherit
             let mut events = vec![
@@ -212,13 +216,13 @@ impl<'a> Generator<'a> {
             encode(events);
 
             // Class description
-            let config = self.config;
+            let config = self.resolver;
             let mut broken_link_callback = broken_link_callback!(config);
             let class_documentation = EventIterator {
                 context: config,
                 parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                     &class.documentation,
-                    config.markdown_options,
+                    self.markdown_options,
                     Some(&mut broken_link_callback),
                 ),
             };
@@ -296,6 +300,7 @@ impl<'a> Generator<'a> {
                     |events| callbacks.encode(&mut class_file, events),
                     config,
                     method,
+                    self.markdown_options
                 )
             }
             self.callbacks.finish_encoding(&mut class_file);
@@ -305,14 +310,19 @@ impl<'a> Generator<'a> {
     }
 
     /// Encode the documentation for `method`.
-    fn generate_method(mut encode: impl FnMut(Vec<Event>), config: &Config, method: &Method) {
+    fn generate_method(
+        mut encode: impl FnMut(Vec<Event>),
+        config: &Resolver,
+        method: &Method,
+        markdown_options: MarkdownOptions,
+    ) {
         let config = config;
         let mut broken_link_callback = broken_link_callback!(config);
         let method_iterator = EventIterator {
             context: config,
             parser: pulldown_cmark::Parser::new_with_broken_link_callback(
                 &method.documentation,
-                config.markdown_options,
+                markdown_options,
                 Some(&mut broken_link_callback),
             ),
         };
@@ -323,7 +333,7 @@ impl<'a> Generator<'a> {
 /// Iterate over [events](Event), resolving links and changing the resolved
 /// broken links types.
 struct EventIterator<'config, 'parser> {
-    context: &'config Config,
+    context: &'config Resolver,
     parser: Parser<'parser>,
 }
 

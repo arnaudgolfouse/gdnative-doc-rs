@@ -1,7 +1,7 @@
 //! Build a crate's module tree
 //!
 //! This allows a (rough) building of the crate's module tree, using
-//! [`Package::from_root_file`].
+//! [`CrateTree::from_root_file`].
 
 use crate::{Error, Result};
 use std::{collections::HashMap, fmt, fs, path::PathBuf};
@@ -61,7 +61,7 @@ pub(crate) struct Module {
 
 /// Representation of a Rust crate's module tree.
 #[derive(Debug)]
-pub(crate) struct Package {
+pub(crate) struct CrateTree {
     /// Which module is the root module.
     pub(crate) root_module: ModuleId,
     /// Map from file to their main module.
@@ -70,7 +70,7 @@ pub(crate) struct Package {
     pub(crate) modules: HashMap<ModuleId, Module>,
 }
 
-impl Package {
+impl CrateTree {
     /// Try to build the crate tree with the file at the given `path` as
     /// root module.
     pub(crate) fn from_root_file(path: PathBuf) -> Result<Self> {

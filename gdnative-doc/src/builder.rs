@@ -1,45 +1,56 @@
 use crate::{
-    backend, documentation::Documentation, files::Package, Backend, Callbacks, Config, ConfigFile,
-    Error, LevelFilter, Result,
+    backend, documentation::Documentation, files::CrateTree, Backend, Callbacks, ConfigFile, Error,
+    LevelFilter, Resolver, Result,
 };
 use std::{fs, path::PathBuf};
 
+/// Used to specify a crate in [`Builder::package`].
+#[derive(Clone)]
+pub enum Package {
+    /// Specify the crate by name
+    Name(String),
+    /// Specify the crate by the path of its root file
+    Root(PathBuf),
+}
+
 /// A builder for generating godot documentation in various formats.
 pub struct Builder {
-    config: Config,
+    config: Resolver,
     backends: Vec<(Backend, Box<dyn Callbacks>)>,
     log_level: LevelFilter,
-    root_file: Option<PathBuf>,
+    /// Configuration file
+    user_config: Option<PathBuf>,
+    /// Used to disambiguate which crate to use.
+    package: Option<Package>,
+    /// Markdown options
+    markdown_options: pulldown_cmark::Options,
 }
 
 impl Builder {
-    /// Load a configuration from the given `path`.
-    pub fn from_user_config(path: PathBuf) -> Result<Self> {
-        let config_file = match fs::read_to_string(&path) {
-            Ok(config) => config,
-            Err(err) => return Err(Error::Io(path, err)),
-        };
-        let config = ConfigFile::read_from(&config_file)?;
-
-        let root_file = config.root_file.clone();
-
-        let backend_config = Config::from_user_config(config);
-        let backends = backend_config.backends.clone();
-        let mut result = Self::new(backend_config);
-        result.root_file = root_file;
-        for backend in backends {
-            result = result.add_backend(backend);
-        }
-        Ok(result)
-    }
-
-    pub fn new(config: Config) -> Self {
+    /// Create a default `Builder`.
+    pub fn new() -> Self {
         Self {
-            config,
+            config: Resolver::default(),
             backends: Vec::new(),
             log_level: LevelFilter::Info,
-            root_file: None,
+            user_config: None,
+            package: None,
+            markdown_options: pulldown_cmark::Options::empty(),
         }
+    }
+
+    /// Set configuration options in `self` according to the file at `path`.
+    ///
+    /// See the [`ConfigFile`] documentation for information about the configuration file format.
+    pub fn user_config(mut self, path: PathBuf) -> Self {
+        self.user_config = Some(path);
+        self
+    }
+
+    /// Specify the crate to document.
+    pub fn package(mut self, package: Package) -> Self {
+        self.package = Some(package);
+        self
     }
 
     /// Set the logging level.
@@ -73,10 +84,20 @@ impl Builder {
 
     pub fn build(mut self) -> Result<()> {
         init_logger(self.log_level);
+
+        if let Some(path) = self.user_config.take() {
+            self.load_user_config(path)?
+        }
+
         let documentation = self.build_documentation()?;
         for (backend, callbacks) in self.backends {
             let extension = callbacks.extension();
-            let mut generator = backend::Generator::new(&self.config, &documentation, callbacks);
+            let mut generator = backend::Generator::new(
+                &self.config,
+                &documentation,
+                callbacks,
+                self.markdown_options,
+            );
             let files = generator.generate_files();
             let root_file = generator.generate_root_file(extension);
 
@@ -108,17 +129,30 @@ impl Builder {
         Ok(())
     }
 
+    fn load_user_config(&mut self, path: PathBuf) -> Result<()> {
+        let user_config = ConfigFile::read_from(&match fs::read_to_string(&path) {
+            Ok(config) => config,
+            Err(err) => return Err(Error::Io(path, err)),
+        })?;
+
+        self.markdown_options = user_config
+            .markdown_options()
+            .unwrap_or(pulldown_cmark::Options::empty());
+        self.config.apply_user_config(user_config);
+        Ok(())
+    }
+
     /// Build documentation from a root file.
     ///
     /// The root file is either stored in `self`, or autmatically discovered using
     /// [`find_root_file`].
     fn build_documentation(&mut self) -> Result<Documentation> {
-        let root_file = if let Some(file) = self.root_file.take() {
-            file
-        } else {
-            find_root_file()?
+        let root_file = match self.package.take() {
+            Some(Package::Root(root_file)) => root_file,
+            Some(Package::Name(name)) => find_root_file(Some(&name))?,
+            None => find_root_file(None)?,
         };
-        let package = Package::from_root_file(root_file)?;
+        let package = CrateTree::from_root_file(root_file)?;
 
         let mut documentation = Documentation::new();
         for (module_id, module) in package.modules {
@@ -147,7 +181,7 @@ fn init_logger(level: LevelFilter) {
     .unwrap();
 }
 
-fn find_root_file() -> Result<PathBuf> {
+fn find_root_file(package_name: Option<&str>) -> Result<PathBuf> {
     let metadata = cargo_metadata::MetadataCommand::new().exec()?;
     let mut root_files = Vec::new();
     for package in metadata.packages {
@@ -162,14 +196,24 @@ fn find_root_file() -> Result<PathBuf> {
         }
     }
 
-    if root_files.len() > 1 {
-        return Err(Error::MultipleCandidateCrate(
-            root_files.into_iter().map(|(name, _)| name).collect(),
-        ));
-    }
-    if let Some((_, root_file)) = root_files.pop() {
-        Ok(root_file)
+    if let Some(package_name) = package_name {
+        match root_files
+            .into_iter()
+            .find(|(name, _)| name == package_name)
+        {
+            Some((_, root_file)) => Ok(root_file),
+            None => Err(Error::NoMatchingCrate(package_name.to_string())),
+        }
     } else {
-        Err(Error::NoCandidateCrate)
+        if root_files.len() > 1 {
+            return Err(Error::MultipleCandidateCrate(
+                root_files.into_iter().map(|(name, _)| name).collect(),
+            ));
+        }
+        if let Some((_, root_file)) = root_files.pop() {
+            Ok(root_file)
+        } else {
+            Err(Error::NoCandidateCrate)
+        }
     }
 }

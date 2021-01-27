@@ -1,4 +1,4 @@
-use super::{Callbacks, Config};
+use super::{Callbacks, Resolver};
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
 use std::collections::HashMap;
 
@@ -34,7 +34,7 @@ impl Callbacks for MarkdownCallbacks {
         "md"
     }
 
-    fn start_method(&mut self, s: &mut String, config: &Config, method: &super::Method) {
+    fn start_method(&mut self, s: &mut String, config: &Resolver, method: &super::Method) {
         (self as &mut dyn Callbacks).start_method_default(s, config, method)
     }
 

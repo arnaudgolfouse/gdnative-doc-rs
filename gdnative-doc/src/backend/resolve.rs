@@ -1,4 +1,3 @@
-use super::Backend;
 use crate::{
     config::ConfigFile,
     documentation::{self, Documentation, Type},
@@ -6,28 +5,21 @@ use crate::{
 use pulldown_cmark::{CowStr, Event, Tag};
 use std::collections::HashMap;
 
-/// Configuration options for [Builder](crate::Builder).
-///
-/// It can be built within code, or generated via an instance of
-/// [`ConfigFile`].
-pub struct Config {
+/// Information to resolve links.
+pub struct Resolver {
     /// Link to godot items' documentation
     ///
     /// Contains the link to godot classes, but also `true`, `INF`, `Err`...
-    pub(crate) godot_items: HashMap<String, String>,
+    pub godot_items: HashMap<String, String>,
     /// Mapping from Rust to Godot types
-    pub(crate) rust_to_godot: HashMap<String, String>,
+    pub rust_to_godot: HashMap<String, String>,
     /// User-defined overrides
-    pub(crate) url_overrides: HashMap<String, String>,
+    pub url_overrides: HashMap<String, String>,
     /// User-defined Rust to Godot mapping
-    pub(crate) rename_classes: HashMap<String, String>,
-    /// Markdown options
-    pub(crate) markdown_options: pulldown_cmark::Options,
-    /// Enabled backends
-    pub(crate) backends: Vec<Backend>,
+    pub rename_classes: HashMap<String, String>,
 }
 
-/// Url for the godot documentation
+/// Url for the (stable) godot documentation
 const GODOT_DOCUMENTATION_URL: &str = "https://docs.godotengine.org/en/stable/classes";
 
 /// List of godot classes, like `Array`, `int`, `Transform2D`...
@@ -58,20 +50,18 @@ const RUST_TO_GODOT: &[(&str, &str)] = &[
     ("Float32Array", "PoolRealArray"),
 ];
 
-impl Default for Config {
+impl Default for Resolver {
     fn default() -> Self {
         Self {
             godot_items: Self::godot_items(),
             rust_to_godot: Self::rust_to_godot(),
             url_overrides: HashMap::new(),
             rename_classes: HashMap::new(),
-            markdown_options: pulldown_cmark::Options::empty(),
-            backends: Vec::new(),
         }
     }
 }
 
-impl Config {
+impl Resolver {
     fn godot_items() -> HashMap<String, String> {
         let mut godot_items = HashMap::new();
         for class in GODOT_CLASSES {
@@ -104,21 +94,9 @@ impl Config {
         rust_to_godot
     }
 
-    pub fn from_user_config(user_config: ConfigFile) -> Self {
-        let markdown_options = user_config
-            .markdown_options()
-            .unwrap_or(pulldown_cmark::Options::empty());
-        let url_overrides = user_config.url_overrides.unwrap_or_default();
-        let name_overrides = user_config.rename_classes.unwrap_or_default();
-
-        Self {
-            godot_items: Self::godot_items(),
-            rust_to_godot: Self::rust_to_godot(),
-            url_overrides,
-            rename_classes: name_overrides,
-            markdown_options,
-            backends: Vec::new(),
-        }
+    pub(crate) fn apply_user_config(&mut self, user_config: ConfigFile) {
+        self.url_overrides = user_config.url_overrides.unwrap_or_default();
+        self.rename_classes = user_config.rename_classes.unwrap_or_default();
     }
 
     /// Convert all type names from Rust to Godot.

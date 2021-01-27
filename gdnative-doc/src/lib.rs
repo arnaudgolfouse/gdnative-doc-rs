@@ -22,8 +22,8 @@ mod config;
 pub mod documentation;
 mod files;
 
-pub use backend::{Backend, Callbacks, Config};
-pub use builder::Builder;
+pub use backend::{Backend, Callbacks, Resolver};
+pub use builder::{Builder, Package};
 pub use config::ConfigFile;
 pub use simplelog::LevelFilter;
 
@@ -42,7 +42,10 @@ pub enum Error {
     /// Error while running `cargo metadata`.
     #[error("{0}")]
     Metadata(#[from] cargo_metadata::Error),
-    /// When trying to determine a root file, multiple candidates were found.
+    #[error("No crate matched the name '{0}'")]
+    /// When trying to determine a root file, no suitable crate matched the expected name.
+    NoMatchingCrate(String),
+    /// When trying to determine a root file, multiple suitable candidates were found.
     #[error(
         r"Multiple crates were found with a 'cdylib' target: {0:?}
 Please select the one you want via either:
@@ -51,7 +54,7 @@ Please select the one you want via either:
 "
     )]
     MultipleCandidateCrate(Vec<String>),
-    /// When trying to determine a root file, no candidate was found.
+    /// When trying to determine a root file, no suitable candidate was found.
     #[error("No crate was found with a 'cdylib' target")]
     NoCandidateCrate,
 }

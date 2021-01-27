@@ -8,5 +8,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-fnv = "1.0.7"
 gdnative = "0.9"
+
+[build-dependencies]
+gdnative-doc = { path = "../../gdnative-doc" }

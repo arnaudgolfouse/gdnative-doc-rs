@@ -1,4 +1,4 @@
-use super::{Callbacks, Config, Event, Method};
+use super::{Callbacks, Resolver, Event, Method};
 
 /// Implementation of [`Callbacks`] for html.
 #[derive(Default)]
@@ -9,7 +9,7 @@ impl Callbacks for HtmlCallbacks {
         "html"
     }
 
-    fn start_method(&mut self, s: &mut String, config: &Config, method: &Method) {
+    fn start_method(&mut self, s: &mut String, config: &Resolver, method: &Method) {
         (self as &mut dyn Callbacks).start_method_default(s, config, method)
     }
 

@@ -1,3 +1,4 @@
 /target
+/example/*/target
 Cargo.lock
 /fetch_godot_classes/godot
