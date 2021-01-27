@@ -56,7 +56,7 @@ pub(crate) struct Module {
     /// Items of the module (aka functions, constants, impl blocks...)
     pub(crate) items: Vec<syn::Item>,
     /// Attributes of this module if it is a file module.
-    pub(crate) attributes: Option<Vec<syn::Attribute>>,
+    pub(crate) attrs: Option<Vec<syn::Attribute>>,
 }
 
 /// Representation of a Rust crate's module tree.
@@ -167,7 +167,7 @@ impl PackageBuilder {
             submodules,
             parent: parent,
             items: items,
-            attributes,
+            attrs: attributes,
             visibility,
         };
         self.modules.insert(id, module);

@@ -156,15 +156,7 @@ impl Builder {
 
         let mut documentation = Documentation::new();
         for (module_id, module) in package.modules {
-            let root_module = if module_id == package.root_module {
-                match module.attributes.as_ref() {
-                    Some(attrs) => Some(attrs.as_slice()),
-                    None => None,
-                }
-            } else {
-                None
-            };
-            documentation.parse_from_module(&module.items, root_module)?;
+            documentation.parse_from_module(&module, module_id == package.root_module);
         }
         self.config.rename_classes(&mut documentation);
         Ok(documentation)

@@ -1,7 +1,11 @@
 //! Structures representing the documentation of a `gdnative` package.
 
-use crate::Result;
+use crate::files::Module;
 use std::collections::HashMap;
+use syn::{
+    visit::{self, Visit},
+    ItemImpl, ItemStruct,
+};
 
 /// Attribute in a function parameter.
 #[derive(Clone, Copy, Debug)]
@@ -68,8 +72,6 @@ pub struct GdnativeClass {
     pub methods: Vec<Method>,
 }
 
-/// Holds the information necessary to build the crate's documentation
-#[derive(Clone, Debug)]
 pub(crate) struct Documentation {
     /// Documentation of the root module.
     pub(crate) root_documentation: String,
@@ -78,6 +80,85 @@ pub(crate) struct Documentation {
     /// FIXME: the name of the class is repeated all over the place.
     ///       It may be better to use identifiers
     pub(crate) classes: HashMap<String, GdnativeClass>,
+}
+
+impl<'ast> Visit<'ast> for Documentation {
+    fn visit_item_struct(&mut self, strukt: &'ast ItemStruct) {
+        let mut implement_native_class = false;
+        let mut inherit = None;
+        for attr in &strukt.attrs {
+            if let Ok(syn::Meta::List(syn::MetaList { path, nested, .. })) = attr.parse_meta() {
+                if path.is_ident("inherit") && nested.len() == 1 {
+                    if let Some(syn::NestedMeta::Meta(syn::Meta::Path(path))) = nested.first() {
+                        // TODO: support path of the form "gdnative::Class"
+                        if let Some(class) = path.get_ident() {
+                            inherit = Some(class.to_string())
+                        }
+                    }
+                } else if path.is_ident("derive") && nested.len() == 1 {
+                    if let Some(syn::NestedMeta::Meta(syn::Meta::Path(path))) = nested.first() {
+                        if path.is_ident("NativeClass") {
+                            implement_native_class = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if !implement_native_class {
+            return;
+        }
+
+        if let Some(inherit) = inherit {
+            let self_type = strukt.ident.to_string();
+            // FIXME: warn or error if we already visited a struct with the same name
+            // But be careful ! We *could* have encountered the name in an `impl` block, in which case no warning is warranted.
+            let class = self
+                .classes
+                .entry(self_type.clone())
+                .or_insert(GdnativeClass {
+                    name: self_type,
+                    inherit: String::new(),
+                    documentation: String::new(),
+                    methods: Vec::new(),
+                });
+            class.inherit = inherit;
+            class.documentation = get_docs(&strukt.attrs);
+        }
+
+        visit::visit_item_struct(self, strukt)
+    }
+
+    fn visit_item_impl(&mut self, impl_block: &'ast ItemImpl) {
+        loop {
+            if attributes_contains(&impl_block.attrs, "methods") {
+                let self_type = match get_type_name(*impl_block.self_ty.clone()) {
+                    Some(Type::Named(self_type)) => self_type,
+                    _ => {
+                        log::error!("Unknown type in 'impl' block");
+                        break;
+                    }
+                };
+                let class = self
+                    .classes
+                    .entry(self_type.clone())
+                    .or_insert(GdnativeClass {
+                        name: self_type,
+                        inherit: String::new(),
+                        documentation: String::new(),
+                        methods: Vec::new(),
+                    });
+                for item in &impl_block.items {
+                    if let syn::ImplItem::Method(method) = item {
+                        class.add_method(method);
+                    }
+                }
+            }
+            break;
+        }
+
+        visit::visit_item_impl(self, impl_block)
+    }
 }
 
 impl Documentation {
@@ -93,63 +174,16 @@ impl Documentation {
     ///
     /// If `root_module` is [`Some`], its content will be used to fill the
     /// root's module documentation.
-    pub(crate) fn parse_from_module(
-        &mut self,
-        items: &[syn::Item],
-        root_module: Option<&[syn::Attribute]>,
-    ) -> Result<()> {
-        if let Some(attrs) = root_module {
-            self.root_documentation = get_docs(attrs);
-        }
-
-        for item in items {
-            match item {
-                syn::Item::Impl(impl_block) => {
-                    // check that this block has the #[methods] attribute
-                    if attributes_contains(&impl_block.attrs, "methods") {
-                        let self_type = match get_type_name(*impl_block.self_ty.clone()) {
-                            Some(Type::Named(self_type)) => self_type,
-                            _ => {
-                                log::error!("Unknown type in 'impl' block");
-                                continue;
-                            }
-                        };
-                        let class =
-                            self.classes
-                                .entry(self_type.clone())
-                                .or_insert(GdnativeClass {
-                                    name: self_type,
-                                    inherit: String::new(),
-                                    documentation: String::new(),
-                                    methods: Vec::new(),
-                                });
-                        for item in &impl_block.items {
-                            if let syn::ImplItem::Method(method) = item {
-                                class.add_method(method);
-                            }
-                        }
-                    }
-                }
-                syn::Item::Struct(strukt) => {
-                    if let Some(inherit) = gdnative_class(&strukt) {
-                        let self_type = strukt.ident.to_string();
-                        let class =
-                            self.classes
-                                .entry(self_type.clone())
-                                .or_insert(GdnativeClass {
-                                    name: self_type,
-                                    inherit: String::new(),
-                                    documentation: String::new(),
-                                    methods: Vec::new(),
-                                });
-                        class.inherit = inherit;
-                        class.documentation = get_docs(&strukt.attrs);
-                    }
-                }
-                _ => {}
+    pub(crate) fn parse_from_module(&mut self, module: &Module, is_root_module: bool) {
+        if is_root_module {
+            if let Some(attrs) = &module.attrs {
+                self.root_documentation = get_docs(attrs);
             }
         }
-        Ok(())
+
+        for item in &module.items {
+            visit::visit_item(self, item);
+        }
     }
 }
 
@@ -223,14 +257,14 @@ impl GdnativeClass {
 }
 
 /// Returns wether or not `attr` contains `#[attribute]`.
-pub(super) fn attributes_contains(attrs: &[syn::Attribute], attribute: &str) -> bool {
+fn attributes_contains(attrs: &[syn::Attribute], attribute: &str) -> bool {
     attrs
         .iter()
         .any(|attr| attr.path.is_ident(attribute) && attr.tokens.is_empty())
 }
 
 /// Get this type's base name if it has one.
-pub(super) fn get_type_name(typ: syn::Type) -> Option<Type> {
+fn get_type_name(typ: syn::Type) -> Option<Type> {
     match typ {
         syn::Type::Path(path) => {
             let path_end = path.path.segments.last()?;
@@ -270,7 +304,7 @@ pub(super) fn get_type_name(typ: syn::Type) -> Option<Type> {
 }
 
 /// Extract '\n'-separated documentation from `attrs`.
-pub(super) fn get_docs(attrs: &[syn::Attribute]) -> String {
+fn get_docs(attrs: &[syn::Attribute]) -> String {
     let mut doc = String::new();
     let mut first_newline = true;
     for attr in attrs {
@@ -293,33 +327,4 @@ pub(super) fn get_docs(attrs: &[syn::Attribute]) -> String {
         }
     }
     doc
-}
-
-/// If this structure derives `NativeClass`, returns the name in `#[inherit(...)]`
-pub(super) fn gdnative_class(strukt: &syn::ItemStruct) -> Option<String> {
-    let mut implement_native_class = false;
-    let mut inherit = None;
-    for attr in &strukt.attrs {
-        if let Ok(syn::Meta::List(syn::MetaList { path, nested, .. })) = attr.parse_meta() {
-            if path.is_ident("inherit") && nested.len() == 1 {
-                if let Some(syn::NestedMeta::Meta(syn::Meta::Path(path))) = nested.first() {
-                    // TODO: support path of the form "gdnative::Class"
-                    if let Some(class) = path.get_ident() {
-                        inherit = Some(class.to_string())
-                    }
-                }
-            } else if path.is_ident("derive") && nested.len() == 1 {
-                if let Some(syn::NestedMeta::Meta(syn::Meta::Path(path))) = nested.first() {
-                    if path.is_ident("NativeClass") {
-                        implement_native_class = true;
-                    }
-                }
-            }
-        }
-    }
-    if implement_native_class {
-        inherit
-    } else {
-        None
-    }
 }
