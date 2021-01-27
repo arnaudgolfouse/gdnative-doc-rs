@@ -1,3 +1,2 @@
-root_file = "example/lib.rs"
 markdown_options = ["STRIKETHROUGH", "TABLES", "TASKLISTS"]
 rename_classes = { Interface = "DijkstraMap" }

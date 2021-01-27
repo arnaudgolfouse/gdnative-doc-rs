@@ -5,4 +5,3 @@
     ```markdown
     [`MyStruct::my_method`]
     ```
-- Make a *real* example (with a `Cargo.toml` and all)
