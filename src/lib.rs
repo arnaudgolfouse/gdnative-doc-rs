@@ -2,7 +2,7 @@
 //!
 //! # Example
 //! ```rust,no_run
-//! use gdnative_doc::{Backend, Builder, Config, LevelFilter};
+//! use gdnative_doc::{Backend, Builder, LevelFilter};
 //!
 //! Builder::new()
 //!     .add_backend(Backend::Markdown {
