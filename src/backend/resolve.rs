@@ -49,6 +49,7 @@ const RUST_TO_GODOT: &[(&str, &str)] = &[
     ("i64", "int"),
     ("f32", "float"),
     ("f64", "float"),
+    ("GodotString", "String"),
     ("VariantArray", "Array"),
     ("Int32Array", "PoolIntArray"),
     ("Float32Array", "PoolRealArray"),
