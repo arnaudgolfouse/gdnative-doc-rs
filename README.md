@@ -28,6 +28,8 @@ A more complete example can be found in the [example/dijkstra-map-gd](example/di
 
 ## Usage
 
+**Note**: It should soon be on [crates.io](https://crates.io), but for now the described installation doesn't work.
+
 This is meant to be used as a build script: Set
 ```toml
 [build-dependencies]
