@@ -37,7 +37,7 @@ gdnative-doc = "*"
 ```
 In your Cargo.toml. Then you can drive the process with the `Builder` structure:
 ```rust
-// build.rs
+// in build.rs
 use gdnative_doc::{Builder, Backend};
 use std::path::PathBuf;
 
