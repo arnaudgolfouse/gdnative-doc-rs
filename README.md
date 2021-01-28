@@ -15,39 +15,25 @@ The goal of this tool is to automate writing documentation in Rust code that wil
 
 ## Example
 
- Example: process function |
+ An example: `process` function |
  :------- |
- Rust |
+ Input: Rust |
  ![](assets/process-function-rust.png) |
- markdown |
+ Output: markdown |
  ![](assets/process-function-markdown-dark.png) |
- gut |
+ Output: gut |
  ![](assets/process-function-gut.png) |
 
-An more complete example can be found in the [example/dijkstra-map-gd](example/dijkstra-map-gd) directory.
+A more complete example can be found in the [example/dijkstra-map-gd](example/dijkstra-map-gd) directory.
 
 ## Usage
 
-There are 2 ways to use this:
-
-### Command line
-
-By executing `cargo build --release`, you should get an executable at `target/release/gdnative-doc-cli`. Then, to test it on a rust crate:
-```
-cd <path-to-my-crate>
-gdnative-doc-cli --md <path-to-markdown-output>
-```
-
-To get more options, run `gdnative-doc-cli --help`.
-
-### Build script (soon)
-
-You can also set
-```
+This is meant to be used as a build script: Set
+```toml
 [build-dependencies]
 gdnative-doc = "*"
 ```
-in your `Cargo.toml`, and then use the `Builder` structure to build the documentation:
+In your Cargo.toml. Then you can drive the process with the `Builder` structure:
 ```rust
 // build.rs
 use gdnative_doc::{Builder, Backend};
@@ -67,6 +53,8 @@ fn main() {
 More informations can be found in the [documentation](TODO).
 
 The format of the configuration file can be found [here](configuration_file-format.md).
+
+You can also use the [command-line tool](gdnative-doc-cli).
 
 ## Limitations
 

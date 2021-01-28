@@ -1,3 +1,5 @@
+`gdnative-doc` allows for an optional `toml` configuration file. The current valid entries are :
+
 - `url_overrides: HashMap<String, String>`:
   List of items for which the linking url should be overriden.
 - `rename_classes: HashMap<String, String>`:
