@@ -1,6 +1,6 @@
 use crate::{
     backend, documentation::Documentation, files::CrateTree, Backend, Callbacks, ConfigFile, Error,
-    LevelFilter, Resolver, Result,
+    Resolver, Result,
 };
 use std::{fs, path::PathBuf};
 
@@ -17,7 +17,6 @@ pub enum Package {
 pub struct Builder {
     resolver: Resolver,
     backends: Vec<(Backend, Box<dyn Callbacks>)>,
-    level_filter: LevelFilter,
     /// Configuration file
     user_config: Option<PathBuf>,
     /// Used to disambiguate which crate to use.
@@ -32,7 +31,6 @@ impl Builder {
         Self {
             resolver: Resolver::default(),
             backends: Vec::new(),
-            level_filter: LevelFilter::Info,
             user_config: None,
             package: None,
             markdown_options: pulldown_cmark::Options::empty(),
@@ -52,14 +50,6 @@ impl Builder {
     /// This can be either the name of the crate, or directly the path of the root file.
     pub fn package(mut self, package: Package) -> Self {
         self.package = Some(package);
-        self
-    }
-
-    /// Set the logging level.
-    ///
-    /// Defaults to [`LevelFilter::Info`].
-    pub fn log_level(mut self, log_level: LevelFilter) -> Self {
-        self.level_filter = log_level;
         self
     }
 
@@ -89,14 +79,13 @@ impl Builder {
     /// This will generate the documentation for each [specified backend](Self::add_backend), creating the
     /// ouput directories if needed.
     pub fn build(mut self) -> Result<()> {
-        init_logger(self.level_filter);
-
         if let Some(path) = self.user_config.take() {
             self.load_user_config(path)?
         }
 
         let documentation = self.build_documentation()?;
         for (backend, callbacks) in self.backends {
+            log::debug!("generating documentation for backend {:?}", backend);
             let extension = callbacks.extension();
             let mut generator = backend::Generator::new(
                 &self.resolver,
@@ -136,6 +125,7 @@ impl Builder {
     }
 
     fn load_user_config(&mut self, path: PathBuf) -> Result<()> {
+        log::debug!("loading user config at {:?}", path);
         let user_config = ConfigFile::read_from(&match fs::read_to_string(&path) {
             Ok(config) => config,
             Err(err) => return Err(Error::Io(path, err)),
@@ -153,6 +143,7 @@ impl Builder {
     /// The root file is either stored in `self`, or autmatically discovered using
     /// [`find_root_file`].
     fn build_documentation(&mut self) -> Result<Documentation> {
+        log::debug!("building documentation");
         let root_file = match self.package.take() {
             Some(Package::Root(root_file)) => root_file,
             Some(Package::Name(name)) => find_root_file(Some(&name))?,
@@ -167,16 +158,6 @@ impl Builder {
         self.resolver.rename_classes(&mut documentation);
         Ok(documentation)
     }
-}
-
-/// Initialize the logger with the specified logging level.
-fn init_logger(level: LevelFilter) {
-    simplelog::TermLogger::init(
-        level,
-        simplelog::Config::default(),
-        simplelog::TerminalMode::Stderr,
-    )
-    .unwrap();
 }
 
 fn find_root_file(package_name: Option<&str>) -> Result<PathBuf> {

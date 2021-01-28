@@ -60,3 +60,13 @@ Please select the one you want via either:
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+/// Initialize the logger with the specified logging level.
+pub fn init_logger(level: LevelFilter) {
+    simplelog::TermLogger::init(
+        level,
+        simplelog::Config::default(),
+        simplelog::TerminalMode::Stderr,
+    )
+    .unwrap();
+}

@@ -133,6 +133,11 @@ impl<'ast> Visit<'ast> for Documentation {
 
         if let Some(inherit) = inherit {
             let self_type = strukt.ident.to_string();
+            log::trace!(
+                "found GDNative class '{}' that inherits '{}'",
+                self_type,
+                inherit
+            );
             // FIXME: warn or error if we already visited a struct with the same name
             // But be careful ! We *could* have encountered the name in an `impl` block, in which case no warning is warranted.
             let class = self
@@ -163,6 +168,7 @@ impl<'ast> Visit<'ast> for Documentation {
                         break;
                     }
                 };
+                log::trace!("found #[methods] impl block for '{}'", self_type);
                 let class = self
                     .classes
                     .entry(self_type.clone())
@@ -267,15 +273,22 @@ impl GdnativeClass {
             params
         };
 
+        let return_type = match output {
+            syn::ReturnType::Default => Type::Unit,
+            syn::ReturnType::Type(_, typ) => get_type_name(*typ.clone()).unwrap_or(Type::Unit),
+        };
+        log::trace!(
+            "added method {}: parameters = {:?}, return = {:?}",
+            method_name,
+            parameters,
+            return_type
+        );
         self.methods.push(Method {
             has_self,
             name: method_name.to_string(),
             self_type: self.name.clone(),
             parameters,
-            return_type: match output {
-                syn::ReturnType::Default => Type::Unit,
-                syn::ReturnType::Type(_, typ) => get_type_name(*typ.clone()).unwrap_or(Type::Unit),
-            },
+            return_type,
             documentation: get_docs(&attrs),
         })
     }
@@ -294,6 +307,11 @@ impl GdnativeClass {
                     typ: get_type_name(field.ty.clone()).unwrap_or(Type::Unit),
                     documentation: get_docs(&field.attrs),
                 };
+                log::trace!(
+                    "added property '{}' of type {:?}",
+                    property.name,
+                    property.typ
+                );
                 self.properties.push(property)
             }
         }

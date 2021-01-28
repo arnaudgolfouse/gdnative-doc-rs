@@ -1,5 +1,5 @@
 use clap::{App, Arg};
-use gdnative_doc::{Backend, Builder, LevelFilter, Package};
+use gdnative_doc::{init_logger, Backend, Builder, LevelFilter, Package};
 use std::path::PathBuf;
 
 fn main() {
@@ -10,13 +10,13 @@ fn main() {
 
 fn real_main() -> gdnative_doc::Result<()> {
     let matches = make_app().get_matches();
-    let log_level = match matches.occurrences_of("verbosity") {
+    init_logger(match matches.occurrences_of("verbosity") {
         0 => LevelFilter::Info,
         1 => LevelFilter::Debug,
         _ => LevelFilter::Trace,
-    };
+    });
 
-    let mut builder = Builder::new().log_level(log_level);
+    let mut builder = Builder::new();
 
     if let Some(config_path) = matches.value_of("config") {
         builder = builder.user_config(PathBuf::from(config_path));
