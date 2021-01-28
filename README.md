@@ -1,8 +1,30 @@
 # gdnative-doc
 
-This is a documentation tool for [gdnative](https://github.com/godot-rust/godot-rust) projects.
+This is a documentation tool for [godot-rust](https://github.com/godot-rust/godot-rust) projects.
 
 **WARNING:** very unstable at the moment.
+
+The goal of this tool is to automate writing documentation in Rust code that will be used in gdscript.
+
+## Features
+
+- Keep the documentation synchronized with your code.
+- Build table of contents automatically.
+- Automatic linking to the [godot documentation](https://docs.godotengine.org/en/stable/index.html).
+- Generate [gut](https://github.com/bitwes/Gut) tests from gdscript examples.
+
+## Example
+
+ Example: process function |
+ :------- |
+ Rust |
+ ![](assets/process-function-rust.png) |
+ markdown |
+ ![](assets/process-function-markdown-dark.png) |
+ gut |
+ ![](assets/process-function-gut.png) |
+
+An more complete example can be found in the [example/dijkstra-map-gd](example/dijkstra-map-gd) directory.
 
 ## Usage
 
@@ -45,11 +67,6 @@ fn main() {
 More informations can be found in the [documentation](TODO).
 
 The format of the configuration file can be found [here](configuration_file-format.md).
-
-## Example
-
-An example of the output can be found in `example/dijkstra-map`. It can be re-built by 
-simply `cd`ing into the `example/dijkstra-map` directory, and running `cargo build`.
 
 ## Limitations
 
