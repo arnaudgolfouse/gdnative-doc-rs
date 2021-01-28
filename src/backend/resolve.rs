@@ -27,7 +27,7 @@ pub struct Resolver {
 const GODOT_DOCUMENTATION_URL: &str = "https://docs.godotengine.org/en/stable/classes";
 
 /// List of godot classes, like `Array`, `int`, `Transform2D`...
-const GODOT_CLASSES: &[&str] = &include!("../../godot_classes");
+const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classes-3.2.txt");
 
 /// List of some godot constants and information about where they sould link to.
 ///
