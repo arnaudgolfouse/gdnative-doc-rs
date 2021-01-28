@@ -45,6 +45,12 @@ And then you must call `recalculate` on it.
 | [Dictionary]| [add_square_grid](#func-add_square_grid "add_square_grid")( bounds: [Variant], terrain_type: [int] (opt), orthogonal_cost: [float] (opt), diagonal_cost: [float] (opt) )
 | [Dictionary]| [add_hexagonal_grid](#func-add_hexagonal_grid "add_hexagonal_grid")( bounds: [Variant], terrain_type: [int] (opt), weight: [float] (opt) )
 
+## Properties Descriptions
+### <a id="property-property"></a> property: [String]
+________
+
+Dummy property for demonstration purposes
+
 ## Methods Descriptions
 ### <a id="func-new"></a>func new() -> Self
 ________

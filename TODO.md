@@ -6,5 +6,4 @@
     [`MyStruct::my_method`]
     ```
 - Add tests !!!
-- Support `#[property]`
 - Support `#[register_with(...)]`

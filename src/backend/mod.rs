@@ -223,9 +223,10 @@ impl<'a> Generator<'a> {
         for (name, class) in &self.documentation.classes {
             let mut class_file = String::new();
             let callbacks = &mut self.callbacks;
-            callbacks.start_class(&mut class_file, self.resolver, class);
-            let mut encode = |events| callbacks.encode(&mut class_file, events);
-            let inherit_link = self.resolver.resolve(&class.inherit);
+            let resolver = &self.resolver;
+
+            callbacks.start_class(&mut class_file, resolver, class);
+            let inherit_link = resolver.resolve(&class.inherit);
 
             // Name of the class + inherit
             let mut events = vec![
@@ -261,10 +262,9 @@ impl<'a> Generator<'a> {
                 Event::Text(CowStr::Borrowed("Description")),
                 Event::End(Tag::Heading(2)),
             ]);
-            encode(events);
+            callbacks.encode(&mut class_file, events);
 
             // Class description
-            let resolver = self.resolver;
             let mut broken_link_callback = broken_link_callback!(resolver);
             let class_documentation = EventIterator {
                 context: resolver,
@@ -273,35 +273,77 @@ impl<'a> Generator<'a> {
                     self.markdown_options,
                     Some(&mut broken_link_callback),
                 ),
-            };
-            encode(class_documentation.into_iter().collect());
+            }
+            .into_iter()
+            .collect();
+            callbacks.encode(&mut class_file, class_documentation);
 
             // Properties table
             if !class.properties.is_empty() {
-                encode(Self::properties_table(&class.properties, resolver))
+                callbacks.encode(
+                    &mut class_file,
+                    Self::properties_table(&class.properties, resolver),
+                )
             }
 
             // Methods table
-            encode(Self::methods_table(&class.methods, resolver));
+            callbacks.encode(
+                &mut class_file,
+                Self::methods_table(&class.methods, resolver),
+            );
+
+            // Properties descriptions
+            if !class.properties.is_empty() {
+                callbacks.encode(
+                    &mut class_file,
+                    vec![
+                        Event::Start(Tag::Heading(2)),
+                        Event::Text(CowStr::Borrowed("Properties Descriptions")),
+                        Event::End(Tag::Heading(2)),
+                    ],
+                );
+                for property in &class.properties {
+                    callbacks.start_property(&mut class_file, resolver, property);
+                    let mut broken_link_callback = broken_link_callback!(resolver);
+                    let property_documentation = EventIterator {
+                        context: resolver,
+                        parser: pulldown_cmark::Parser::new_with_broken_link_callback(
+                            &property.documentation,
+                            self.markdown_options,
+                            Some(&mut broken_link_callback),
+                        ),
+                    }
+                    .into_iter()
+                    .collect();
+                    callbacks.encode(&mut class_file, property_documentation);
+                }
+            }
 
             // Methods descriptions
-            encode(vec![
-                Event::Start(Tag::Heading(2)),
-                Event::Text(CowStr::Borrowed("Methods Descriptions")),
-                Event::End(Tag::Heading(2)),
-            ]);
+            callbacks.encode(
+                &mut class_file,
+                vec![
+                    Event::Start(Tag::Heading(2)),
+                    Event::Text(CowStr::Borrowed("Methods Descriptions")),
+                    Event::End(Tag::Heading(2)),
+                ],
+            );
             for method in &class.methods {
-                self.callbacks
-                    .start_method(&mut class_file, resolver, method);
-                let callbacks = &mut self.callbacks;
-                Self::generate_method(
-                    |events| callbacks.encode(&mut class_file, events),
-                    resolver,
-                    method,
-                    self.markdown_options,
-                )
+                callbacks.start_method(&mut class_file, resolver, method);
+                let mut broken_link_callback = broken_link_callback!(resolver);
+                let method_documentation = EventIterator {
+                    context: resolver,
+                    parser: pulldown_cmark::Parser::new_with_broken_link_callback(
+                        &method.documentation,
+                        self.markdown_options,
+                        Some(&mut broken_link_callback),
+                    ),
+                }
+                .into_iter()
+                .collect();
+                callbacks.encode(&mut class_file, method_documentation);
             }
-            self.callbacks.finish_encoding(&mut class_file);
+            callbacks.finish_encoding(&mut class_file);
             results.push((name.clone(), class_file))
         }
         results
@@ -411,26 +453,6 @@ impl<'a> Generator<'a> {
         ])));
 
         events
-    }
-
-    /// Encode the documentation for `method`.
-    fn generate_method(
-        mut encode: impl FnMut(Vec<Event>),
-        resolver: &Resolver,
-        method: &Method,
-        markdown_options: MarkdownOptions,
-    ) {
-        let resolver = resolver;
-        let mut broken_link_callback = broken_link_callback!(resolver);
-        let method_iterator = EventIterator {
-            context: resolver,
-            parser: pulldown_cmark::Parser::new_with_broken_link_callback(
-                &method.documentation,
-                markdown_options,
-                Some(&mut broken_link_callback),
-            ),
-        };
-        encode(method_iterator.into_iter().collect());
     }
 }
 
