@@ -1,6 +1,6 @@
 # gdnative-doc-cli
 
-Command-line alternative of [gdnative-doc](https://github.com/arnaudgolfouse/gdnative-doc-rs).
+Command-line alternative of [gdnative-doc](https://crates.io/crates/gdnative-doc).
 
 ## Installing
 
