@@ -1,5 +1,5 @@
 use crate::{
-    backend, documentation::Documentation, files::CrateTree, Backend, Callbacks, ConfigFile, Error,
+    backend, documentation::Documentation, Backend, Callbacks, ConfigFile, Error,
     Resolver, Result,
 };
 use std::{fs, path::PathBuf};

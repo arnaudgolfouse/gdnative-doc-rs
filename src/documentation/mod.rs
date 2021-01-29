@@ -2,12 +2,8 @@
 
 mod builder;
 
-use crate::{files::Module, Error, Result};
+use crate::{Error, Result};
 use std::{collections::HashMap, path::PathBuf};
-use syn::{
-    visit::{self, Visit},
-    ItemImpl, ItemStruct,
-};
 
 /// Attribute in a function parameter.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -115,107 +111,16 @@ pub(crate) struct Documentation {
     pub(crate) classes: HashMap<String, GdnativeClass>,
 }
 
-impl<'ast> Visit<'ast> for Documentation {
-    fn visit_item_struct(&mut self, strukt: &'ast ItemStruct) {
-        let mut implement_native_class = false;
-        let mut inherit = None;
-        for attr in &strukt.attrs {
-            if let Ok(syn::Meta::List(syn::MetaList { path, nested, .. })) = attr.parse_meta() {
-                if path.is_ident("inherit") && nested.len() == 1 {
-                    if let Some(syn::NestedMeta::Meta(syn::Meta::Path(path))) = nested.first() {
-                        // TODO: support path of the form "gdnative::Class"
-                        if let Some(class) = path.get_ident() {
-                            inherit = Some(class.to_string())
-                        }
-                    }
-                } else if path.is_ident("derive") && nested.len() == 1 {
-                    if let Some(syn::NestedMeta::Meta(syn::Meta::Path(path))) = nested.first() {
-                        if path.is_ident("NativeClass") {
-                            implement_native_class = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        if !implement_native_class {
-            return;
-        }
-
-        if let Some(inherit) = inherit {
-            let self_type = strukt.ident.to_string();
-            log::trace!(
-                "found GDNative class '{}' that inherits '{}'",
-                self_type,
-                inherit
-            );
-            // FIXME: warn or error if we already visited a struct with the same name
-            // But be careful ! We *could* have encountered the name in an `impl` block, in which case no warning is warranted.
-            let class = self
-                .classes
-                .entry(self_type.clone())
-                .or_insert(GdnativeClass {
-                    name: self_type,
-                    inherit: String::new(),
-                    documentation: String::new(),
-                    properties: Vec::new(),
-                    methods: Vec::new(),
-                });
-            if let syn::Fields::Named(fields) = &strukt.fields {
-                class.get_properties(fields)
-            }
-            class.inherit = inherit;
-            class.documentation = get_docs(&strukt.attrs);
-        }
-    }
-
-    fn visit_item_impl(&mut self, impl_block: &'ast ItemImpl) {
-        loop {
-            if attributes_contains(&impl_block.attrs, "methods") {
-                let self_type = match get_type_name(*impl_block.self_ty.clone()) {
-                    Some(Type::Named(self_type)) => self_type,
-                    _ => {
-                        log::error!("Unknown type in 'impl' block");
-                        break;
-                    }
-                };
-                log::trace!("found #[methods] impl block for '{}'", self_type);
-                let class = self
-                    .classes
-                    .entry(self_type.clone())
-                    .or_insert(GdnativeClass {
-                        name: self_type,
-                        inherit: String::new(),
-                        documentation: String::new(),
-                        properties: Vec::new(),
-                        methods: Vec::new(),
-                    });
-                for item in &impl_block.items {
-                    if let syn::ImplItem::Method(method) = item {
-                        class.add_method(method);
-                    }
-                }
-            }
-            break;
-        }
-
-        visit::visit_item_impl(self, impl_block)
-    }
-}
-
 impl Documentation {
-    /// Create a new, empty `Documentation`
-    pub(crate) fn new() -> Self {
-        Self {
-            root_documentation: String::new(),
-            classes: HashMap::new(),
-        }
-    }
-
     pub(crate) fn from_root_file(root_file: PathBuf) -> Result<Self> {
+        use syn::visit::Visit;
+
         let root_file_content = read_file_at(&root_file)?;
         let mut builder = builder::DocumentationBuilder {
-            documentation: Self::new(),
+            documentation: Self {
+                root_documentation: String::new(),
+                classes: HashMap::new(),
+            },
             current_file: (root_file, true),
             current_module: Vec::new(),
             error: None,
@@ -229,22 +134,6 @@ impl Documentation {
         }
         builder.documentation.root_documentation = root_documentation;
         Ok(builder.documentation)
-    }
-
-    /// Extract documentation from the given `items`.
-    ///
-    /// If `root_module` is [`Some`], its content will be used to fill the
-    /// root's module documentation.
-    pub(crate) fn parse_from_module(&mut self, module: &Module, is_root_module: bool) {
-        if is_root_module {
-            if let Some(attrs) = &module.attrs {
-                self.root_documentation = get_docs(attrs);
-            }
-        }
-
-        for item in &module.items {
-            visit::visit_item(self, item);
-        }
     }
 }
 

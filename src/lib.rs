@@ -23,7 +23,6 @@ mod backend;
 mod builder;
 mod config;
 pub mod documentation;
-mod files;
 
 pub use backend::{Backend, Callbacks, Resolver};
 pub use builder::{Builder, Package};
