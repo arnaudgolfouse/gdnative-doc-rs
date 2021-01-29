@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 #[derive(Clone, Copy, PartialEq)]
 enum Nesting {
+    /// Tracks the index of the current list
+    ListLevel(Option<u64>),
     /// First item after the `"- "`
     StartListItem,
     /// Member of a list item
@@ -69,11 +71,11 @@ impl Callbacks for MarkdownCallbacks {
                             self.apply_nesting(s);
                         }
                     },
-                    Tag::List(_) => {}
+                    Tag::List(level) => self.nesting.push(Nesting::ListLevel(level)),
                     Tag::Item => {
                         self.apply_nesting(s);
+                        self.start_new_item(s);
                         self.nesting.push(Nesting::StartListItem);
-                        s.push_str("- ")
                     }
                     Tag::FootnoteDefinition(_) => {
                         log::warn!("FootnoteDefinition: Unsupported at the moment")
@@ -123,7 +125,9 @@ impl Callbacks for MarkdownCallbacks {
                             s.push_str("```");
                         }
                     },
-                    Tag::List(_) => {}
+                    Tag::List(_) => {
+                        self.nesting.pop();
+                    }
                     Tag::Item => {
                         self.nesting.pop();
                     }
@@ -272,6 +276,16 @@ impl MarkdownCallbacks {
         }
     }
 
+    /// Start a new list item, like `"- "` or `"2. "`.
+    fn start_new_item(&mut self, s: &mut String) {
+        if let Some(Nesting::ListLevel(Some(index))) = self.nesting.last_mut() {
+            *index += 1;
+            s.push_str(&format!("{}. ", *index - 1))
+        } else {
+            s.push_str("- ");
+        }
+    }
+
     /// - If the last item in `self.nesting` is `Nesting::StartListItem`, replace it
     /// with `Nesting::ListItem` and returns.
     /// - Else, push a new line in `s` with indentation given by `self.nesting`.
@@ -282,13 +296,11 @@ impl MarkdownCallbacks {
         s.push('\n');
         for nesting in &mut self.nesting {
             match nesting {
+                Nesting::ListLevel(_) => {}
                 Nesting::ListItem => s.push_str("  "),
                 Nesting::Quote => s.push_str("> "),
                 Nesting::IndentedCode => s.push_str("    "),
-                Nesting::StartListItem => {
-                    s.push_str("- ");
-                    *nesting = Nesting::ListItem
-                }
+                Nesting::StartListItem => {}
             }
         }
     }

@@ -566,6 +566,7 @@ This is what `add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)` would produce:
   \     / \     /
     \ /     \ /
 ```
+
 [Dictionary]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html
 [PoolIntArray]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
 [PoolRealArray]: https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html
