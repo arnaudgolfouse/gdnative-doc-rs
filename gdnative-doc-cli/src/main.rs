@@ -14,7 +14,7 @@ fn real_main() -> gdnative_doc::Result<()> {
         0 => LevelFilter::Info,
         1 => LevelFilter::Debug,
         _ => LevelFilter::Trace,
-    });
+    })?;
 
     let mut builder = Builder::new();
 

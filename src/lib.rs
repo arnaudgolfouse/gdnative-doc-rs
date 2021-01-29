@@ -57,16 +57,18 @@ Please select the one you want via either:
     /// When trying to determine a root file, no suitable candidate was found.
     #[error("No crate was found with a 'cdylib' target")]
     NoCandidateCrate,
+    #[error("Logger initialization failed: {0}")]
+    InitLogger(#[from] log::SetLoggerError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Initialize the logger with the specified logging level.
-pub fn init_logger(level: LevelFilter) {
+pub fn init_logger(level: LevelFilter) -> Result<()> {
     simplelog::TermLogger::init(
         level,
         simplelog::Config::default(),
         simplelog::TerminalMode::Stderr,
-    )
-    .unwrap();
+    )?;
+    Ok(())
 }
