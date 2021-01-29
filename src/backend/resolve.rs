@@ -41,7 +41,7 @@ const GODOT_CONSTANTS: &[(&str, &str, &str)] = &[
     ("INF", "class_@gdscript", "constants"),
     ("NAN", "class_@gdscript", "constants"),
     ("FAILED", "class_@globalscope", "enum-globalscope-error"),
-    ("OK", "class_@globalscope", "class-globalscope-error"),
+    ("OK", "class_@globalscope", "enum-globalscope-error"),
 ];
 
 /// Mapping from Rust to Godot types.
