@@ -150,14 +150,18 @@ impl Builder {
             Some(Package::Name(name)) => find_root_file(Some(&name))?,
             None => find_root_file(None)?,
         };
-        let package = CrateTree::from_root_file(root_file)?;
+
+        let mut documentation = Documentation::from_root_file(root_file)?;
+        self.resolver.rename_classes(&mut documentation);
+        Ok(documentation)
+        /*let package = CrateTree::from_root_file(root_file)?;
 
         let mut documentation = Documentation::new();
         for (module_id, module) in package.modules {
             documentation.parse_from_module(&module, module_id == package.root_module);
         }
         self.resolver.rename_classes(&mut documentation);
-        Ok(documentation)
+        Ok(documentation)*/
     }
 }
 

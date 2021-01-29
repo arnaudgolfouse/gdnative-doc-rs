@@ -1,7 +1,9 @@
 //! Structures representing the documentation of a `gdnative` package.
 
-use crate::files::Module;
-use std::collections::HashMap;
+mod builder;
+
+use crate::{files::Module, Error, Result};
+use std::{collections::HashMap, path::PathBuf};
 use syn::{
     visit::{self, Visit},
     ItemImpl, ItemStruct,
@@ -210,6 +212,25 @@ impl Documentation {
         }
     }
 
+    pub(crate) fn from_root_file(root_file: PathBuf) -> Result<Self> {
+        let root_file_content = read_file_at(&root_file)?;
+        let mut builder = builder::DocumentationBuilder {
+            documentation: Self::new(),
+            current_file: (root_file, true),
+            current_module: Vec::new(),
+            error: None,
+        };
+        let root_documentation = get_docs(&root_file_content.attrs);
+        for item in root_file_content.items {
+            builder.visit_item(&item);
+            if let Some(error) = builder.error.take() {
+                return Err(error);
+            }
+        }
+        builder.documentation.root_documentation = root_documentation;
+        Ok(builder.documentation)
+    }
+
     /// Extract documentation from the given `items`.
     ///
     /// If `root_module` is [`Some`], its content will be used to fill the
@@ -324,6 +345,14 @@ impl GdnativeClass {
                 self.properties.push(property)
             }
         }
+    }
+}
+
+/// Read and parse the file at the given `path` with `syn`, reporting any error.
+fn read_file_at(path: &std::path::Path) -> Result<syn::File> {
+    match std::fs::read_to_string(path) {
+        Ok(content) => Ok(syn::parse_file(&content)?),
+        Err(err) => Err(Error::Io(path.to_path_buf(), err)),
     }
 }
 
