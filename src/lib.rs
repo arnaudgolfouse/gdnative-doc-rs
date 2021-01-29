@@ -2,8 +2,12 @@
 //!
 //! # Example
 //! ```rust,no_run
-//! use gdnative_doc::{Backend, Builder, LevelFilter};
+//! # use std::error::Error;
+//! #
+//! # fn main() -> Result<(), Box<dyn Error>> {
+//! use gdnative_doc::{Backend, Builder, LevelFilter, init_logger};
 //!
+//! init_logger(LevelFilter::Info)?;
 //! Builder::new()
 //!     .add_backend(Backend::Markdown {
 //!         output_dir: "doc".into(),
@@ -11,9 +15,8 @@
 //!     .add_backend(Backend::Gut {
 //!         output_dir: "addons/gut".into(),
 //!     })
-//!     .log_level(LevelFilter::Info)
-//!     .build()
-//!     .unwrap();
+//!     .build()?;
+//! # Ok(()) }
 //! ```
 
 mod backend;
@@ -64,6 +67,8 @@ Please select the one you want via either:
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Initialize the logger with the specified logging level.
+///
+/// The default recommended level is [`LevelFilter::Info`].
 pub fn init_logger(level: LevelFilter) -> Result<()> {
     simplelog::TermLogger::init(
         level,

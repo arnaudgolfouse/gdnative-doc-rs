@@ -7,6 +7,25 @@ use std::collections::HashMap;
 /// Structure that holds user configuration settings.
 ///
 /// Should be obtained via a `toml` [configuration file](ConfigFile::read_from).
+///
+/// # Example
+/// ```
+/// # use gdnative_doc::{Result, ConfigFile};
+/// # fn main() -> Result<()> {
+/// const CONFIG_FILE_CONTENT: &str = r#"
+/// rename_classes = { RustName = "GDScriptName" }
+/// markdown_options = ["STRIKETHROUGH", "TABLES"]
+/// "#;
+///
+/// let config_file = ConfigFile::read_from(CONFIG_FILE_CONTENT)?;
+/// assert!(config_file.url_overrides.is_none());
+/// assert_eq!(config_file.rename_classes.unwrap()["RustName"], "GDScriptName");
+/// assert_eq!(
+///     config_file.markdown_options.unwrap(),
+///     &["STRIKETHROUGH".to_string(), "TABLES".to_string()]
+/// );
+/// # Ok(()) }
+/// ```
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub struct ConfigFile {
     /// List of items for which the linking url should be overriden.

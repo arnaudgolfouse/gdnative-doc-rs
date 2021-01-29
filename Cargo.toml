@@ -10,7 +10,7 @@ license = "MIT"
 
 [workspace]
 members = ["gdnative-doc-cli"]
-default-members = ["gdnative-doc-cli"]
+default-members = [".", "gdnative-doc-cli"]
 exclude = ["example"]
 
 [dependencies]

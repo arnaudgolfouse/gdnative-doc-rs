@@ -1,7 +1,8 @@
-use gdnative_doc::{Backend, Builder};
+use gdnative_doc::{init_logger, Backend, Builder, LevelFilter};
 use std::path::PathBuf;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    init_logger(LevelFilter::Info)?;
     Builder::new()
         .user_config(PathBuf::from("config.toml"))
         .add_backend(Backend::Markdown {
@@ -13,6 +14,6 @@ fn main() {
         .add_backend(Backend::Gut {
             output_dir: PathBuf::from("gut"),
         })
-        .build()
-        .unwrap();
+        .build()?;
+    Ok(())
 }

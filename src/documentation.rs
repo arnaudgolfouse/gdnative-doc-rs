@@ -65,7 +65,7 @@ pub struct Method {
 /// }
 /// ```
 /// Translates into:
-/// ```
+/// ```text
 /// name: "my_property",
 /// typ: Type::Named("String"),
 /// documentation: "Some doc"

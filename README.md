@@ -41,14 +41,13 @@ In your Cargo.toml. Then you can drive the process with the `Builder` structure:
 use gdnative_doc::{Builder, Backend};
 use std::path::PathBuf;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     Builder::new()
-        .user_config(PathBuf::from("config.toml"))
         .add_backend(Backend::Markdown {
             output_dir: PathBuf::from("doc/markdown"),
         })
-        .build()
-        .unwrap();
+        .build()?;
+    Ok(())
 }
 ```
 

@@ -17,7 +17,7 @@ pub(crate) struct Module {
     ///
     /// # Examples
     /// - in `lib.rs`
-    /// ```rust
+    /// ```
     /// mod a {
     ///     mod b {}
     /// }
