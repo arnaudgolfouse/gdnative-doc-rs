@@ -11,3 +11,4 @@ license = "MIT"
 [dependencies]
 gdnative-doc = { path = "..", version = "0.0.1" }
 clap = "2.33"
+anyhow = "1.0"

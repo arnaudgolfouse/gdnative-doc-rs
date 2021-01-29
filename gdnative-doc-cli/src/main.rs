@@ -2,13 +2,7 @@ use clap::{App, Arg};
 use gdnative_doc::{init_logger, Backend, Builder, LevelFilter, Package};
 use std::path::PathBuf;
 
-fn main() {
-    if let Err(err) = real_main() {
-        println!("{}", err)
-    }
-}
-
-fn real_main() -> gdnative_doc::Result<()> {
+fn main() -> anyhow::Result<()> {
     let matches = make_app().get_matches();
     init_logger(match matches.occurrences_of("verbosity") {
         0 => LevelFilter::Info,
@@ -44,7 +38,7 @@ fn real_main() -> gdnative_doc::Result<()> {
         builder = builder.package(Package::Root(PathBuf::from(root_file)))
     }
 
-    builder.build()
+    Ok(builder.build()?)
 }
 
 fn make_app() -> App<'static, 'static> {
