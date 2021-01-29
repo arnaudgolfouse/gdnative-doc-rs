@@ -210,6 +210,7 @@ impl Callbacks for MarkdownCallbacks {
     }
 
     fn finish_encoding(&mut self, s: &mut String) {
+        s.push('\n');
         let mut link_lines = Vec::new();
         self.shortcut_link.take();
         let links = std::mem::take(&mut self.links);
