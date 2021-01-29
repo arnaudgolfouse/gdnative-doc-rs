@@ -1,6 +1,6 @@
 # gdnative-doc
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/arnaudgolfouse/gdnative-doc-rs/blob/main/LICENSE)
+[![MIT license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/arnaudgolfouse/gdnative-doc-rs/blob/main/LICENSE)
 [![Latest Version](https://img.shields.io/crates/v/gdnative-doc.svg)](https://crates.io/crates/gdnative-doc)
 [![Docs Status](https://docs.rs/gdnative-doc/badge.svg)](https://docs.rs/gdnative-doc)
 
