@@ -151,7 +151,7 @@ impl dyn Callbacks {
 
 impl std::fmt::Debug for dyn Callbacks {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str("_")
+        formatter.write_str("Callbacks")
     }
 }
 
