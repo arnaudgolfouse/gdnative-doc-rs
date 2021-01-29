@@ -2,8 +2,6 @@
 
 Command-line alternative of [gdnative-doc](https://github.com/arnaudgolfouse/gdnative-doc-rs).
 
-**Note**: It should soon be on [crates.io](https://crates.io), but for now the described installation doesn't work.
-
 ## Installing
 
 If you have cargo, simply run 
