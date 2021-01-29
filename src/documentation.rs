@@ -8,7 +8,7 @@ use syn::{
 };
 
 /// Attribute in a function parameter.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum ParameterAttribute {
     /// No or unrecognized attribute
     None,
@@ -17,7 +17,7 @@ pub enum ParameterAttribute {
 }
 
 /// Most type are simply `String`, but not all (e.g. return type)
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Type {
     /// `Option<Type>`
     Option(String),
@@ -28,7 +28,7 @@ pub enum Type {
 }
 
 /// Method in an `impl` block.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Method {
     /// Does this method have a `self` parameter ?
     pub has_self: bool,
@@ -52,17 +52,25 @@ pub struct Method {
     pub documentation: String,
 }
 
-/// Property exported to godot, like
+/// Property exported to godot
 ///
+/// # Example
 /// ```rust,ignore
 /// #[derive(NativeClass)]
 /// #[inherit(Resource)]
 /// struct MyResource {
+///     /// Some doc
 ///     #[property]
-///     name: String,
+///     my_property: String,
 /// }
 /// ```
-#[derive(Clone, Debug)]
+/// Translates into:
+/// ```
+/// name: "my_property",
+/// typ: Type::Named("String"),
+/// documentation: "Some doc"
+/// ```
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Property {
     /// Name of the property
     pub name: String,
@@ -76,7 +84,7 @@ pub struct Property {
 ///
 /// # Note
 /// It cannot be generic.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct GdnativeClass {
     /// Name of the structure
     pub name: String,
@@ -94,6 +102,7 @@ pub struct GdnativeClass {
     pub methods: Vec<Method>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Documentation {
     /// Documentation of the root module.
     pub(crate) root_documentation: String,

@@ -74,7 +74,7 @@ impl CrateTree {
     /// Try to build the crate tree with the file at the given `path` as
     /// root module.
     pub(crate) fn from_root_file(path: PathBuf) -> Result<Self> {
-        let mut builder = PackageBuilder::default();
+        let mut builder = CrateTreeBuilder::default();
         let file = match fs::read_to_string(&path) {
             Ok(content) => syn::parse_file(&content)?,
             Err(io_error) => return Err(Error::Io(path, io_error)),
@@ -120,16 +120,16 @@ impl fmt::Debug for Module {
     }
 }
 
-/// Builder for [`Package`]
+/// Builder for [`CrateTree`]
 #[derive(Default)]
-struct PackageBuilder {
+struct CrateTreeBuilder {
     /// Next unallocated id
     next_module_id: ModuleId,
     files_to_ids: HashMap<PathBuf, ModuleId>,
     modules: HashMap<ModuleId, Module>,
 }
 
-impl PackageBuilder {
+impl CrateTreeBuilder {
     fn next_id(&mut self) -> ModuleId {
         let id = self.next_module_id;
         self.next_module_id += 1;

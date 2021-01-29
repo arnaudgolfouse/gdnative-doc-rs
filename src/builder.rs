@@ -5,7 +5,7 @@ use crate::{
 use std::{fs, path::PathBuf};
 
 /// Used to specify a crate in [`Builder::package`].
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Package {
     /// Specify the crate by name
     Name(String),
@@ -13,6 +13,7 @@ pub enum Package {
     Root(PathBuf),
 }
 
+#[derive(Debug)]
 /// A builder for generating godot documentation in various formats.
 pub struct Builder {
     resolver: Resolver,

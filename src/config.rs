@@ -7,7 +7,7 @@ use std::collections::HashMap;
 /// Structure that holds user configuration settings.
 ///
 /// Should be obtained via a `toml` [configuration file](ConfigFile::read_from).
-#[derive(Deserialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub struct ConfigFile {
     /// List of items for which the linking url should be overriden.
     pub url_overrides: Option<HashMap<String, String>>,

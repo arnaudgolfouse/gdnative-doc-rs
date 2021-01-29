@@ -5,6 +5,7 @@ use crate::{
 use pulldown_cmark::{CowStr, Event, Tag};
 use std::collections::HashMap;
 
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// Information to resolve links.
 pub struct Resolver {
     /// Link to godot items' documentation.

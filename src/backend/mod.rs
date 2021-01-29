@@ -3,15 +3,14 @@ mod html;
 mod markdown;
 mod resolve;
 
+use crate::documentation::{Documentation, GdnativeClass, Method, Property};
+use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Options as MarkdownOptions, Parser, Tag};
 use std::path::PathBuf;
 
 pub(super) use gut::GutCallbacks;
 pub(super) use html::HtmlCallbacks;
 pub(super) use markdown::MarkdownCallbacks;
 pub use resolve::Resolver;
-
-use crate::documentation::{Documentation, GdnativeClass, Method, Property};
-use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Options as MarkdownOptions, Parser, Tag};
 
 /// Generate a callback to resolve broken links.
 ///
@@ -150,7 +149,14 @@ impl dyn Callbacks {
     }
 }
 
+impl std::fmt::Debug for dyn Callbacks {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str("_")
+    }
+}
+
 /// Generate files given an encoding
+#[derive(Debug)]
 pub(crate) struct Generator<'a> {
     /// Used to resolve links.
     resolver: &'a Resolver,
