@@ -42,6 +42,30 @@ fn simple_code() {
 }
 
 #[test]
+fn simple_quote() {
+    let quote = encode(
+        r#"
+> This is a quote
+> On multiple lines.
+"#,
+    );
+    insta::assert_display_snapshot!(quote)
+}
+
+#[test]
+fn various_text_emphasis() {
+    let text = encode(
+        r#"
+Normal text.
+*Italic text*
+**Bold text**
+~~ Strikethrough ? ~~
+"#,
+    );
+    insta::assert_display_snapshot!(text)
+}
+
+#[test]
 fn new_paragraph() {
     let new_paragraph = encode(
         r"hello
@@ -99,4 +123,21 @@ fn complicated_list() {
 3. Last item."#,
     );
     insta::assert_display_snapshot!(list)
+}
+
+#[test]
+fn quotes_and_lists() {
+    let mixed = encode(
+        r#"
+> Quoted text
+> - And now quoted list...
+>     > With quoted text inside !
+> - Back to lists...
+>     - Nested list
+- Break out
+    > With a 
+    > Final quote
+"#,
+    );
+    insta::assert_display_snapshot!(mixed)
 }

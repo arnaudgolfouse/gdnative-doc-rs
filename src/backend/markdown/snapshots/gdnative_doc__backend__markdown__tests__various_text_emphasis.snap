@@ -1,0 +1,10 @@
+---
+source: src/backend/markdown/tests.rs
+expression: text
+---
+
+Normal text.
+*Italic text*
+**Bold text**
+~~ Strikethrough ? ~~
+

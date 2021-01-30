@@ -159,8 +159,8 @@ impl Callbacks for MarkdownCallbacks {
                         s.push(']');
                         let closing_character = match link_type {
                             LinkType::Shortcut => {
-                                if let Some(mut shortcut) = self.shortcut_link.take() {
-                                    self.add_shortcut_link(&mut shortcut, &dest);
+                                if let Some(shortcut) = self.shortcut_link.take() {
+                                    self.add_shortcut_link(shortcut, &dest);
                                 }
                                 None
                             }
@@ -260,8 +260,8 @@ impl MarkdownCallbacks {
     /// - If it is already present, but none of the `n` links associated
     /// with it correspond to `link`, add `link` to its list and change
     /// `shortcut` to `shortcut-n`.
-    fn add_shortcut_link(&mut self, shortcut: &mut String, link: &str) {
-        if let Some(links) = self.links.get_mut(shortcut) {
+    fn add_shortcut_link(&mut self, mut shortcut: String, link: &str) {
+        if let Some(links) = self.links.get_mut(&shortcut) {
             if let Some((index, _)) = links.iter().enumerate().find(|(_, l)| l == &link) {
                 if index > 0 {
                     shortcut.push_str(&format!("-{}", index));
@@ -274,8 +274,7 @@ impl MarkdownCallbacks {
                 }
             }
         } else {
-            self.links
-                .insert(shortcut.to_string(), vec![link.to_string()]);
+            self.links.insert(shortcut, vec![link.to_string()]);
         }
     }
 
