@@ -13,6 +13,7 @@ The goal of this tool is to automate writing documentation in Rust code that wil
 ## Features
 
 - Keep the documentation synchronized with your code.
+- Generate readable and easy to change markdown
 - Build table of contents automatically.
 - Automatic linking to the [godot documentation](https://docs.godotengine.org/en/stable/index.html).
 - Generate [gut](https://github.com/bitwes/Gut) tests from gdscript examples.
