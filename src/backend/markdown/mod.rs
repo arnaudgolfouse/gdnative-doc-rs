@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use super::{Callbacks, Method, Property, Resolver};
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
 use std::collections::HashMap;
