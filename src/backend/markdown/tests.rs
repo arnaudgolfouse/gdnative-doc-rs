@@ -82,3 +82,21 @@ fn numbered_list() {
     );
     insta::assert_display_snapshot!(list)
 }
+
+#[test]
+fn complicated_list() {
+    let list = encode(
+        r#"
+1. Text [link-section](#section)
+2. Other text:
+  
+    This is on a new paragraph
+    - Nested bullet
+    - 1. With nested
+      2. Numbered list inside
+
+    Resume on a new paragraph...
+3. Last item."#,
+    );
+    insta::assert_display_snapshot!(list)
+}
