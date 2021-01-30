@@ -1,4 +1,10 @@
 //! Snapshot tests
+//!
+//! These compare the output of `MarkdownCallbacks` against a stored value
+//! (the snapshot), and fail if it differs.
+//!
+//! When that happen, run `cargo insta review` to accept incoming changes
+//! (when it makes sense to !)
 
 use super::*;
 
@@ -133,7 +139,7 @@ fn quotes_and_lists() {
 > - And now quoted list...
 >     > With quoted text inside !
 > - Back to lists...
->     - Nested list
+>     - > Nested quoted list
 - Break out
     > With a 
     > Final quote

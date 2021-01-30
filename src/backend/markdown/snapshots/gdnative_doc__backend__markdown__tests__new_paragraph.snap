@@ -2,7 +2,6 @@
 source: src/backend/markdown/tests.rs
 expression: new_paragraph
 ---
-
 hello
 
 world !

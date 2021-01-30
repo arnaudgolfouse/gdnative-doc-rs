@@ -1,7 +1,6 @@
 ---
 source: src/backend/markdown/tests.rs
-expression: simple_text
+expression: simple
 ---
-
 hello world !
 

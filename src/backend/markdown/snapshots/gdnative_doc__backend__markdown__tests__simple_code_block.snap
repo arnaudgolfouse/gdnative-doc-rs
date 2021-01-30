@@ -2,7 +2,6 @@
 source: src/backend/markdown/tests.rs
 expression: code_block
 ---
-
 ```rust
 #[test]
 fn simple_code() {
