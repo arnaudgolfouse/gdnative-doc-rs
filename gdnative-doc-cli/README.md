@@ -1,5 +1,9 @@
 # gdnative-doc-cli
 
+
+[![MIT license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/arnaudgolfouse/gdnative-doc-rs/blob/main/LICENSE)
+[![Latest Version](https://img.shields.io/crates/v/gdnative-doc.svg)](https://crates.io/crates/gdnative-doc-cli)
+
 Command-line alternative of [gdnative-doc](https://crates.io/crates/gdnative-doc).
 
 ## Installing
