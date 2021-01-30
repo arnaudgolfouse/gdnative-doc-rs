@@ -1,7 +1,9 @@
 ---
 source: src/backend/markdown/tests.rs
-expression: simple_text
+expression: new_paragraph
 ---
 
-hello world !
+hello
+
+world !
 

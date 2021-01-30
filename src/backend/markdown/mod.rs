@@ -113,7 +113,7 @@ impl Callbacks for MarkdownCallbacks {
                     }
                 },
                 Event::End(tag) => match tag {
-                    Tag::Paragraph => self.apply_nesting(s),
+                    Tag::Paragraph => s.push('\n'),
                     Tag::Heading(_) => {}
                     Tag::BlockQuote => {
                         self.nesting.pop();
@@ -300,7 +300,7 @@ impl MarkdownCallbacks {
         for nesting in &mut self.nesting {
             match nesting {
                 Nesting::ListLevel(_) => {}
-                Nesting::ListItem => s.push_str("  "),
+                Nesting::ListItem => s.push_str("    "),
                 Nesting::Quote => s.push_str("> "),
                 Nesting::IndentedCode => s.push_str("    "),
                 Nesting::StartListItem => {}
