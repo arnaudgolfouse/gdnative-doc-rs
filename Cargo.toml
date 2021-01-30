@@ -23,6 +23,9 @@ syn = { version = "1.0", default-features = false, features = ["parsing", "full"
 thiserror = "1.0"
 toml = "0.5"
 
+[dev-dependencies]
+insta = "1.5.3"
+
 # Make toml config parsing optional ?
 #[features]
 #default = ["toml"]

@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use super::{Callbacks, Method, Property, Resolver};
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
 use std::collections::HashMap;
@@ -6,8 +9,6 @@ use std::collections::HashMap;
 enum Nesting {
     /// Tracks the index of the current list
     ListLevel(Option<u64>),
-    /// First item after the `"- "`
-    StartListItem,
     /// Member of a list item
     ListItem,
     /// Quoted text: `"> "`
@@ -25,10 +26,14 @@ pub(crate) struct MarkdownCallbacks {
     /// So we keep them all, and disambiguate via `name`, `name-1`,
     /// `name-2`, ...
     links: HashMap<String, Vec<String>>,
+    /// Shortcut link whose name we are currently building
     shortcut_link: Option<String>,
     /// Stack of tables alignment
     tables_alignements: Vec<Vec<Alignment>>,
+    /// Information for indentation
     nesting: Vec<Nesting>,
+    /// Have we written to the string since we last pushed to `nesting` ?
+    top_written: bool,
 }
 
 impl Callbacks for MarkdownCallbacks {
@@ -48,9 +53,15 @@ impl Callbacks for MarkdownCallbacks {
         for event in events {
             match event {
                 Event::Start(tag) => match tag {
-                    Tag::Paragraph => self.apply_nesting(s),
+                    Tag::Paragraph => {
+                        self.apply_nesting(s);
+                        if self.top_written {
+                            self.apply_nesting(s)
+                        }
+                    }
                     Tag::Heading(level) => {
                         self.apply_nesting(s);
+                        self.top_written = true;
                         for _ in 0..level {
                             s.push('#');
                         }
@@ -66,6 +77,7 @@ impl Callbacks for MarkdownCallbacks {
                         }
                         CodeBlockKind::Fenced(lang) => {
                             self.apply_nesting(s);
+                            self.top_written = true;
                             s.push_str("```");
                             s.push_str(&lang);
                             self.apply_nesting(s);
@@ -75,7 +87,8 @@ impl Callbacks for MarkdownCallbacks {
                     Tag::Item => {
                         self.apply_nesting(s);
                         self.start_new_item(s);
-                        self.nesting.push(Nesting::StartListItem);
+                        self.nesting.push(Nesting::ListItem);
+                        self.top_written = false;
                     }
                     Tag::FootnoteDefinition(_) => {
                         log::warn!("FootnoteDefinition: Unsupported at the moment")
@@ -110,7 +123,7 @@ impl Callbacks for MarkdownCallbacks {
                     }
                 },
                 Event::End(tag) => match tag {
-                    Tag::Paragraph => self.apply_nesting(s),
+                    Tag::Paragraph => {}
                     Tag::Heading(_) => {}
                     Tag::BlockQuote => {
                         self.nesting.pop();
@@ -156,8 +169,8 @@ impl Callbacks for MarkdownCallbacks {
                         s.push(']');
                         let closing_character = match link_type {
                             LinkType::Shortcut => {
-                                if let Some(mut shortcut) = self.shortcut_link.take() {
-                                    self.add_shortcut_link(&mut shortcut, &dest);
+                                if let Some(shortcut) = self.shortcut_link.take() {
+                                    self.add_shortcut_link(shortcut, &dest);
                                 }
                                 None
                             }
@@ -180,17 +193,17 @@ impl Callbacks for MarkdownCallbacks {
                     Tag::Image(_, _, _) => {}
                 },
                 Event::Text(text) => {
-                    self.remove_top_most_start_item();
+                    self.top_written = true;
                     self.push_str(s, &text)
                 }
                 Event::Code(code) => {
-                    self.remove_top_most_start_item();
+                    self.top_written = true;
                     self.push_str(s, "`");
                     self.push_str(s, &code);
                     self.push_str(s, "`");
                 }
                 Event::Html(html) => {
-                    self.remove_top_most_start_item();
+                    self.top_written = true;
                     s.push_str(&html)
                 }
                 Event::FootnoteReference(_) => {
@@ -206,7 +219,7 @@ impl Callbacks for MarkdownCallbacks {
                     s.push_str("________\n");
                 }
                 Event::TaskListMarker(checked) => {
-                    self.remove_top_most_start_item();
+                    self.top_written = true;
                     s.push_str(if checked { "[X] " } else { "[ ] " })
                 }
             }
@@ -242,6 +255,7 @@ impl Callbacks for MarkdownCallbacks {
 impl MarkdownCallbacks {
     /// Push `string` in both `s` and `self.shortcut_link` if is is `Some`.
     fn push_str(&mut self, s: &mut String, string: &str) {
+        self.top_written = true;
         s.push_str(string);
         if let Some(shortcut) = &mut self.shortcut_link {
             shortcut.push_str(string)
@@ -257,8 +271,8 @@ impl MarkdownCallbacks {
     /// - If it is already present, but none of the `n` links associated
     /// with it correspond to `link`, add `link` to its list and change
     /// `shortcut` to `shortcut-n`.
-    fn add_shortcut_link(&mut self, shortcut: &mut String, link: &str) {
-        if let Some(links) = self.links.get_mut(shortcut) {
+    fn add_shortcut_link(&mut self, mut shortcut: String, link: &str) {
+        if let Some(links) = self.links.get_mut(&shortcut) {
             if let Some((index, _)) = links.iter().enumerate().find(|(_, l)| l == &link) {
                 if index > 0 {
                     shortcut.push_str(&format!("-{}", index));
@@ -271,8 +285,7 @@ impl MarkdownCallbacks {
                 }
             }
         } else {
-            self.links
-                .insert(shortcut.to_string(), vec![link.to_string()]);
+            self.links.insert(shortcut, vec![link.to_string()]);
         }
     }
 
@@ -290,29 +303,20 @@ impl MarkdownCallbacks {
     /// with `Nesting::ListItem` and returns.
     /// - Else, push a new line in `s` with indentation given by `self.nesting`.
     fn apply_nesting(&mut self, s: &mut String) {
-        if self.remove_top_most_start_item() {
+        if !self.top_written {
+            if matches!(self.nesting.last(), Some(Nesting::Quote)) {
+                s.push_str("> ")
+            }
             return;
         }
         s.push('\n');
         for nesting in &mut self.nesting {
             match nesting {
                 Nesting::ListLevel(_) => {}
-                Nesting::ListItem => s.push_str("  "),
+                Nesting::ListItem => s.push_str("    "),
                 Nesting::Quote => s.push_str("> "),
                 Nesting::IndentedCode => s.push_str("    "),
-                Nesting::StartListItem => {}
             }
-        }
-    }
-
-    /// If the last item in `self.nesting` is `Nesting::StartListItem`, replace it
-    /// with `Nesting::ListItem` and returns `true`.
-    fn remove_top_most_start_item(&mut self) -> bool {
-        if let Some(start_item @ Nesting::StartListItem) = self.nesting.last_mut() {
-            *start_item = Nesting::ListItem;
-            true
-        } else {
-            false
         }
     }
 }

@@ -1,0 +1,11 @@
+---
+source: src/backend/markdown/tests.rs
+expression: code_block
+---
+```rust
+#[test]
+fn simple_code() {
+    let code = encode("`hello code !`");
+    insta::assert_display_snapshot!(code)
+}
+```
