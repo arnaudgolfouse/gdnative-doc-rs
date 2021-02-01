@@ -33,7 +33,7 @@ A more complete example can be found in the [example/dijkstra-map-gd](example/di
 
 ## Usage
 
-This is meant to be used as a build script: Set
+This is meant to be used as a [build script](https://doc.rust-lang.org/cargo/reference/build-scripts.html): Set
 ```toml
 [build-dependencies]
 gdnative-doc = "*"
