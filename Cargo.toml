@@ -9,9 +9,8 @@ edition = "2018"
 license = "MIT"
 
 [workspace]
-members = ["gdnative-doc-cli"]
+members = ["gdnative-doc-cli", "examples/dijkstra-map-gd"]
 default-members = [".", "gdnative-doc-cli"]
-exclude = ["example"]
 
 [dependencies]
 cargo_metadata = "0.12"

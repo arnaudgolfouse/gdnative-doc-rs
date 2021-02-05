@@ -29,6 +29,6 @@ adjust/add tests accordingly.
 - ## Examples
 
     If your contribution changes the markdown/html/gut output, it would be 
-	good to update the example in `example/dijkstra-map-gd`.
+	good to update the example in `examples/dijkstra-map-gd`.
 
-	To do so, simply go to `example/dijkstra-map-gd` and run `cargo build`.
+	To do so, simply run `cargo build -p dijkstra-map-gd`.

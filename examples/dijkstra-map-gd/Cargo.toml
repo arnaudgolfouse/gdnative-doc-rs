@@ -1,5 +1,5 @@
 [package]
-name = "dijkstra_map_gd"
+name = "dijkstra-map-gd"
 version = "0.1.0"
 authors = ["Astrale", "Matej Sloboda"]
 edition = "2018"

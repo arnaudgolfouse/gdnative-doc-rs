@@ -29,7 +29,7 @@ The goal of this tool is to automate writing documentation in Rust code that wil
  Output: gut |
  ![](assets/process-function-gut.png) |
 
-A more complete example can be found in the [example/dijkstra-map-gd](example/dijkstra-map-gd) directory.
+A more complete example can be found in the [examples/dijkstra-map-gd](examples/dijkstra-map-gd) directory.
 
 ## Usage
 
