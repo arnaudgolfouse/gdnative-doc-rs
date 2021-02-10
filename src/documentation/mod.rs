@@ -182,7 +182,8 @@ impl GdnativeClass {
 
                     params.push((
                         arg_name,
-                        get_type_name(*ty.clone()).unwrap_or(Type::Named("{ERROR}".to_string())),
+                        get_type_name(*ty.clone())
+                            .unwrap_or_else(|| Type::Named("{ERROR}".to_string())),
                         if attributes_contains(&attrs, "opt") {
                             ParameterAttribute::Opt
                         } else {

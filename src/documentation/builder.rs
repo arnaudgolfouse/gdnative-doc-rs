@@ -47,6 +47,39 @@ impl DocumentationBuilder {
             path
         })
     }
+
+    /// Inner function for Visit::visit_item_impl
+    ///
+    /// Used for the early return
+    #[inline]
+    fn visit_item_impl_inner(&mut self, impl_block: &ItemImpl) {
+        if attributes_contains(&impl_block.attrs, "methods") {
+            let self_type = match get_type_name(*impl_block.self_ty.clone()) {
+                Some(Type::Named(self_type)) => self_type,
+                _ => {
+                    log::error!("Unknown type in 'impl' block");
+                    return;
+                }
+            };
+            log::trace!("found #[methods] impl block for '{}'", self_type);
+            let class = self
+                .documentation
+                .classes
+                .entry(self_type.clone())
+                .or_insert(GdnativeClass {
+                    name: self_type,
+                    inherit: String::new(),
+                    documentation: String::new(),
+                    properties: Vec::new(),
+                    methods: Vec::new(),
+                });
+            for item in &impl_block.items {
+                if let syn::ImplItem::Method(method) = item {
+                    class.add_method(method);
+                }
+            }
+        }
+    }
 }
 
 impl<'ast> Visit<'ast> for DocumentationBuilder {
@@ -70,7 +103,7 @@ impl<'ast> Visit<'ast> for DocumentationBuilder {
                 let file = match read_file_at(&path) {
                     Ok(file) => file,
                     Err(err) => {
-                        self.error = Some(err.into());
+                        self.error = Some(err);
                         return;
                     }
                 };
@@ -159,35 +192,7 @@ impl<'ast> Visit<'ast> for DocumentationBuilder {
         if self.error.is_some() {
             return;
         }
-        loop {
-            if attributes_contains(&impl_block.attrs, "methods") {
-                let self_type = match get_type_name(*impl_block.self_ty.clone()) {
-                    Some(Type::Named(self_type)) => self_type,
-                    _ => {
-                        log::error!("Unknown type in 'impl' block");
-                        break;
-                    }
-                };
-                log::trace!("found #[methods] impl block for '{}'", self_type);
-                let class = self
-                    .documentation
-                    .classes
-                    .entry(self_type.clone())
-                    .or_insert(GdnativeClass {
-                        name: self_type,
-                        inherit: String::new(),
-                        documentation: String::new(),
-                        properties: Vec::new(),
-                        methods: Vec::new(),
-                    });
-                for item in &impl_block.items {
-                    if let syn::ImplItem::Method(method) = item {
-                        class.add_method(method);
-                    }
-                }
-            }
-            break;
-        }
+        self.visit_item_impl_inner(impl_block);
 
         visit::visit_item_impl(self, impl_block)
     }

@@ -234,7 +234,7 @@ impl Callbacks for MarkdownCallbacks {
         for (shortcut, links) in links {
             for (index, link) in links.into_iter().enumerate() {
                 let mut line = String::new();
-                line.push_str("[");
+                line.push('[');
                 line.push_str(&shortcut);
                 if index != 0 {
                     line.push_str(&format!("-{}", index));

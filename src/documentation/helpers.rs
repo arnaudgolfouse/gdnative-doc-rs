@@ -64,19 +64,18 @@ pub(super) fn get_docs(attrs: &[syn::Attribute]) -> String {
         if !attr.path.is_ident("doc") {
             continue;
         }
-        match attr.parse_meta() {
-            Ok(syn::Meta::NameValue(syn::MetaNameValue {
-                lit: syn::Lit::Str(lit_str),
-                ..
-            })) => {
-                if first_newline {
-                    first_newline = false;
-                } else {
-                    doc.push('\n');
-                }
-                doc.push_str(&lit_str.value());
+
+        if let Ok(syn::Meta::NameValue(syn::MetaNameValue {
+            lit: syn::Lit::Str(lit_str),
+            ..
+        })) = attr.parse_meta()
+        {
+            if first_newline {
+                first_newline = false;
+            } else {
+                doc.push('\n');
             }
-            _ => {}
+            doc.push_str(&lit_str.value());
         }
     }
     doc

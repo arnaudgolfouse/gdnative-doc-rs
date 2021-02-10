@@ -1,6 +1,5 @@
 use crate::{
-    backend, documentation::Documentation, Backend, Callbacks, ConfigFile, Error,
-    Resolver, Result,
+    backend, documentation::Documentation, Backend, Callbacks, ConfigFile, Error, Resolver, Result,
 };
 use std::{fs, path::PathBuf};
 
@@ -24,6 +23,12 @@ pub struct Builder {
     package: Option<Package>,
     /// Markdown options
     markdown_options: pulldown_cmark::Options,
+}
+
+impl Default for Builder {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Builder {
@@ -125,6 +130,7 @@ impl Builder {
         Ok(())
     }
 
+    #[allow(clippy::or_fun_call)]
     fn load_user_config(&mut self, path: PathBuf) -> Result<()> {
         log::debug!("loading user config at {:?}", path);
         let user_config = ConfigFile::read_from(&match fs::read_to_string(&path) {

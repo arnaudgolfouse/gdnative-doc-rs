@@ -189,9 +189,8 @@ impl Resolver {
     pub(super) fn resolve_event(&self, event: &mut Event) {
         match event {
             Event::Start(Tag::Link(_, dest, _)) | Event::End(Tag::Link(_, dest, _)) => {
-                match self.resolve(&dest) {
-                    Some(new_dest) => *dest = new_dest.to_string().into(),
-                    None => {}
+                if let Some(new_dest) = self.resolve(&dest) {
+                    *dest = new_dest.to_string().into()
                 }
             }
             Event::Start(Tag::Heading(n)) | Event::End(Tag::Heading(n)) => *n += 3,

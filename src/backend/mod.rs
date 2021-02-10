@@ -203,7 +203,7 @@ impl<'a> Generator<'a> {
             Event::End(Tag::Heading(1)),
             Event::Start(Tag::List(None)),
         ]);
-        for (class_name, _) in &self.documentation.classes {
+        for class_name in self.documentation.classes.keys() {
             let link = Tag::Link(
                 LinkType::Inline,
                 format!("./{}.{}", class_name, extension).into(),
