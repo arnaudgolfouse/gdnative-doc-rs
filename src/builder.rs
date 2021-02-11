@@ -3,6 +3,10 @@ use crate::{
 };
 use std::{fs, path::PathBuf};
 
+const PRISM_CSS: (&str, &str) = ("prism.css", include_str!("../html/prism.css"));
+const PRISM_JS: (&str, &str) = ("prism.js", include_str!("../html/prism.js"));
+const STYLE_CSS: (&str, &str) = ("style.css", include_str!("../html/style.css"));
+
 /// Used to specify a crate in [`Builder::package`].
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Package {
@@ -102,8 +106,6 @@ impl Builder {
             let files = generator.generate_files();
             let root_file = generator.generate_root_file(extension);
 
-            let backend_is_gut = matches!(&backend, Backend::Gut { .. });
-
             match &backend {
                 Backend::Markdown { output_dir }
                 | Backend::Html { output_dir }
@@ -111,10 +113,18 @@ impl Builder {
                     if let Err(err) = fs::create_dir_all(&output_dir) {
                         return Err(Error::Io(output_dir.clone(), err));
                     }
-                    if !backend_is_gut {
+                    if !matches!(&backend, Backend::Gut { .. }) {
                         let out_file = output_dir.join("index").with_extension(extension);
                         if let Err(err) = fs::write(&out_file, root_file) {
                             return Err(Error::Io(out_file, err));
+                        }
+                    }
+                    if matches!(&backend, Backend::Html { .. }) {
+                        for (file_name, file_content) in &[PRISM_CSS, PRISM_JS, STYLE_CSS] {
+                            let file = output_dir.join(file_name);
+                            if let Err(err) = fs::write(&file, file_content) {
+                                return Err(Error::Io(file, err));
+                            }
                         }
                     }
                     for (name, content) in files {
