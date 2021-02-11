@@ -84,7 +84,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// This function returns [`FAILED`] if `source_instance` is not a DijkstraMap.
+    /// This function returns [FAILED] if `source_instance` is not a DijkstraMap.
     ///
     /// # Example
     /// ```gdscript
@@ -119,7 +119,7 @@ impl Interface {
     /// # Errors
     ///
     /// If a point with the given id already exists, the map is unchanged and
-    /// [`FAILED`] is returned.
+    /// [FAILED] is returned.
     ///
     /// # Example
     /// ```gdscript
@@ -143,7 +143,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// If the given id does not exists in the map, [`FAILED`] is returned.
+    /// If the given id does not exists in the map, [FAILED] is returned.
     ///
     /// # Example
     /// ```gdscript
@@ -188,7 +188,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// Returns [`FAILED`] if the point does not exists in the map.
+    /// Returns [FAILED] if the point does not exists in the map.
     ///
     /// # Example
     /// ```gdscript
@@ -202,7 +202,7 @@ impl Interface {
     }
 
     #[export]
-    /// Returns [`true`] if the map contains the given point.
+    /// Returns [true] if the map contains the given point.
     pub fn has_point(&mut self, _owner: &Reference, point_id: i32) -> bool {
         false
     }
@@ -212,7 +212,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// Returns [`FAILED`] if the point does not exists in the map.
+    /// Returns [FAILED] if the point does not exists in the map.
     ///
     /// # Example
     /// ```gdscript
@@ -230,7 +230,7 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// Returns [`FAILED`] if the point does not exists in the map.
+    /// Returns [FAILED] if the point does not exists in the map.
     ///
     /// # Example
     /// ```gdscript
@@ -244,8 +244,8 @@ impl Interface {
     }
 
     #[export]
-    /// Returns [`true`] if the point exists and is disabled, otherwise returns
-    /// [`false`].
+    /// Returns [true] if the point exists and is disabled, otherwise returns
+    /// [false].
     ///
     /// # Example
     /// ```gdscript
@@ -270,11 +270,11 @@ impl Interface {
     /// - `target` : target point of the connection.
     /// - `weight` : weight of the connection. Defaults to `1.0`.
     /// - `bidirectional` : wether or not the reciprocal connection should be
-    /// made. Defaults to [`true`].
+    /// made. Defaults to [true].
     ///
     /// # Errors
     ///
-    /// Return [`FAILED`] if one of the points does not exists in the map.
+    /// Return [FAILED] if one of the points does not exists in the map.
     ///
     /// # Example
     /// ```gdscript
@@ -307,12 +307,12 @@ impl Interface {
     ///
     /// - `source` : source point of the connection.
     /// - `target` : target point of the connection.
-    /// - `bidirectional` (default : [`true`]) : if [`true`], also removes
+    /// - `bidirectional` (default : [true]) : if [true], also removes
     /// connection from target to source.
     ///
     /// # Errors
     ///
-    /// Returns [`FAILED`] if one of the points does not exist.
+    /// Returns [FAILED] if one of the points does not exist.
     ///
     /// # Example
     /// ```gdscript
@@ -338,7 +338,7 @@ impl Interface {
     }
 
     #[export]
-    /// Returns [`true`] if there is a connection from `source` to `target`
+    /// Returns [true] if there is a connection from `source` to `target`
     /// (and they both exist).
     ///
     /// # Example
@@ -382,7 +382,7 @@ impl Interface {
     #[export]
     /// Returns the cost of the shortest path from this point to the target.
     ///
-    /// If there is no path, the cost is [`INF`].
+    /// If there is no path, the cost is [INF].
     ///
     /// # Example
     /// ```gdscript
@@ -410,29 +410,29 @@ impl Interface {
     /// # Parameters
     ///
     /// - `origin` : ID of the origin point, or array of IDs (preferably
-    /// [`Int32Array`]).
-    /// - `optional_params: `[`Dictionary`] : Specifies optional arguments. \
+    /// [Int32Array]).
+    /// - `optional_params:` [Dictionary] : Specifies optional arguments. \
     /// Valid arguments are :
-    ///   - `"input_is_destination": `[`bool`] (default : [`true`]) : \
+    ///   - `"input_is_destination":` [bool] (default : [true]) : \
     ///     Wether or not the `origin` points are seen as destination.
-    ///   - `"maximum_cost": `[`float`]
-    ///         (default : [`INF`]) : \
+    ///   - `"maximum_cost":` [float]
+    ///         (default : [INF]) : \
     ///     Specifies maximum cost. Once all shortest paths no longer than
     ///     maximum cost are found, algorithm terminates. All points with cost
     ///     bigger than this are treated as inaccessible.
-    ///   - `"initial_costs": `[`float`] [`Array`] (default : empty) : \
+    ///   - `"initial_costs":` [float] [Array] (default : empty) : \
     ///     Specifies initial costs for given origins. Values are paired with
     ///     corresponding indices in the origin argument. Every unspecified
     ///     cost is defaulted to `0.0`. \
     ///     Can be used to weigh the origins with a preference.
-    ///   - `"terrain_weights": `[`Dictionary`] (default : empty) : \
+    ///   - `"terrain_weights":` [Dictionary] (default : empty) : \
     ///     Specifies weights of terrain types. Keys are terrain type IDs and
     ///     values are floats. Unspecified terrains will have
     ///     [infinite](INF) weight. \
     ///     Note that `-1` correspond to the default terrain (which have a
     ///     weight of `1.0`), and will thus be ignored if it appears in the
     ///     keys.
-    ///   - `"termination_points": `[`int`] OR [`int`] [`Array`] (default : empty) : \
+    ///   - `"termination_points":` [int] OR [int] [Array] (default : empty) : \
     ///     A set of points that stop the computation if they are reached by
     ///     the algorithm.
     ///
@@ -440,9 +440,9 @@ impl Interface {
     ///
     /// # Errors
     ///
-    /// [`FAILED`] is returned if :
+    /// [FAILED] is returned if :
     /// - One of the keys in `optional_params` is invalid.
-    /// - `origin` is neither an [`int`], a [`PoolIntArray`] or a [`Array`].
+    /// - `origin` is neither an [int], a [PoolIntArray] or a [Array].
     ///
     /// # Example
     /// ```gdscript
@@ -504,7 +504,7 @@ impl Interface {
     /// path from this point to the target.
     ///
     /// If there is no path from a point to the target, the cost is
-    /// [`INF`].
+    /// [INF].
     ///
     /// # Example
     /// ```gdscript
@@ -549,7 +549,7 @@ impl Interface {
 
     #[export]
     /// Returns the entire Dijkstra map of directions in form of a
-    /// [`Dictionary`].
+    /// [Dictionary].
     ///
     /// Keys are points' IDs, and values are the next point along the shortest
     /// path.
@@ -625,23 +625,23 @@ impl Interface {
     ///
     /// # Parameters
     ///
-    /// - `bounds` : Dimensions of the grid. At the moment, only [`Rect2`] is
+    /// - `bounds` : Dimensions of the grid. At the moment, only [Rect2] is
     ///   supported.
     /// - `terrain_type` (default : `-1`) : Terrain to use for all points of
     ///   the grid.
     /// - `orthogonal_cost` (default : `1.0`) : specifies cost of orthogonal
     ///   connections (up, down, right and left). \
-    ///   If `orthogonal_cost` is [`INF`] or [`NAN`], orthogonal
+    ///   If `orthogonal_cost` is [INF] or [NAN], orthogonal
     ///   connections are disabled.
-    /// - `diagonal_cost` (default : [`INF`]) : specifies cost of diagonal
+    /// - `diagonal_cost` (default : [INF]) : specifies cost of diagonal
     ///   connections. \
-    ///   If `diagonal_cost` is [`INF`] or [`NAN`], diagonal connections
+    ///   If `diagonal_cost` is [INF] or [NAN], diagonal connections
     ///   are disabled.
     ///
     /// # Returns
     ///
     /// This function returns a Dictionary where keys are coordinates of points
-    /// ([`Vector2`]) and values are their corresponding point IDs.
+    /// ([Vector2]) and values are their corresponding point IDs.
     pub fn add_square_grid(
         &mut self,
         _owner: &Reference,
@@ -664,16 +664,16 @@ impl Interface {
     ///
     /// # Returns
     ///
-    /// This function returns a [`Dictionary`] where keys are coordinates of
-    /// points ([`Vector2`]) and values are their corresponding point IDs.
+    /// This function returns a [Dictionary] where keys are coordinates of
+    /// points ([Vector2]) and values are their corresponding point IDs.
     ///
     /// # Note
     ///
     /// Hexgrid is in the "pointy" orentation by default (see example below).
     ///
     /// To switch to "flat" orientation, swap `width` and `height`, and switch
-    /// `x` and `y` coordinates of the keys in the return [`Dictionary`].
-    /// ([`Transform2D`] may be convenient there)
+    /// `x` and `y` coordinates of the keys in the return [Dictionary].
+    /// ([Transform2D] may be convenient there)
     ///
     /// # Example
     ///

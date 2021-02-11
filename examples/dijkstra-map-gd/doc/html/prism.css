@@ -1,11 +1,11 @@
-/* PrismJS 1.23.0
-https://prismjs.com/download.html#themes=prism-dark&languages=markup+css+clike+javascript+c+csharp+cpp+gdscript+go+lua+ruby+rust */
-
 /**
- * prism.js Dark theme for JavaScript, CSS and HTML
- * Based on the slides of the talk “/Reg(exp){2}lained/”
- * @author Lea Verou
- */
+  * prism.js theme, based on godot's documentation:
+  * https://github.com/godotengine/godot-docs/blob/master/_static/css/custom.css
+  * 
+  * Adapted from prism's 'Dark theme' by Lea Verou
+  * 
+  * @author Arnaud Golfouse
+  */
 
 code[class*="language-"], pre[class*="language-"] {
 	color: rgba(255, 255, 255, 0.85);
