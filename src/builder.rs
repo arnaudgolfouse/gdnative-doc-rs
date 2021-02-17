@@ -1,7 +1,7 @@
 use crate::{
-    backend::{self, Backend, BuiltinBackend},
+    backend::{self, BuiltinBackend, Callbacks, Resolver},
     documentation::Documentation,
-    Callbacks, ConfigFile, Error, Resolver, Result,
+    ConfigFile, Error, Result,
 };
 use std::{fs, path::PathBuf};
 
@@ -18,7 +18,7 @@ pub enum Package {
 /// A builder for generating godot documentation in various formats.
 pub struct Builder {
     resolver: Resolver,
-    backends: Vec<Backend>,
+    backends: Vec<(Box<dyn Callbacks>, PathBuf)>,
     /// Configuration file
     user_config: Option<PathBuf>,
     /// Used to disambiguate which crate to use.
@@ -61,17 +61,14 @@ impl Builder {
         self
     }
 
-    /// Add a new backend to the builder.
-    pub fn add_builtin_backend(mut self, backend: BuiltinBackend, output_dir: PathBuf) -> Self {
+    /// Add a new builtin backend to the builder.
+    pub fn add_backend(mut self, backend: BuiltinBackend, output_dir: PathBuf) -> Self {
         let callbacks: Box<dyn Callbacks> = match &backend {
             BuiltinBackend::Markdown => Box::new(backend::MarkdownCallbacks::default()),
             BuiltinBackend::Html => Box::new(backend::HtmlCallbacks::default()),
             BuiltinBackend::Gut => Box::new(backend::GutCallbacks::default()),
         };
-        self.backends.push(Backend {
-            callbacks,
-            output_dir,
-        });
+        self.backends.push((callbacks, output_dir));
         self
     }
 
@@ -81,10 +78,7 @@ impl Builder {
         callbacks: Box<dyn Callbacks>,
         output_dir: PathBuf,
     ) -> Self {
-        self.backends.push(Backend {
-            callbacks,
-            output_dir,
-        });
+        self.backends.push((callbacks, output_dir));
         self
     }
 
@@ -98,11 +92,7 @@ impl Builder {
         }
 
         let documentation = self.build_documentation()?;
-        for Backend {
-            mut callbacks,
-            output_dir,
-        } in self.backends
-        {
+        for (mut callbacks, output_dir) in self.backends {
             let generator =
                 backend::Generator::new(&self.resolver, &documentation, self.markdown_options);
 

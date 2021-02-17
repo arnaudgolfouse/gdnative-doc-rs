@@ -55,7 +55,7 @@ pub struct Method {
 /// Property exported to godot
 ///
 /// # Example
-/// ```rust,ignore
+/// ```text
 /// #[derive(NativeClass)]
 /// #[inherit(Resource)]
 /// struct MyResource {
@@ -103,14 +103,13 @@ pub struct GdnativeClass {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct Documentation {
+pub struct Documentation {
     /// Documentation of the root module.
-    pub(crate) root_documentation: String,
+    pub root_documentation: String,
     /// Classes, organized by name.
-    ///
-    /// FIXME: the name of the class is repeated all over the place.
-    ///       It may be better to use identifiers
-    pub(crate) classes: HashMap<String, GdnativeClass>,
+    // FIXME: the name of the class is repeated all over the place.
+    //       It may be better to use identifiers ?
+    pub classes: HashMap<String, GdnativeClass>,
 }
 
 impl Documentation {

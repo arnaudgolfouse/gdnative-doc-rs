@@ -1,17 +1,30 @@
+//! Module for implementing your own backend.
+//!
+//! To implement your own backend:
+//! 1. Create a structure that represent your backend, and implement [`Callbacks`] on
+//! it.
+//!
+//!     You can look in the source code of this crate to get examples of what that
+//!     would look like.
+//! 2. Add your backend to the `Builder` via the [`add_backend_with_callbacks`]
+//! method.
+//!
+//! [`add_backend_with_callbacks`]: crate::Builder::add_backend_with_callbacks
+
 mod callbacks;
 mod gut;
 mod html;
 mod markdown;
 mod resolve;
 
-use crate::documentation::{Documentation, Method, Property};
+use crate::documentation::{Method, Property};
 use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Options as MarkdownOptions, Parser, Tag};
-use std::path::PathBuf;
 
 pub(super) use gut::GutCallbacks;
 pub(super) use html::HtmlCallbacks;
 pub(super) use markdown::MarkdownCallbacks;
 
+pub use crate::documentation::Documentation;
 pub use callbacks::Callbacks;
 pub use resolve::Resolver;
 
@@ -36,22 +49,53 @@ macro_rules! broken_link_callback {
     };
 }
 
-#[derive(Debug)]
-pub(crate) struct Backend {
-    pub(crate) callbacks: Box<dyn Callbacks>,
-    pub(crate) output_dir: PathBuf,
-}
-
-/// Backend already implemented.
+/// Backend already implemented by this library.
+///
+/// This must be used in the [`Builder::add_backend`] method.
+///
+/// [`Builder::add_backend`]: crate::Builder::add_backend
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum BuiltinBackend {
     /// Markdown backend
+    ///
+    /// This generates a file for every structure that implements `NativeClass` + an
+    /// `index.md` file that contains the crate's documentation.
     Markdown,
     /// Html backend
+    ///
+    /// This generates a file for every structure that implements `NativeClass` + an
+    /// `index.html` file that contains the crate's documentation.
     ///
     /// Also generates css and javascript files (for styling and code highlighting).
     Html,
     /// Gut backend
+    /// 
+    /// This generates a file for every structure that implements `NativeClass`, generating tests from `gdscript` code blocks:
+    /// ```text
+    /// #[derive(NativeClass)]
+    /// #[inherit(Node)]
+    /// pub struct MyClass {}
+    /// 
+    /// #[methods]
+    /// impl MyClass {
+    ///     /// ```gdscript
+    ///     /// var x = 0
+    ///     /// assert_eq(x, 0)
+    ///     /// ```
+    ///     pub fn new() -> Self {
+    ///         // ...
+    /// # todo!()
+    ///     }
+    /// }
+    /// ```
+    /// Will generates the following in `MyClass.gd`:
+    /// ```gdscript
+    /// extends "res://addons/gut/test.gd"
+    /// 
+    /// func test_new():
+    ///     var x = 0
+    ///     assert_eq(x, 0)
+    /// ```
     Gut,
 }
 
@@ -59,10 +103,10 @@ pub enum BuiltinBackend {
 #[derive(Debug)]
 pub struct Generator<'a> {
     /// Used to resolve links.
-    resolver: &'a Resolver,
-    /// Data to encode.
-    documentation: &'a Documentation,
-    /// Markdown options
+    pub resolver: &'a Resolver,
+    /// Holds the crate's documentation.
+    pub documentation: &'a Documentation,
+    /// Enabled markdown options
     pub markdown_options: MarkdownOptions,
 }
 
@@ -80,6 +124,8 @@ impl<'a> Generator<'a> {
     }
 
     /// Generate the root documentation file of the crate.
+    ///
+    /// This is a decent default: it generate a description based on
     pub fn generate_root_file(&mut self, extension: &str, callbacks: &mut dyn Callbacks) -> String {
         let mut root_file = String::new();
         let resolver = self.resolver;

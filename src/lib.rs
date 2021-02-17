@@ -5,26 +5,22 @@
 //! # use std::error::Error;
 //! #
 //! # fn main() -> Result<(), Box<dyn Error>> {
-//! use gdnative_doc::{Backend, Builder, LevelFilter, init_logger};
+//! use gdnative_doc::{backend::BuiltinBackend, Builder, LevelFilter, init_logger};
+//! use std::path::PathBuf;
 //!
 //! init_logger(LevelFilter::Info)?;
 //! Builder::new()
-//!     .add_backend(Backend::Markdown {
-//!         output_dir: "doc".into(),
-//!     })
-//!     .add_backend(Backend::Gut {
-//!         output_dir: "addons/gut".into(),
-//!     })
+//!     .add_backend(BuiltinBackend::Markdown, PathBuf::from("doc"))
+//!     .add_backend(BuiltinBackend::Gut, PathBuf::from("addons/gut"))
 //!     .build()?;
 //! # Ok(()) }
 //! ```
 
-mod backend;
+pub mod backend;
 mod builder;
 mod config;
 pub mod documentation;
 
-pub use backend::{BuiltinBackend, Callbacks, Resolver};
 pub use builder::{Builder, Package};
 pub use config::ConfigFile;
 pub use simplelog::LevelFilter;

@@ -151,10 +151,10 @@ impl Resolver {
         documentation.classes = renamed_classes;
     }
 
-    /// Resolve a name to the class it must link to.
+    /// Resolve a name to the location it must link to.
     ///
     /// `link` must already have been stripped off the enclosing \`.
-    pub(super) fn resolve(&self, link: &str) -> Option<&str> {
+    pub fn resolve(&self, link: &str) -> Option<&str> {
         if let Some(link) = self.url_overrides.get(link) {
             return Some(link);
         }
@@ -186,6 +186,7 @@ impl Resolver {
         }
     }
 
+    /// Increase the header count, and resolve link destinations
     pub(super) fn resolve_event(&self, event: &mut Event) {
         match event {
             Event::Start(Tag::Link(_, dest, _)) | Event::End(Tag::Link(_, dest, _)) => {
