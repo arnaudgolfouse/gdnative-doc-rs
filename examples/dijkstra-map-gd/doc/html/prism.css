@@ -51,7 +51,7 @@ pre[class*="language-"] {
 	color: rgba(204, 206, 211, 0.5);
 }
 
-.token.boolean, .token.number, .token.symbol {
+.token.number, .token.symbol {
 	color: #a1ffe0;
 }
 
@@ -63,7 +63,7 @@ pre[class*="language-"] {
 	color: #ffeca1;
 }
 
-.token.keyword {
+.token.keyword, .token.boolean, .token.constant {
 	color: #ff7085;
 }
 
@@ -77,7 +77,7 @@ pre[class*="language-"] {
 
 /* type2 */
 
-.token.class, .token.constant, .token.namespace, .token.variable {
+.token.class, .token.namespace, .token.variable {
 	color: #c6ffed;
 }
 
