@@ -24,7 +24,7 @@ mod builder;
 mod config;
 pub mod documentation;
 
-pub use backend::{Backend, Callbacks, Resolver};
+pub use backend::{BuiltinBackend, Callbacks, Resolver};
 pub use builder::{Builder, Package};
 pub use config::ConfigFile;
 pub use simplelog::LevelFilter;

@@ -1,4 +1,9 @@
-use super::{Callbacks, Event, Method, Property, Resolver};
+use super::{Callbacks, Event, Generator, Method, Property, Resolver};
+use std::collections::HashMap;
+
+const PRISM_CSS: (&str, &str) = ("prism.css", include_str!("../../html/prism.css"));
+const PRISM_JS: (&str, &str) = ("prism.js", include_str!("../../html/prism.js"));
+const STYLE_CSS: (&str, &str) = ("style.css", include_str!("../../html/style.css"));
 
 /// Implementation of [`Callbacks`] for html.
 #[derive(Default)]
@@ -9,9 +14,8 @@ impl Callbacks for HtmlCallbacks {
         "html"
     }
 
-    fn start_file(&mut self, s: &mut String) {
-        s.push_str(
-            r#"<!DOCTYPE HTML>
+    fn generate_files(&mut self, mut generator: Generator) -> HashMap<String, String> {
+        const HTML_START: &str = r#"<!DOCTYPE HTML>
 <html>
 
 <head>
@@ -21,8 +25,29 @@ impl Callbacks for HtmlCallbacks {
 </head>
 
 <body>
-"#,
-        )
+"#;
+        const HTML_END: &str = r#"
+<script src="./prism.js"></script>
+</body>
+
+</html>"#;
+
+        let mut files = HashMap::new();
+
+        files.insert(
+            String::from("index.html"),
+            HTML_START.to_string() + &generator.generate_root_file("html", self) + HTML_END,
+        );
+        for (mut name, content) in generator.generate_files(self) {
+            name.push_str(".html");
+            files.insert(name, HTML_START.to_string() + &content + HTML_END);
+        }
+
+        for (name, content) in &[PRISM_CSS, PRISM_JS, STYLE_CSS] {
+            files.insert(name.to_string(), content.to_string());
+        }
+
+        files
     }
 
     fn start_method(&mut self, s: &mut String, resolver: &Resolver, method: &Method) {
@@ -35,15 +60,5 @@ impl Callbacks for HtmlCallbacks {
 
     fn encode(&mut self, s: &mut String, events: Vec<Event<'_>>) {
         pulldown_cmark::html::push_html(s, events.into_iter())
-    }
-
-    fn finish_encoding(&mut self, s: &mut String) {
-        s.push_str(
-            r#"<script src="./prism.js"></script>
-</body>
-
-</html>
-"#,
-        )
     }
 }

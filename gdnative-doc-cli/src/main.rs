@@ -1,5 +1,5 @@
 use clap::{App, Arg};
-use gdnative_doc::{init_logger, Backend, Builder, LevelFilter, Package};
+use gdnative_doc::{init_logger, Builder, BuiltinBackend, LevelFilter, Package};
 use std::path::PathBuf;
 
 fn main() -> anyhow::Result<()> {
@@ -16,19 +16,13 @@ fn main() -> anyhow::Result<()> {
         builder = builder.user_config(PathBuf::from(config_path));
     }
     if let Some(output_dir) = matches.value_of("markdown") {
-        builder = builder.add_backend(Backend::Markdown {
-            output_dir: PathBuf::from(output_dir),
-        })
+        builder = builder.add_builtin_backend(BuiltinBackend::Markdown, PathBuf::from(output_dir));
     }
     if let Some(output_dir) = matches.value_of("html") {
-        builder = builder.add_backend(Backend::Html {
-            output_dir: PathBuf::from(output_dir),
-        })
+        builder = builder.add_builtin_backend(BuiltinBackend::Html, PathBuf::from(output_dir));
     }
     if let Some(output_dir) = matches.value_of("gut") {
-        builder = builder.add_backend(Backend::Gut {
-            output_dir: PathBuf::from(output_dir),
-        })
+        builder = builder.add_builtin_backend(BuiltinBackend::Gut, PathBuf::from(output_dir));
     }
 
     if let Some(package_name) = matches.value_of("package") {

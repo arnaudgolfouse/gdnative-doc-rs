@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests;
 
-use super::{Callbacks, Method, Property, Resolver};
+use super::{Callbacks, Generator, Method, Property, Resolver};
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
 use std::collections::HashMap;
 
@@ -39,6 +39,21 @@ pub(crate) struct MarkdownCallbacks {
 impl Callbacks for MarkdownCallbacks {
     fn extension(&self) -> &'static str {
         "md"
+    }
+
+    fn generate_files(&mut self, mut generator: Generator) -> HashMap<String, String> {
+        let mut files = HashMap::new();
+
+        let mut index_content = generator.generate_root_file("md", self);
+        self.finish_encoding(&mut index_content);
+        files.insert(String::from("index.md"), index_content);
+        for (mut name, mut content) in generator.generate_files(self) {
+            name.push_str(".md");
+            self.finish_encoding(&mut content);
+            files.insert(name, content);
+        }
+
+        files
     }
 
     fn start_method(&mut self, s: &mut String, resolver: &Resolver, method: &Method) {
@@ -225,31 +240,6 @@ impl Callbacks for MarkdownCallbacks {
             }
         }
     }
-
-    fn finish_encoding(&mut self, s: &mut String) {
-        s.push('\n');
-        let mut link_lines = Vec::new();
-        self.shortcut_link.take();
-        let links = std::mem::take(&mut self.links);
-        for (shortcut, links) in links {
-            for (index, link) in links.into_iter().enumerate() {
-                let mut line = String::new();
-                line.push('[');
-                line.push_str(&shortcut);
-                if index != 0 {
-                    line.push_str(&format!("-{}", index));
-                }
-                line.push_str("]: ");
-                line.push_str(&link);
-                link_lines.push(line);
-            }
-        }
-        link_lines.sort_unstable();
-        for line in link_lines {
-            s.push('\n');
-            s.push_str(&line)
-        }
-    }
 }
 
 impl MarkdownCallbacks {
@@ -317,6 +307,32 @@ impl MarkdownCallbacks {
                 Nesting::Quote => s.push_str("> "),
                 Nesting::IndentedCode => s.push_str("    "),
             }
+        }
+    }
+
+    /// Called after encoding a file.
+    fn finish_encoding(&mut self, s: &mut String) {
+        s.push('\n');
+        let mut link_lines = Vec::new();
+        self.shortcut_link.take();
+        let links = std::mem::take(&mut self.links);
+        for (shortcut, links) in links {
+            for (index, link) in links.into_iter().enumerate() {
+                let mut line = String::new();
+                line.push('[');
+                line.push_str(&shortcut);
+                if index != 0 {
+                    line.push_str(&format!("-{}", index));
+                }
+                line.push_str("]: ");
+                line.push_str(&link);
+                link_lines.push(line);
+            }
+        }
+        link_lines.sort_unstable();
+        for line in link_lines {
+            s.push('\n');
+            s.push_str(&line)
         }
     }
 }

@@ -1,11 +1,9 @@
 use crate::{
-    backend, documentation::Documentation, Backend, Callbacks, ConfigFile, Error, Resolver, Result,
+    backend::{self, Backend, BuiltinBackend},
+    documentation::Documentation,
+    Callbacks, ConfigFile, Error, Resolver, Result,
 };
 use std::{fs, path::PathBuf};
-
-const PRISM_CSS: (&str, &str) = ("prism.css", include_str!("../html/prism.css"));
-const PRISM_JS: (&str, &str) = ("prism.js", include_str!("../html/prism.js"));
-const STYLE_CSS: (&str, &str) = ("style.css", include_str!("../html/style.css"));
 
 /// Used to specify a crate in [`Builder::package`].
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -20,7 +18,7 @@ pub enum Package {
 /// A builder for generating godot documentation in various formats.
 pub struct Builder {
     resolver: Resolver,
-    backends: Vec<(Backend, Box<dyn Callbacks>)>,
+    backends: Vec<Backend>,
     /// Configuration file
     user_config: Option<PathBuf>,
     /// Used to disambiguate which crate to use.
@@ -64,23 +62,29 @@ impl Builder {
     }
 
     /// Add a new backend to the builder.
-    pub fn add_backend(mut self, backend: Backend) -> Self {
+    pub fn add_builtin_backend(mut self, backend: BuiltinBackend, output_dir: PathBuf) -> Self {
         let callbacks: Box<dyn Callbacks> = match &backend {
-            Backend::Markdown { .. } => Box::new(backend::MarkdownCallbacks::default()),
-            Backend::Html { .. } => Box::new(backend::HtmlCallbacks::default()),
-            Backend::Gut { .. } => Box::new(backend::GutCallbacks::default()),
+            BuiltinBackend::Markdown => Box::new(backend::MarkdownCallbacks::default()),
+            BuiltinBackend::Html => Box::new(backend::HtmlCallbacks::default()),
+            BuiltinBackend::Gut => Box::new(backend::GutCallbacks::default()),
         };
-        self.backends.push((backend, callbacks));
+        self.backends.push(Backend {
+            callbacks,
+            output_dir,
+        });
         self
     }
 
     /// Add a new backend to the builder, with custom callbacks encoding functions.
     pub fn add_backend_with_callbacks(
         mut self,
-        backend: Backend,
         callbacks: Box<dyn Callbacks>,
+        output_dir: PathBuf,
     ) -> Self {
-        self.backends.push((backend, callbacks));
+        self.backends.push(Backend {
+            callbacks,
+            output_dir,
+        });
         self
     }
 
@@ -94,45 +98,23 @@ impl Builder {
         }
 
         let documentation = self.build_documentation()?;
-        for (backend, callbacks) in self.backends {
-            log::debug!("generating documentation for backend {:?}", backend);
-            let extension = callbacks.extension();
-            let mut generator = backend::Generator::new(
-                &self.resolver,
-                &documentation,
-                callbacks,
-                self.markdown_options,
-            );
-            let files = generator.generate_files();
-            let root_file = generator.generate_root_file(extension);
+        for Backend {
+            mut callbacks,
+            output_dir,
+        } in self.backends
+        {
+            let generator =
+                backend::Generator::new(&self.resolver, &documentation, self.markdown_options);
 
-            match &backend {
-                Backend::Markdown { output_dir }
-                | Backend::Html { output_dir }
-                | Backend::Gut { output_dir } => {
-                    if let Err(err) = fs::create_dir_all(&output_dir) {
-                        return Err(Error::Io(output_dir.clone(), err));
-                    }
-                    if !matches!(&backend, Backend::Gut { .. }) {
-                        let out_file = output_dir.join("index").with_extension(extension);
-                        if let Err(err) = fs::write(&out_file, root_file) {
-                            return Err(Error::Io(out_file, err));
-                        }
-                    }
-                    if matches!(&backend, Backend::Html { .. }) {
-                        for (file_name, file_content) in &[PRISM_CSS, PRISM_JS, STYLE_CSS] {
-                            let file = output_dir.join(file_name);
-                            if let Err(err) = fs::write(&file, file_content) {
-                                return Err(Error::Io(file, err));
-                            }
-                        }
-                    }
-                    for (name, content) in files {
-                        let out_file = output_dir.join(name).with_extension(extension);
-                        if let Err(err) = fs::write(&out_file, content) {
-                            return Err(Error::Io(out_file, err));
-                        }
-                    }
+            let files = callbacks.generate_files(generator);
+
+            if let Err(err) = fs::create_dir_all(&output_dir) {
+                return Err(Error::Io(output_dir, err));
+            }
+            for (file_name, content) in files {
+                let out_file = output_dir.join(file_name);
+                if let Err(err) = fs::write(&out_file, content) {
+                    return Err(Error::Io(out_file, err));
                 }
             }
         }

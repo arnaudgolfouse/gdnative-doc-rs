@@ -1,6 +1,6 @@
+use super::{Callbacks, Generator, Method};
 use pulldown_cmark::{CodeBlockKind, Event, Tag};
-
-use super::{Callbacks, Method};
+use std::collections::HashMap;
 
 #[derive(Default)]
 pub(crate) struct GutCallbacks {
@@ -14,14 +14,18 @@ impl Callbacks for GutCallbacks {
         "gd"
     }
 
-    fn start_class(
-        &mut self,
-        s: &mut String,
-        _resolver: &super::Resolver,
-        _class: &super::GdnativeClass,
-    ) {
-        s.push_str(r#"extends "res://addons/gut/test.gd""#);
-        s.push_str("\n\n")
+    fn generate_files(&mut self, mut generator: Generator) -> HashMap<String, String> {
+        let mut files = HashMap::new();
+
+        for (mut name, content) in generator.generate_files(self) {
+            name.push_str(".gd");
+            files.insert(
+                name,
+                String::from("extends \"res://addons/gut/test.gd\"\n\n") + &content,
+            );
+        }
+
+        files
     }
 
     fn start_method(&mut self, _s: &mut String, _resolver: &super::Resolver, method: &Method) {
