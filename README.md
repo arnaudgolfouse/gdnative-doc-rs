@@ -20,14 +20,47 @@ The goal of this tool is to automate writing documentation in Rust code that wil
 
 ## Example
 
-| An example: `process` function                 |
-| :--------------------------------------------- |
-| Input: Rust                                    |
-| ![](assets/process-function-rust.png)          |
-| Output: markdown                               |
-| ![](assets/process-function-markdown-dark.png) |
-| Output: gut                                    |
-| ![](assets/process-function-gut.png)           |
+An example: `process` function
+
+- Input: Rust
+
+  ````rust
+  /// Process the given [`String`], returning [`FAILED`] on error.
+  ///
+  /// # Example
+  /// ```gdscript
+  /// var processor = Myprocessor.new()
+  /// assert_eq(processor.process("hello"), OK)
+  /// ```
+  #[export]
+  pub fn process(&mut self, _: &Node, s: GodotString) -> i32 { /* ... */ }
+  ````
+
+- Output: Markdown
+
+  ````markdown
+  ### <a id="func-process"></a>func process(s: [String]) -> [int]
+
+  Process the given [`String`], returning [`FAILED`] on error.
+
+  #### Example
+  ```gdscript
+  var processor = Myprocessor.new()
+  assert_eq(processor.process("hello"), OK)
+  ```
+
+  [String]: https://docs.godotengine.org/en/stable/classes/class_string.html
+  [`String`]: https://docs.godotengine.org/en/stable/classes/class_string.html
+  [int]: https://docs.godotengine.org/en/stable/classes/class_int.html
+  [`FAILED`]: https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error
+  ````
+- Output: Gut
+
+  ```gdscript
+  func test_process():
+      var processor = Myprocessor.new()
+      assert_eq(processor.process("hello"), OK)
+  ```
 
 A more complete example can be found in the [examples/dijkstra-map-gd](examples/dijkstra-map-gd) directory.
 
