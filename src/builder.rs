@@ -16,8 +16,15 @@ pub enum Package {
 
 #[derive(Debug)]
 /// A builder for generating godot documentation in various formats.
+///
+/// For each format you want to generate, you must add a backend via [`add_backend`]
+/// or [`add_backend_with_callbacks`].
+///
+/// [`add_backend`]: Builder::add_backend
+/// [`add_backend_with_callbacks`]: Builder::add_backend_with_callbacks
 pub struct Builder {
     resolver: Resolver,
+    /// List of backends with their output directory
     backends: Vec<(Box<dyn Callbacks>, PathBuf)>,
     /// Configuration file
     user_config: Option<PathBuf>,
@@ -55,13 +62,32 @@ impl Builder {
 
     /// Specify the crate to document.
     ///
-    /// This can be either the name of the crate, or directly the path of the root file.
+    /// The `Builder` will try to automatically determine which crate you want to document. If this fails or you are not satisfied with its guess, you can use this function to manually specify the crate you want to refer to.
+    ///
+    /// This can be either the [name](Package::Name) of the crate, or directly the
+    /// [path of the root file](Package::Root).
+    ///
+    /// Only one crate can be documented at a time: if this function is called
+    /// multiple times, the last call will prevail.
+    ///
+    /// # Example
+    /// ```
+    /// # use gdnative_doc::{Builder, Package};
+    /// let builder = Builder::new().package(Package::Name("my-gdnative-crate".to_string()));
+    /// ```
     pub fn package(mut self, package: Package) -> Self {
         self.package = Some(package);
         self
     }
 
     /// Add a new builtin backend to the builder.
+    ///
+    /// # Example
+    /// ```
+    /// # use gdnative_doc::{Builder, backend::BuiltinBackend};
+    /// # use std::path::PathBuf;
+    /// let builder = Builder::new().add_backend(BuiltinBackend::Markdown, PathBuf::from("doc"));
+    /// ```
     pub fn add_backend(mut self, backend: BuiltinBackend, output_dir: PathBuf) -> Self {
         let callbacks: Box<dyn Callbacks> = match &backend {
             BuiltinBackend::Markdown => Box::new(backend::MarkdownCallbacks::default()),
@@ -73,6 +99,9 @@ impl Builder {
     }
 
     /// Add a new backend to the builder, with custom callbacks encoding functions.
+    ///
+    /// See the [`backend`](crate::backend) module for how to implement your own
+    /// backend.
     pub fn add_backend_with_callbacks(
         mut self,
         callbacks: Box<dyn Callbacks>,
@@ -84,8 +113,9 @@ impl Builder {
 
     /// Build the documentation.
     ///
-    /// This will generate the documentation for each [specified backend](Self::add_backend), creating the
-    /// ouput directories if needed.
+    /// This will generate the documentation for each
+    /// [specified backend](Self::add_backend), creating the ouput directories if
+    /// needed.
     pub fn build(mut self) -> Result<()> {
         if let Some(path) = self.user_config.take() {
             self.load_user_config(path)?

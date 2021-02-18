@@ -69,15 +69,15 @@ pub enum BuiltinBackend {
     /// Also generates css and javascript files (for styling and code highlighting).
     Html,
     /// Gut backend
-    /// 
-    /// This generates a file for every structure that implements `NativeClass`, 
+    ///
+    /// This generates a file for every structure that implements `NativeClass`,
     /// generating tests from `gdscript` code blocks:
     /// ```
     /// # use gdnative::prelude::*;
     /// #[derive(NativeClass)]
     /// #[inherit(Node)]
     /// pub struct MyClass {}
-    /// 
+    ///
     /// #[methods]
     /// impl MyClass {
     ///     /// ```gdscript
@@ -93,7 +93,7 @@ pub enum BuiltinBackend {
     /// Will generates the following in `MyClass.gd`:
     /// ```gdscript
     /// extends "res://addons/gut/test.gd"
-    /// 
+    ///
     /// func test_new():
     ///     var x = 0
     ///     assert_eq(x, 0)
@@ -101,7 +101,9 @@ pub enum BuiltinBackend {
     Gut,
 }
 
-/// Generate files given an encoding
+/// Holds the information necessary to generate the output files.
+///
+/// This is used by structures implementing [`Callbacks`].
 #[derive(Debug)]
 pub struct Generator<'a> {
     /// Used to resolve links.

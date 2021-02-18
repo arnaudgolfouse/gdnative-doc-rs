@@ -105,6 +105,7 @@ pub struct GdnativeClass {
     pub methods: Vec<Method>,
 }
 
+/// Holds the documentation for the crate.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Documentation {
     /// Documentation of the root module.

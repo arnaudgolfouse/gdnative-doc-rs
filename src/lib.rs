@@ -1,6 +1,12 @@
 //! Generating documentation for gdnative.
 //!
-//! # Example
+//! The goal of this library is to automatically generate documentation and
+//! [gut](https://github.com/bitwes/Gut) tests from a
+//! [gdnative](https://godot-rust.github.io/) project, that would still look good to
+//! Godot users.
+//!
+//! You should either use this library in a `build.rs` script, using the [`Builder`]
+//! structure to drive the documentation generation:
 //! ```rust,no_run
 //! # use std::error::Error;
 //! #
@@ -15,6 +21,8 @@
 //!     .build()?;
 //! # Ok(()) }
 //! ```
+//!
+//! Or you can use the [command-line tool](https://crates.io/crates/gdnative-doc-cli).
 
 pub mod backend;
 mod builder;

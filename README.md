@@ -20,35 +20,37 @@ The goal of this tool is to automate writing documentation in Rust code that wil
 
 ## Example
 
- An example: `process` function |
- :------- |
- Input: Rust |
- ![](assets/process-function-rust.png) |
- Output: markdown |
- ![](assets/process-function-markdown-dark.png) |
- Output: gut |
- ![](assets/process-function-gut.png) |
+| An example: `process` function                 |
+| :--------------------------------------------- |
+| Input: Rust                                    |
+| ![](assets/process-function-rust.png)          |
+| Output: markdown                               |
+| ![](assets/process-function-markdown-dark.png) |
+| Output: gut                                    |
+| ![](assets/process-function-gut.png)           |
 
 A more complete example can be found in the [examples/dijkstra-map-gd](examples/dijkstra-map-gd) directory.
 
 ## Usage
 
 This is meant to be used as a [build script](https://doc.rust-lang.org/cargo/reference/build-scripts.html): Set
+
 ```toml
 [build-dependencies]
 gdnative-doc = "*"
 ```
+
 In your Cargo.toml. Then you can drive the process with the `Builder` structure:
+
 ```rust
 // in build.rs
-use gdnative_doc::{Builder, Backend};
+use gdnative_doc::{backend::BuiltinBackend, init_logger, Builder, LevelFilter};
 use std::path::PathBuf;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    init_logger(LevelFilter::Info)?;
     Builder::new()
-        .add_backend(Backend::Markdown {
-            output_dir: PathBuf::from("doc/markdown"),
-        })
+        .add_backend(BuiltinBackend::Markdown, PathBuf::from("doc/markdown"))
         .build()?;
     Ok(())
 }
