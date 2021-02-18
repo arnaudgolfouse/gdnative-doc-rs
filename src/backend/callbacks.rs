@@ -35,7 +35,7 @@ impl dyn Callbacks {
     /// code duplication.
     ///
     /// This will create a level 3 header that looks like (in markdown):
-    /// ```text
+    /// ```markdown
     /// ### <a id="func-name"></a>func name(arg1: [type](link), ...) -> [type](link)
     /// ________
     /// ```
@@ -75,7 +75,7 @@ impl dyn Callbacks {
     /// code duplication.
     ///
     /// This will create a level 3 header that looks like (in markdown):
-    /// ```text
+    /// ```markdown
     /// ### <a id="property-name"></a> name: [type](link)
     /// ________
     /// ```

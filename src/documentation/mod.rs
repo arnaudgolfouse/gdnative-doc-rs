@@ -55,7 +55,9 @@ pub struct Method {
 /// Property exported to godot
 ///
 /// # Example
-/// ```text
+/// ```
+/// # use gdnative::prelude::*;
+/// # use gdnative::api::Resource;
 /// #[derive(NativeClass)]
 /// #[inherit(Resource)]
 /// struct MyResource {
@@ -63,6 +65,7 @@ pub struct Method {
 ///     #[property]
 ///     my_property: String,
 /// }
+/// # #[methods] impl MyResource { pub fn new(_: &Resource) -> Self { todo!() } }
 /// ```
 /// Translates into:
 /// ```text

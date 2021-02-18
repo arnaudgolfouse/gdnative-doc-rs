@@ -24,6 +24,7 @@ toml = "0.5"
 
 [dev-dependencies]
 insta = "1.5.3"
+gdnative = "0.9"
 
 # Make toml config parsing optional ?
 #[features]

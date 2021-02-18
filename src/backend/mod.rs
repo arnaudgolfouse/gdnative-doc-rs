@@ -70,8 +70,10 @@ pub enum BuiltinBackend {
     Html,
     /// Gut backend
     /// 
-    /// This generates a file for every structure that implements `NativeClass`, generating tests from `gdscript` code blocks:
-    /// ```text
+    /// This generates a file for every structure that implements `NativeClass`, 
+    /// generating tests from `gdscript` code blocks:
+    /// ```
+    /// # use gdnative::prelude::*;
     /// #[derive(NativeClass)]
     /// #[inherit(Node)]
     /// pub struct MyClass {}
@@ -82,7 +84,7 @@ pub enum BuiltinBackend {
     ///     /// var x = 0
     ///     /// assert_eq(x, 0)
     ///     /// ```
-    ///     pub fn new() -> Self {
+    ///     pub fn new(_: &Node) -> Self {
     ///         // ...
     /// # todo!()
     ///     }
