@@ -1,12 +1,12 @@
 //! User configuration settings.
 
-use crate::Result;
+use crate::{Error, Result};
 use serde::Deserialize;
-use std::collections::HashMap;
+use std::{collections::HashMap, fs, path::PathBuf};
 
 /// Structure that holds user configuration settings.
 ///
-/// Should be obtained via a `toml` [configuration file](ConfigFile::read_from).
+/// Should be obtained via a `toml` configuration file.
 ///
 /// # Example
 /// ```
@@ -17,7 +17,7 @@ use std::collections::HashMap;
 /// markdown_options = ["STRIKETHROUGH", "TABLES"]
 /// "#;
 ///
-/// let config_file = ConfigFile::read_from(CONFIG_FILE_CONTENT)?;
+/// let config_file = ConfigFile::load_from_str(CONFIG_FILE_CONTENT)?;
 /// assert!(config_file.url_overrides.is_none());
 /// assert_eq!(config_file.rename_classes.unwrap()["RustName"], "GDScriptName");
 /// assert_eq!(
@@ -26,6 +26,9 @@ use std::collections::HashMap;
 /// );
 /// # Ok(()) }
 /// ```
+///
+/// Note that if you are reading the configuration file from an on-disk file, you
+/// should prefer [`load_from_path`](ConfigFile::load_from_path).
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub struct ConfigFile {
     /// List of items for which the linking url should be overriden.
@@ -50,8 +53,17 @@ pub struct ConfigFile {
 }
 
 impl ConfigFile {
-    /// Read `ConfigFile` from the given `toml` configuration file.
-    pub fn read_from(config: &str) -> Result<Self> {
+    /// Load the config file from the given `path`.
+    pub fn load_from_path(path: PathBuf) -> Result<Self> {
+        log::debug!("loading user config at {:?}", path);
+        Ok(toml::from_str(&match fs::read_to_string(&path) {
+            Ok(config) => config,
+            Err(err) => return Err(Error::Io(path, err)),
+        })?)
+    }
+
+    /// Load the config file from the given `config` string.
+    pub fn load_from_str(config: &str) -> Result<Self> {
         Ok(toml::from_str(config)?)
     }
 

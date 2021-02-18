@@ -23,7 +23,7 @@ thiserror = "1.0"
 toml = "0.5"
 
 [dev-dependencies]
-insta = "1.5.3"
+insta = "1.6.3"
 gdnative = "0.9"
 
 # Make toml config parsing optional ?

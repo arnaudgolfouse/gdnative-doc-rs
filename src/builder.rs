@@ -27,11 +27,9 @@ pub struct Builder {
     /// List of backends with their output directory
     backends: Vec<(Box<dyn Callbacks>, PathBuf)>,
     /// Configuration file
-    user_config: Option<PathBuf>,
+    user_config: Option<ConfigFile>,
     /// Used to disambiguate which crate to use.
     package: Option<Package>,
-    /// Markdown options
-    markdown_options: pulldown_cmark::Options,
 }
 
 impl Default for Builder {
@@ -48,15 +46,14 @@ impl Builder {
             backends: Vec::new(),
             user_config: None,
             package: None,
-            markdown_options: pulldown_cmark::Options::empty(),
         }
     }
 
-    /// Set configuration options according to the file at `path`.
+    /// Set user configuration options.
     ///
-    /// See the [`ConfigFile`] documentation for information about the configuration file format.
-    pub fn user_config(mut self, path: PathBuf) -> Self {
-        self.user_config = Some(path);
+    /// See the `ConfigFile` documentation for information about the configuration file format.
+    pub fn user_config(mut self, config: ConfigFile) -> Self {
+        self.user_config = Some(config);
         self
     }
 
@@ -116,15 +113,22 @@ impl Builder {
     /// This will generate the documentation for each
     /// [specified backend](Self::add_backend), creating the ouput directories if
     /// needed.
+    #[allow(clippy::or_fun_call)]
     pub fn build(mut self) -> Result<()> {
-        if let Some(path) = self.user_config.take() {
-            self.load_user_config(path)?
-        }
+        let markdown_options = if let Some(user_config) = self.user_config.take() {
+            let markdown_options = user_config
+                .markdown_options()
+                .unwrap_or(pulldown_cmark::Options::empty());
+            self.resolver.apply_user_config(user_config);
+            markdown_options
+        } else {
+            pulldown_cmark::Options::empty()
+        };
 
         let documentation = self.build_documentation()?;
         for (mut callbacks, output_dir) in self.backends {
             let generator =
-                backend::Generator::new(&self.resolver, &documentation, self.markdown_options);
+                backend::Generator::new(&self.resolver, &documentation, markdown_options);
 
             let files = callbacks.generate_files(generator);
 
@@ -139,21 +143,6 @@ impl Builder {
             }
         }
 
-        Ok(())
-    }
-
-    #[allow(clippy::or_fun_call)]
-    fn load_user_config(&mut self, path: PathBuf) -> Result<()> {
-        log::debug!("loading user config at {:?}", path);
-        let user_config = ConfigFile::read_from(&match fs::read_to_string(&path) {
-            Ok(config) => config,
-            Err(err) => return Err(Error::Io(path, err)),
-        })?;
-
-        self.markdown_options = user_config
-            .markdown_options()
-            .unwrap_or(pulldown_cmark::Options::empty());
-        self.resolver.apply_user_config(user_config);
         Ok(())
     }
 

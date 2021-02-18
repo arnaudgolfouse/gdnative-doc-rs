@@ -11,7 +11,7 @@
 //! # use std::error::Error;
 //! #
 //! # fn main() -> Result<(), Box<dyn Error>> {
-//! use gdnative_doc::{backend::BuiltinBackend, Builder, LevelFilter, init_logger};
+//! use gdnative_doc::{backend::BuiltinBackend, init_logger, Builder, LevelFilter};
 //! use std::path::PathBuf;
 //!
 //! init_logger(LevelFilter::Info)?;

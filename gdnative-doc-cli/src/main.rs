@@ -1,5 +1,7 @@
 use clap::{App, Arg};
-use gdnative_doc::{backend::BuiltinBackend, init_logger, Builder, LevelFilter, Package};
+use gdnative_doc::{
+    backend::BuiltinBackend, init_logger, Builder, ConfigFile, LevelFilter, Package,
+};
 use std::path::PathBuf;
 
 fn main() -> anyhow::Result<()> {
@@ -13,7 +15,7 @@ fn main() -> anyhow::Result<()> {
     let mut builder = Builder::new();
 
     if let Some(config_path) = matches.value_of("config") {
-        builder = builder.user_config(PathBuf::from(config_path));
+        builder = builder.user_config(ConfigFile::load_from_path(PathBuf::from(config_path))?);
     }
     if let Some(output_dir) = matches.value_of("markdown") {
         builder = builder.add_backend(BuiltinBackend::Markdown, PathBuf::from(output_dir));
