@@ -17,7 +17,7 @@ cargo_metadata = "0.12"
 log = { version = "0.4", features = ["std"] }
 pulldown-cmark = { version = "0.8", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
-simplelog = "0.9"
+simplelog = { version = "0.9", optional = true }
 syn = { version = "1.0", default-features = false, features = ["parsing", "full", "visit"] }
 thiserror = "1.0"
 toml = "0.5"
@@ -26,9 +26,8 @@ toml = "0.5"
 insta = "1.6.3"
 gdnative = "0.9"
 
-# Make toml config parsing optional ?
-#[features]
-#default = ["toml"]
+[features]
+default = ["simplelog"]
 
 [profile.release]
 lto = true

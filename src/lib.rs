@@ -31,6 +31,7 @@ pub mod documentation;
 
 pub use builder::{Builder, Package};
 pub use config::ConfigFile;
+#[cfg(feature = "simplelog")]
 pub use simplelog::LevelFilter;
 
 /// Type of errors emitted by this library.
@@ -63,6 +64,8 @@ Please select the one you want via either:
     /// When trying to determine a root file, no suitable candidate was found.
     #[error("No crate was found with a 'cdylib' target")]
     NoCandidateCrate,
+    #[cfg(feature = "simplelog")]
+    /// Error while initializing logging via [`init_logger`].
     #[error("Logger initialization failed: {0}")]
     InitLogger(#[from] log::SetLoggerError),
 }
@@ -71,7 +74,14 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Initialize the logger with the specified logging level.
 ///
+/// The library regularly log messages using the [`log`] crate, so this is a utility
+/// function for initializing log via the [`simplelog`] crate.
+///
+/// If you want to use another logger, you can disable the `simplelog` feature of this
+/// crate.
+///
 /// The default recommended level is [`LevelFilter::Info`].
+#[cfg(feature = "simplelog")]
 pub fn init_logger(level: LevelFilter) -> Result<()> {
     simplelog::TermLogger::init(
         level,
