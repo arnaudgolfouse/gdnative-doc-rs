@@ -17,14 +17,13 @@ mod html;
 mod markdown;
 mod resolve;
 
-use crate::documentation::{Method, Property};
+use crate::documentation::{Documentation, Method, Property};
 use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Options as MarkdownOptions, Parser, Tag};
 
 pub(super) use gut::GutCallbacks;
 pub(super) use html::HtmlCallbacks;
 pub(super) use markdown::MarkdownCallbacks;
 
-pub use crate::documentation::Documentation;
 pub use callbacks::Callbacks;
 pub use resolve::Resolver;
 
