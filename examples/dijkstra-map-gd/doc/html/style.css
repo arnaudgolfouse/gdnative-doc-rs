@@ -4,7 +4,6 @@
 */
 
 body {
-	font-size: larger;
 	margin-right: 10rem;
 	margin-left: 10rem;
 	color: white;
@@ -30,7 +29,7 @@ table, th, td {
 }
 
 tr:nth-child(odd) {
-	background-color: #3a3d41;
+	background-color: #3b3e41;
 }
 
 th {
@@ -79,6 +78,10 @@ a:link {
 a:hover {
 	color: #9df;
 	text-decoration: underline;
+}
+
+a:active {
+	color: #6ad;
 }
 
 a:visited {
