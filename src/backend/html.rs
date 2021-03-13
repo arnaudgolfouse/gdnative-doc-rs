@@ -45,10 +45,12 @@ impl Callbacks for HtmlCallbacks {
             r"<!-- 
 This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
 
+Crate: {}
 Source file: {}
 -->
 
 {}{}{}",
+            generator.documentation.name,
             generator
                 .documentation
                 .root_file
@@ -70,10 +72,12 @@ Source file: {}
                 r"<!-- 
 This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
 
+Crate: {}
 Source file: {}
 -->
 
 {}{}{}",
+                generator.documentation.name,
                 root_dir
                     .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
                     .unwrap_or(&PathBuf::new())

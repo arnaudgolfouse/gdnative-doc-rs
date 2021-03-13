@@ -152,13 +152,13 @@ impl Builder {
     /// [`find_root_file`].
     fn build_documentation(&mut self) -> Result<Documentation> {
         log::debug!("building documentation");
-        let root_file = match self.package.take() {
-            Some(Package::Root(root_file)) => root_file,
+        let (name, root_file) = match self.package.take() {
+            Some(Package::Root(root_file)) => ("_".to_string(), root_file),
             Some(Package::Name(name)) => find_root_file(Some(&name))?,
             None => find_root_file(None)?,
         };
 
-        let mut documentation = Documentation::from_root_file(root_file)?;
+        let mut documentation = Documentation::from_root_file(name, root_file)?;
         self.resolver.rename_classes(&mut documentation);
         Ok(documentation)
         /*let package = CrateTree::from_root_file(root_file)?;
@@ -172,7 +172,8 @@ impl Builder {
     }
 }
 
-fn find_root_file(package_name: Option<&str>) -> Result<PathBuf> {
+/// Returns the name of the crate and the root file.
+fn find_root_file(package_name: Option<&str>) -> Result<(String, PathBuf)> {
     let metadata = cargo_metadata::MetadataCommand::new().exec()?;
     let mut root_files = Vec::new();
     for package in metadata.packages {
@@ -192,7 +193,7 @@ fn find_root_file(package_name: Option<&str>) -> Result<PathBuf> {
             .into_iter()
             .find(|(name, _)| name == package_name)
         {
-            Some((_, root_file)) => Ok(root_file),
+            Some((_, root_file)) => Ok((package_name.to_string(), root_file)),
             None => Err(Error::NoMatchingCrate(package_name.to_string())),
         }
     } else {
@@ -201,8 +202,8 @@ fn find_root_file(package_name: Option<&str>) -> Result<PathBuf> {
                 root_files.into_iter().map(|(name, _)| name).collect(),
             ));
         }
-        if let Some((_, root_file)) = root_files.pop() {
-            Ok(root_file)
+        if let Some((name, root_file)) = root_files.pop() {
+            Ok((name, root_file))
         } else {
             Err(Error::NoCandidateCrate)
         }

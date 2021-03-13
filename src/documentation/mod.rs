@@ -112,6 +112,8 @@ pub struct GdnativeClass {
 /// Holds the documentation for the crate.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Documentation {
+    /// Name of the crate.
+    pub name: String,
     /// Path of the root file for the documentation.
     pub root_file: PathBuf,
     /// Documentation of the root module.
@@ -123,12 +125,13 @@ pub struct Documentation {
 }
 
 impl Documentation {
-    pub(crate) fn from_root_file(root_file: PathBuf) -> Result<Self> {
+    pub(crate) fn from_root_file(name: String, root_file: PathBuf) -> Result<Self> {
         use syn::visit::Visit;
 
         let root_file_content = read_file_at(&root_file)?;
         let mut builder = builder::DocumentationBuilder {
             documentation: Self {
+                name,
                 root_file: root_file.clone(),
                 root_documentation: String::new(),
                 classes: HashMap::new(),

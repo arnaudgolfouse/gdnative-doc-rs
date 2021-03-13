@@ -1,6 +1,7 @@
 <!-- 
 This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
 
+Crate: dijkstra-map-gd
 Source file: lib.rs
 -->
 
