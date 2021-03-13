@@ -1,5 +1,9 @@
 extends "res://addons/gut/test.gd"
 
+# This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
+# 
+# Source file: lib.rs
+
 func test_new():
     var dijkstra_map = DijkstraMap.new()
 

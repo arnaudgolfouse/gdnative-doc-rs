@@ -17,7 +17,7 @@ mod html;
 mod markdown;
 mod resolve;
 
-use crate::documentation::{Documentation, Method, Property};
+use crate::documentation::{Documentation, GdnativeClass, Method, Property};
 use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Options as MarkdownOptions, Parser, Tag};
 
 pub(super) use gut::GutCallbacks;
@@ -138,8 +138,7 @@ impl<'a> Generator<'a> {
     /// ```
     ///
     /// This then uses [`Callbacks::encode`] to encode this in the target format.
-    pub fn generate_root_file(&mut self, extension: &str, callbacks: &mut dyn Callbacks) -> String {
-        let mut root_file = String::new();
+    pub fn generate_root_file(&self, extension: &str, callbacks: &mut dyn Callbacks) -> String {
         let resolver = self.resolver;
         let mut broken_link_callback = broken_link_callback!(resolver);
         let class_iterator = EventIterator {
@@ -172,11 +171,12 @@ impl<'a> Generator<'a> {
             ])
         }
         events.push(Event::End(Tag::List(None)));
+        let mut root_file = String::new();
         callbacks.encode(&mut root_file, events);
         root_file
     }
 
-    /// Generate pairs of `(class_name, file_content)`.
+    /// Generate the documentation for a class.
     ///
     /// The following will be generated (in markdown style):
     /// ```text
@@ -206,129 +206,130 @@ impl<'a> Generator<'a> {
     /// ```
     ///
     /// This then uses [`Callbacks::encode`] to encode this in the target format.
-    pub fn generate_files(&mut self, callbacks: &mut dyn Callbacks) -> Vec<(String, String)> {
-        let mut results = Vec::new();
-        for (name, class) in &self.documentation.classes {
-            let mut class_file = String::new();
-            let resolver = &self.resolver;
+    pub fn generate_file(
+        &self,
+        name: &str,
+        class: &GdnativeClass,
+        callbacks: &mut dyn Callbacks,
+    ) -> String {
+        let mut class_file = String::new();
+        let resolver = &self.resolver;
 
-            let inherit_link = resolver.resolve(&class.inherit);
+        let inherit_link = resolver.resolve(&class.inherit);
 
-            // Name of the class + inherit
-            let mut events = vec![
-                Event::Start(Tag::Heading(1)),
-                Event::Text(CowStr::Borrowed(&name)),
-                Event::End(Tag::Heading(1)),
-                Event::Start(Tag::Paragraph),
-                Event::Start(Tag::Strong),
-                Event::Text(CowStr::Borrowed("Inherit:")),
-                Event::End(Tag::Strong),
-                Event::Text(CowStr::Borrowed(" ")),
-            ];
-            if let Some(inherit_link) = inherit_link.as_ref() {
-                let link = Tag::Link(
-                    LinkType::Shortcut,
-                    CowStr::Borrowed(&inherit_link),
-                    CowStr::Borrowed(""),
-                );
-                events.extend(vec![
-                    Event::Start(link.clone()),
-                    Event::Text(CowStr::Borrowed(&class.inherit)),
-                    Event::End(link),
-                ])
-            } else {
-                events.push(Event::Text(CowStr::Borrowed(&class.inherit)))
-            }
+        // Name of the class + inherit
+        let mut events = vec![
+            Event::Start(Tag::Heading(1)),
+            Event::Text(CowStr::Borrowed(&name)),
+            Event::End(Tag::Heading(1)),
+            Event::Start(Tag::Paragraph),
+            Event::Start(Tag::Strong),
+            Event::Text(CowStr::Borrowed("Inherit:")),
+            Event::End(Tag::Strong),
+            Event::Text(CowStr::Borrowed(" ")),
+        ];
+        if let Some(inherit_link) = inherit_link.as_ref() {
+            let link = Tag::Link(
+                LinkType::Shortcut,
+                CowStr::Borrowed(&inherit_link),
+                CowStr::Borrowed(""),
+            );
             events.extend(vec![
-                Event::End(Tag::Paragraph),
-                Event::Start(Tag::Heading(2)),
-                Event::Text(CowStr::Borrowed("Description")),
-                Event::End(Tag::Heading(2)),
-            ]);
-            callbacks.encode(&mut class_file, events);
+                Event::Start(link.clone()),
+                Event::Text(CowStr::Borrowed(&class.inherit)),
+                Event::End(link),
+            ])
+        } else {
+            events.push(Event::Text(CowStr::Borrowed(&class.inherit)))
+        }
+        events.extend(vec![
+            Event::End(Tag::Paragraph),
+            Event::Start(Tag::Heading(2)),
+            Event::Text(CowStr::Borrowed("Description")),
+            Event::End(Tag::Heading(2)),
+        ]);
+        callbacks.encode(&mut class_file, events);
 
-            // Class description
-            let mut broken_link_callback = broken_link_callback!(resolver);
-            let class_documentation = EventIterator {
-                context: resolver,
-                parser: pulldown_cmark::Parser::new_with_broken_link_callback(
-                    &class.documentation,
-                    self.markdown_options,
-                    Some(&mut broken_link_callback),
-                ),
-            }
-            .into_iter()
-            .collect();
-            callbacks.encode(&mut class_file, class_documentation);
+        // Class description
+        let mut broken_link_callback = broken_link_callback!(resolver);
+        let class_documentation = EventIterator {
+            context: resolver,
+            parser: pulldown_cmark::Parser::new_with_broken_link_callback(
+                &class.documentation,
+                self.markdown_options,
+                Some(&mut broken_link_callback),
+            ),
+        }
+        .into_iter()
+        .collect();
+        callbacks.encode(&mut class_file, class_documentation);
 
-            // Properties table
-            if !class.properties.is_empty() {
-                callbacks.encode(
-                    &mut class_file,
-                    Self::properties_table(&class.properties, resolver),
-                )
-            }
-
-            // Methods table
+        // Properties table
+        if !class.properties.is_empty() {
             callbacks.encode(
                 &mut class_file,
-                Self::methods_table(&class.methods, resolver),
-            );
+                Self::properties_table(&class.properties, resolver),
+            )
+        }
 
-            // Properties descriptions
-            if !class.properties.is_empty() {
-                callbacks.encode(
-                    &mut class_file,
-                    vec![
-                        Event::Start(Tag::Heading(2)),
-                        Event::Text(CowStr::Borrowed("Properties Descriptions")),
-                        Event::End(Tag::Heading(2)),
-                    ],
-                );
-                for property in &class.properties {
-                    callbacks.start_property(&mut class_file, resolver, property);
-                    let mut broken_link_callback = broken_link_callback!(resolver);
-                    let property_documentation = EventIterator {
-                        context: resolver,
-                        parser: pulldown_cmark::Parser::new_with_broken_link_callback(
-                            &property.documentation,
-                            self.markdown_options,
-                            Some(&mut broken_link_callback),
-                        ),
-                    }
-                    .into_iter()
-                    .collect();
-                    callbacks.encode(&mut class_file, property_documentation);
-                }
-            }
+        // Methods table
+        callbacks.encode(
+            &mut class_file,
+            Self::methods_table(&class.methods, resolver),
+        );
 
-            // Methods descriptions
+        // Properties descriptions
+        if !class.properties.is_empty() {
             callbacks.encode(
                 &mut class_file,
                 vec![
                     Event::Start(Tag::Heading(2)),
-                    Event::Text(CowStr::Borrowed("Methods Descriptions")),
+                    Event::Text(CowStr::Borrowed("Properties Descriptions")),
                     Event::End(Tag::Heading(2)),
                 ],
             );
-            for method in &class.methods {
-                callbacks.start_method(&mut class_file, resolver, method);
+            for property in &class.properties {
+                callbacks.start_property(&mut class_file, resolver, property);
                 let mut broken_link_callback = broken_link_callback!(resolver);
-                let method_documentation = EventIterator {
+                let property_documentation = EventIterator {
                     context: resolver,
                     parser: pulldown_cmark::Parser::new_with_broken_link_callback(
-                        &method.documentation,
+                        &property.documentation,
                         self.markdown_options,
                         Some(&mut broken_link_callback),
                     ),
                 }
                 .into_iter()
                 .collect();
-                callbacks.encode(&mut class_file, method_documentation);
+                callbacks.encode(&mut class_file, property_documentation);
             }
-            results.push((name.clone(), class_file))
         }
-        results
+
+        // Methods descriptions
+        callbacks.encode(
+            &mut class_file,
+            vec![
+                Event::Start(Tag::Heading(2)),
+                Event::Text(CowStr::Borrowed("Methods Descriptions")),
+                Event::End(Tag::Heading(2)),
+            ],
+        );
+        for method in &class.methods {
+            callbacks.start_method(&mut class_file, resolver, method);
+            let mut broken_link_callback = broken_link_callback!(resolver);
+            let method_documentation = EventIterator {
+                context: resolver,
+                parser: pulldown_cmark::Parser::new_with_broken_link_callback(
+                    &method.documentation,
+                    self.markdown_options,
+                    Some(&mut broken_link_callback),
+                ),
+            }
+            .into_iter()
+            .collect();
+            callbacks.encode(&mut class_file, method_documentation);
+        }
+        class_file
     }
 
     /// Create a table summarizing the properties.

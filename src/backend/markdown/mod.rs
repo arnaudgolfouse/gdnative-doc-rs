@@ -3,7 +3,7 @@ mod tests;
 
 use super::{Callbacks, Generator, Method, Property, Resolver};
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Clone, Copy, PartialEq)]
 enum Nesting {
@@ -41,14 +41,45 @@ impl Callbacks for MarkdownCallbacks {
         "md"
     }
 
-    fn generate_files(&mut self, mut generator: Generator) -> HashMap<String, String> {
+    fn generate_files(&mut self, generator: Generator) -> HashMap<String, String> {
         let mut files = HashMap::new();
 
-        let mut index_content = generator.generate_root_file("md", self);
+        let mut index_content = format!(
+            r"<!-- 
+This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
+
+Source file: {}
+-->
+
+{}",
+            generator
+                .documentation
+                .root_file
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or_default(),
+            generator.generate_root_file("md", self),
+        );
+
         self.finish_encoding(&mut index_content);
         files.insert(String::from("index.md"), index_content);
-        for (mut name, mut content) in generator.generate_files(self) {
-            name.push_str(".md");
+        let root_dir = generator.documentation.root_file.parent();
+        for (name, class) in &generator.documentation.classes {
+            let mut content = format!(
+                r"<!-- 
+This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
+
+Source file: {}
+-->
+
+{}",
+                root_dir
+                    .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
+                    .unwrap_or(&PathBuf::new())
+                    .display(),
+                generator.generate_file(name, class, self)
+            );
+            let name = format!("{}.md", name);
             self.finish_encoding(&mut content);
             files.insert(name, content);
         }

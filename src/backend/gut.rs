@@ -1,6 +1,6 @@
 use super::{Callbacks, Generator, Method};
 use pulldown_cmark::{CodeBlockKind, Event, Tag};
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Default)]
 pub(crate) struct GutCallbacks {
@@ -14,11 +14,24 @@ impl Callbacks for GutCallbacks {
         "gd"
     }
 
-    fn generate_files(&mut self, mut generator: Generator) -> HashMap<String, String> {
+    fn generate_files(&mut self, generator: Generator) -> HashMap<String, String> {
         let mut files = HashMap::new();
 
-        for (mut name, content) in generator.generate_files(self) {
-            name.push_str(".gd");
+        let root_dir = generator.documentation.root_file.parent();
+        for (name, class) in &generator.documentation.classes {
+            let content = format!(
+                r"# This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
+# 
+# Source file: {}
+
+{}",
+                root_dir
+                    .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
+                    .unwrap_or(&PathBuf::new())
+                    .display(),
+                generator.generate_file(name, class, self)
+            );
+            let name = format!("{}.gd", name);
             files.insert(
                 name,
                 String::from("extends \"res://addons/gut/test.gd\"\n\n") + &content,

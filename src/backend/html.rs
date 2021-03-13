@@ -1,5 +1,5 @@
 use super::{Callbacks, Event, Generator, Method, Property, Resolver};
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 const PRISM_CSS: (&str, &str) = ("prism.css", include_str!("../../html/prism.css"));
 const PRISM_JS: (&str, &str) = ("prism.js", include_str!("../../html/prism.js"));
@@ -14,7 +14,7 @@ impl Callbacks for HtmlCallbacks {
         "html"
     }
 
-    fn generate_files(&mut self, mut generator: Generator) -> HashMap<String, String> {
+    fn generate_files(&mut self, generator: Generator) -> HashMap<String, String> {
         const HTML_START: &str = r#"<!DOCTYPE HTML>
 <html>
 
@@ -34,13 +34,56 @@ impl Callbacks for HtmlCallbacks {
 
         let mut files = HashMap::new();
 
-        files.insert(
-            String::from("index.html"),
-            HTML_START.to_string() + &generator.generate_root_file("html", self) + HTML_END,
+        generator
+            .documentation
+            .root_file
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or_default();
+
+        let index_content = format!(
+            r"<!-- 
+This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
+
+Source file: {}
+-->
+
+{}{}{}",
+            generator
+                .documentation
+                .root_file
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or_default(),
+            HTML_START,
+            generator.generate_root_file("html", self),
+            HTML_END
         );
-        for (mut name, content) in generator.generate_files(self) {
-            name.push_str(".html");
-            files.insert(name, HTML_START.to_string() + &content + HTML_END);
+
+        files.insert(String::from("index.html"), index_content);
+
+        // directory that contains the root file
+        let root_dir = generator.documentation.root_file.parent();
+        for (name, class) in &generator.documentation.classes {
+            let content = generator.generate_file(name, class, self);
+            let file_content = format!(
+                r"<!-- 
+This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
+
+Source file: {}
+-->
+
+{}{}{}",
+                root_dir
+                    .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
+                    .unwrap_or(&PathBuf::new())
+                    .display(),
+                HTML_START,
+                content,
+                HTML_END
+            );
+            let name = format!("{}.html", name);
+            files.insert(name.clone(), file_content);
         }
 
         for (name, content) in &[PRISM_CSS, PRISM_JS, STYLE_CSS] {
