@@ -129,7 +129,16 @@ impl<'a> Generator<'a> {
 
     /// Generate the root documentation file of the crate.
     ///
-    /// This is a decent default: it generate a description based on
+    /// The following will be generated (in markdown style):
+    /// ```text
+    /// <crate documentation>
+    ///
+    /// # Classes:
+    ///
+    /// <list of GDNative classes>
+    /// ```
+    ///
+    /// This then uses [`Callbacks::encode`] to encode this in the target format.
     pub fn generate_root_file(&mut self, extension: &str, callbacks: &mut dyn Callbacks) -> String {
         let mut root_file = String::new();
         let resolver = self.resolver;
@@ -168,7 +177,36 @@ impl<'a> Generator<'a> {
         root_file
     }
 
-    /// Generate pairs of (class_name, file_content).
+    /// Generate pairs of `(class_name, file_content)`.
+    ///
+    /// The following will be generated (in markdown style):
+    /// ```text
+    /// # <class name>
+    ///
+    /// **Inherit:** <inherited class>
+    ///
+    /// ## Description
+    ///
+    /// <class documentation>
+    ///
+    /// ## Properties
+    ///
+    /// <table of class properties>
+    ///
+    /// ## Methods
+    ///
+    /// <table of class methods>
+    ///
+    /// ## Properties Descriptions
+    ///
+    /// <list of the class properties with their documentation>
+    ///
+    /// ## Methods Descriptions
+    ///
+    /// <list of the class methods with their documentation>
+    /// ```
+    ///
+    /// This then uses [`Callbacks::encode`] to encode this in the target format.
     pub fn generate_files(&mut self, callbacks: &mut dyn Callbacks) -> Vec<(String, String)> {
         let mut results = Vec::new();
         for (name, class) in &self.documentation.classes {
@@ -189,18 +227,15 @@ impl<'a> Generator<'a> {
                 Event::Text(CowStr::Borrowed(" ")),
             ];
             if let Some(inherit_link) = inherit_link.as_ref() {
+                let link = Tag::Link(
+                    LinkType::Shortcut,
+                    CowStr::Borrowed(&inherit_link),
+                    CowStr::Borrowed(""),
+                );
                 events.extend(vec![
-                    Event::Start(Tag::Link(
-                        LinkType::Shortcut,
-                        CowStr::Borrowed(&inherit_link),
-                        CowStr::Borrowed(""),
-                    )),
+                    Event::Start(link.clone()),
                     Event::Text(CowStr::Borrowed(&class.inherit)),
-                    Event::End(Tag::Link(
-                        LinkType::Shortcut,
-                        CowStr::Borrowed(&inherit_link),
-                        CowStr::Borrowed(""),
-                    )),
+                    Event::End(link),
                 ])
             } else {
                 events.push(Event::Text(CowStr::Borrowed(&class.inherit)))
@@ -297,7 +332,7 @@ impl<'a> Generator<'a> {
         results
     }
 
-    /// Create a table summarizing the `properties`.
+    /// Create a table summarizing the properties.
     fn properties_table<'ev>(
         properties: &'ev [Property],
         resolver: &'ev Resolver,
@@ -345,6 +380,7 @@ impl<'a> Generator<'a> {
         events
     }
 
+    /// Create a table summarizing the methods.
     fn methods_table<'ev>(methods: &'ev [Method], resolver: &'ev Resolver) -> Vec<Event<'ev>> {
         let mut events = vec![
             Event::Start(Tag::Heading(2)),
