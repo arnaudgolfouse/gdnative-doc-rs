@@ -72,10 +72,11 @@ impl DocumentationBuilder {
                     documentation: String::new(),
                     properties: Vec::new(),
                     methods: Vec::new(),
+                    file: PathBuf::new(),
                 });
             for item in &impl_block.items {
                 if let syn::ImplItem::Method(method) = item {
-                    class.add_method(method);
+                    class.add_method(method, self.current_file.0.clone());
                 }
             }
         }
@@ -179,6 +180,7 @@ impl<'ast> Visit<'ast> for DocumentationBuilder {
                     documentation: String::new(),
                     properties: Vec::new(),
                     methods: Vec::new(),
+                    file: self.current_file.0.clone(),
                 });
             if let syn::Fields::Named(fields) = &strukt.fields {
                 class.get_properties(fields)

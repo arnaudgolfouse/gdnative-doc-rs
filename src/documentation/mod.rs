@@ -50,6 +50,8 @@ pub struct Method {
     /// # Note
     /// This keeps the leading space in `/// doc`
     pub documentation: String,
+    /// File in which the method was declared
+    pub file: PathBuf,
 }
 
 /// Property exported to godot
@@ -103,11 +105,15 @@ pub struct GdnativeClass {
     /// - In a `#[methods]` impl block
     /// - Either `new`, or marked with `#[export]`
     pub methods: Vec<Method>,
+    /// File in which the `struct` was declared
+    pub file: PathBuf,
 }
 
 /// Holds the documentation for the crate.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Documentation {
+    /// Path of the root file for the documentation.
+    pub root_file: PathBuf,
     /// Documentation of the root module.
     pub root_documentation: String,
     /// Classes, organized by name.
@@ -123,6 +129,7 @@ impl Documentation {
         let root_file_content = read_file_at(&root_file)?;
         let mut builder = builder::DocumentationBuilder {
             documentation: Self {
+                root_file: root_file.clone(),
                 root_documentation: String::new(),
                 classes: HashMap::new(),
             },
@@ -144,7 +151,7 @@ impl Documentation {
 
 impl GdnativeClass {
     /// Check that the method is exported, parse it, and add it to the class.
-    fn add_method(&mut self, method: &syn::ImplItemMethod) {
+    fn add_method(&mut self, method: &syn::ImplItemMethod, file: PathBuf) {
         let syn::ImplItemMethod {
             vis, attrs, sig, ..
         } = method;
@@ -215,6 +222,7 @@ impl GdnativeClass {
             parameters,
             return_type,
             documentation: get_docs(&attrs),
+            file,
         })
     }
 
