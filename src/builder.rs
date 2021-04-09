@@ -148,7 +148,7 @@ impl Builder {
 
     /// Build documentation from a root file.
     ///
-    /// The root file is either stored in `self`, or autmatically discovered using
+    /// The root file is either stored in `self`, or automatically discovered using
     /// [`find_root_file`].
     fn build_documentation(&mut self) -> Result<Documentation> {
         log::debug!("building documentation");
@@ -161,14 +161,6 @@ impl Builder {
         let mut documentation = Documentation::from_root_file(name, root_file)?;
         self.resolver.rename_classes(&mut documentation);
         Ok(documentation)
-        /*let package = CrateTree::from_root_file(root_file)?;
-
-        let mut documentation = Documentation::new();
-        for (module_id, module) in package.modules {
-            documentation.parse_from_module(&module, module_id == package.root_module);
-        }
-        self.resolver.rename_classes(&mut documentation);
-        Ok(documentation)*/
     }
 }
 
