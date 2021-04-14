@@ -1,17 +1,46 @@
-`gdnative-doc` allows for an optional `toml` configuration file. The current valid entries are :
+# Configuration file
 
-- `url_overrides: HashMap<String, String>`:
-  List of items for which the linking url should be overriden.
-- `rename_classes: HashMap<String, String>`:
-  Renaming of types when going from Rust to Godot.
+The behaviour of `gdnative-doc` can be configured via a [toml configuration file](https://toml.io/en/).
 
-  This is useful because GDNative allows defining a `script_class_name` in the
-  `.gdns` file.
+The current options are:
 
-- `markdown_options: Vec<String>`:
-  Optional markdown options.
+- ## url_overrides
 
-  ### Valid options
+  Here you can specify a list of items for which the linking url should be overriden.
+
+  ### Example
+
+  ```toml
+  # link `bool` to the latest documentation instead of stable.
+  url_overrides = { bool = "https://docs.godotengine.org/en/latest/classes/class_bool.html" }
+  ```
+
+- ## rename_classes
+
+  Here you can a list of structures that will be renamed.
+
+  This is useful because GDNative allows defining a `script_class_name` in the `.gdns` file.
+
+  ### Example
+
+  ```rust
+  // in lib.rs
+
+  #[derive(NativeClass)]
+  #[inherit(Reference)]
+  /// My Rust interface
+  pub struct RustStructure {}
+  ```
+
+  ```toml
+  rename_classes = { RustStructure = "GodotClass" }
+  ```
+
+- ## markdown_options
+
+  List of optional markdown options.
+
+- ### Valid options
 
   - FOOTNOTES
   - SMART_PUNCTUATION
@@ -23,12 +52,24 @@
 
   No option enabled.
 
-- `opening_comment: bool`:
-  Control whether or not to include commentary in the generated files.
+  ### Example
 
-  The commentary includes information such that the file was automatically
-  generated, the name of the source file it originated from...
+  ```toml
+  markdown_options = ["STRIKETHROUGH", "TABLES", "TASKLISTS"]
+  ```
+
+- ## opening_comment
+
+  Boolean that control whether or not to include a comment in the generated files.
+
+  The comment includes information such that the file was automatically generated, the name of the source file it originated from...
 
   ### Default
 
   `true`
+
+  ### Example
+
+  ```toml
+  opening_comment = false
+  ```

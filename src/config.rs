@@ -52,9 +52,9 @@ pub struct ConfigFile {
     /// # Default
     /// No option enabled.
     pub markdown_options: Option<Vec<String>>,
-    /// Control whether or not to include commentary in the generated files.
+    /// Control whether or not to include a comment in the generated files.
     ///
-    /// The commentary includes information such that the file was automatically
+    /// The comment includes information such that the file was automatically
     /// generated, the name of the source file it originated from...
     ///
     /// # Default
