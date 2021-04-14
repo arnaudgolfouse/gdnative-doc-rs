@@ -19,18 +19,27 @@ impl Callbacks for GutCallbacks {
 
         let root_dir = generator.documentation.root_file.parent();
         for (name, class) in &generator.documentation.classes {
-            let content = format!(
-                r"# This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
+            let opening_comment = if generator.opening_comment {
+                format!(
+                    r"# This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
 # 
 # Crate: {}
 # Source file: {}
 
-{}",
-                generator.documentation.name,
-                root_dir
-                    .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
-                    .unwrap_or(&PathBuf::new())
-                    .display(),
+",
+                    generator.documentation.name,
+                    root_dir
+                        .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
+                        .unwrap_or(&PathBuf::new())
+                        .display(),
+                )
+            } else {
+                String::new()
+            };
+
+            let content = format!(
+                r"{}{}",
+                opening_comment,
                 generator.generate_file(name, class, self)
             );
             let name = format!("{}.gd", name);

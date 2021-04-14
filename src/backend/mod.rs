@@ -111,6 +111,11 @@ pub struct Generator<'a> {
     pub documentation: &'a Documentation,
     /// Enabled markdown options
     pub markdown_options: MarkdownOptions,
+    /// Control if an opening comment with meta-information should ba added to
+    /// generated files.
+    ///
+    /// See [`ConfigFile::opening_comment`]
+    pub opening_comment: bool,
 }
 
 impl<'a> Generator<'a> {
@@ -118,11 +123,13 @@ impl<'a> Generator<'a> {
         resolver: &'a Resolver,
         documentation: &'a Documentation,
         markdown_options: MarkdownOptions,
+        opening_comment: bool,
     ) -> Self {
         Self {
             resolver,
             documentation,
             markdown_options,
+            opening_comment,
         }
     }
 

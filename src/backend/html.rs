@@ -9,6 +9,29 @@ const STYLE_CSS: (&str, &str) = ("style.css", include_str!("../../html/style.css
 #[derive(Default)]
 pub(crate) struct HtmlCallbacks {}
 
+impl HtmlCallbacks {
+    /// Generate an opening comment if `generator.opening_comment` is `true`.
+    ///
+    /// Else, returns an empty `String`.
+    fn make_opening_comment(generator: &Generator, source_file: &dyn std::fmt::Display) -> String {
+        if generator.opening_comment {
+            format!(
+                r"<!-- 
+This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
+
+Crate: {}
+Source file: {}
+-->
+
+",
+                generator.documentation.name, source_file,
+            )
+        } else {
+            String::new()
+        }
+    }
+}
+
 impl Callbacks for HtmlCallbacks {
     fn extension(&self) -> &'static str {
         "html"
@@ -42,21 +65,16 @@ impl Callbacks for HtmlCallbacks {
             .unwrap_or_default();
 
         let index_content = format!(
-            r"<!-- 
-This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
-
-Crate: {}
-Source file: {}
--->
-
-{}{}{}",
-            generator.documentation.name,
-            generator
-                .documentation
-                .root_file
-                .file_name()
-                .and_then(|name| name.to_str())
-                .unwrap_or_default(),
+            r"{}{}{}{}",
+            Self::make_opening_comment(
+                &generator,
+                &generator
+                    .documentation
+                    .root_file
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap_or_default(),
+            ),
             HTML_START,
             generator.generate_root_file("html", self),
             HTML_END
@@ -69,19 +87,14 @@ Source file: {}
         for (name, class) in &generator.documentation.classes {
             let content = generator.generate_file(name, class, self);
             let file_content = format!(
-                r"<!-- 
-This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
-
-Crate: {}
-Source file: {}
--->
-
-{}{}{}",
-                generator.documentation.name,
-                root_dir
-                    .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
-                    .unwrap_or(&PathBuf::new())
-                    .display(),
+                r"{}{}{}{}",
+                Self::make_opening_comment(
+                    &generator,
+                    &root_dir
+                        .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
+                        .unwrap_or(&PathBuf::new())
+                        .display(),
+                ),
                 HTML_START,
                 content,
                 HTML_END

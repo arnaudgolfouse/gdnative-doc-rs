@@ -1,3 +1,5 @@
+//! Facilities related to link resolution.
+
 use crate::{
     config::ConfigFile,
     documentation::{self, Documentation, Type},

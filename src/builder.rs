@@ -115,20 +115,26 @@ impl Builder {
     /// needed.
     #[allow(clippy::or_fun_call)]
     pub fn build(mut self) -> Result<()> {
-        let markdown_options = if let Some(user_config) = self.user_config.take() {
+        let (markdown_options, opening_comment) = if let Some(user_config) = self.user_config.take()
+        {
+            let opening_comment = user_config.opening_comment.unwrap_or(true);
             let markdown_options = user_config
                 .markdown_options()
                 .unwrap_or(pulldown_cmark::Options::empty());
             self.resolver.apply_user_config(user_config);
-            markdown_options
+            (markdown_options, opening_comment)
         } else {
-            pulldown_cmark::Options::empty()
+            (pulldown_cmark::Options::empty(), true)
         };
 
         let documentation = self.build_documentation()?;
         for (mut callbacks, output_dir) in self.backends {
-            let generator =
-                backend::Generator::new(&self.resolver, &documentation, markdown_options);
+            let generator = backend::Generator::new(
+                &self.resolver,
+                &documentation,
+                markdown_options,
+                opening_comment,
+            );
 
             let files = callbacks.generate_files(generator);
 

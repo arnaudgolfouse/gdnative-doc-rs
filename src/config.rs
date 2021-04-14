@@ -29,6 +29,8 @@ use std::{collections::HashMap, fs, path::PathBuf};
 ///
 /// Note that if you are reading the configuration file from an on-disk file, you
 /// should prefer [`load_from_path`](ConfigFile::load_from_path).
+// Note: any update to this structure should be documented in
+// configuration_file-format.md.
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub struct ConfigFile {
     /// List of items for which the linking url should be overriden.
@@ -50,6 +52,14 @@ pub struct ConfigFile {
     /// # Default
     /// No option enabled.
     pub markdown_options: Option<Vec<String>>,
+    /// Control whether or not to include commentary in the generated files.
+    ///
+    /// The commentary includes information such that the file was automatically
+    /// generated, the name of the source file it originated from...
+    ///
+    /// # Default
+    /// `true`
+    pub opening_comment: Option<bool>,
 }
 
 impl ConfigFile {

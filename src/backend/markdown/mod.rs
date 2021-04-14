@@ -45,21 +45,16 @@ impl Callbacks for MarkdownCallbacks {
         let mut files = HashMap::new();
 
         let mut index_content = format!(
-            r"<!-- 
-This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
-
-Crate: {}
-Source file: {}
--->
-
-{}",
-            generator.documentation.name,
-            generator
-                .documentation
-                .root_file
-                .file_name()
-                .and_then(|name| name.to_str())
-                .unwrap_or_default(),
+            r"{}{}",
+            Self::make_opening_comment(
+                &generator,
+                &generator
+                    .documentation
+                    .root_file
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap_or_default(),
+            ),
             generator.generate_root_file("md", self),
         );
 
@@ -68,19 +63,14 @@ Source file: {}
         let root_dir = generator.documentation.root_file.parent();
         for (name, class) in &generator.documentation.classes {
             let mut content = format!(
-                r"<!-- 
-This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
-
-Crate: {}
-Source file: {}
--->
-
-{}",
-                generator.documentation.name,
-                root_dir
-                    .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
-                    .unwrap_or(&PathBuf::new())
-                    .display(),
+                r"{}{}",
+                Self::make_opening_comment(
+                    &generator,
+                    &root_dir
+                        .and_then(|root_dir| class.file.strip_prefix(root_dir).ok())
+                        .unwrap_or(&PathBuf::new())
+                        .display(),
+                ),
                 generator.generate_file(name, class, self)
             );
             let name = format!("{}.md", name);
@@ -368,6 +358,27 @@ impl MarkdownCallbacks {
         for line in link_lines {
             s.push('\n');
             s.push_str(&line)
+        }
+    }
+
+    /// Generate an opening comment if `generator.opening_comment` is `true`.
+    ///
+    /// Else, returns an empty `String`.
+    fn make_opening_comment(generator: &Generator, source_file: &dyn std::fmt::Display) -> String {
+        if generator.opening_comment {
+            format!(
+                r"<!-- 
+This file was automatically generated using [gdnative-doc-rs](https://github.com/arnaudgolfouse/gdnative-doc-rs)
+
+Crate: {}
+Source file: {}
+-->
+
+",
+                generator.documentation.name, source_file,
+            )
+        } else {
+            String::new()
         }
     }
 }
