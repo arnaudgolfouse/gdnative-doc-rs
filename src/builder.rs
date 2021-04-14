@@ -181,7 +181,7 @@ fn find_root_file(package_name: Option<&str>) -> Result<(String, PathBuf)> {
                 .into_iter()
                 .find(|target| target.kind.iter().any(|kind| kind == "cdylib"))
             {
-                root_files.push((package.name, target.src_path))
+                root_files.push((package.name, target.src_path.into()))
             }
         }
     }

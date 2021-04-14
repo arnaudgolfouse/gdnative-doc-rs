@@ -13,11 +13,11 @@ members = ["gdnative-doc-cli", "examples/dijkstra-map-gd"]
 default-members = [".", "gdnative-doc-cli"]
 
 [dependencies]
-cargo_metadata = "0.12"
+cargo_metadata = "0.13"
 log = { version = "0.4", features = ["std"] }
 pulldown-cmark = { version = "0.8", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
-simplelog = { version = "0.9", optional = true }
+simplelog = { version = "0.10", optional = true }
 syn = { version = "1.0", default-features = false, features = ["parsing", "full", "visit"] }
 thiserror = "1.0"
 toml = "0.5"

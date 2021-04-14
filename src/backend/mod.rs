@@ -114,7 +114,7 @@ pub struct Generator<'a> {
     /// Control if an opening comment with meta-information should ba added to
     /// generated files.
     ///
-    /// See [`ConfigFile::opening_comment`]
+    /// See [`ConfigFile::opening_comment`](crate::ConfigFile::opening_comment)
     pub opening_comment: bool,
 }
 

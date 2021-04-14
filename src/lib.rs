@@ -87,6 +87,7 @@ pub fn init_logger(level: LevelFilter) -> Result<()> {
         level,
         simplelog::Config::default(),
         simplelog::TerminalMode::Stderr,
+        simplelog::ColorChoice::Auto,
     )?;
     Ok(())
 }
