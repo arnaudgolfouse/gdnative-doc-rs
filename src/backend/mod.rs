@@ -18,7 +18,9 @@ mod markdown;
 mod resolve;
 
 use crate::documentation::{Documentation, GdnativeClass, Method, Property};
-use pulldown_cmark::{Alignment, CowStr, Event, LinkType, Options as MarkdownOptions, Parser, Tag};
+use pulldown_cmark::{
+    Alignment, CowStr, Event, HeadingLevel, LinkType, Options as MarkdownOptions, Parser, Tag,
+};
 
 pub(super) use gut::GutCallbacks;
 pub(super) use html::HtmlCallbacks;
@@ -37,7 +39,7 @@ macro_rules! broken_link_callback {
         move |broken_link: ::pulldown_cmark::BrokenLink| {
             use ::pulldown_cmark::CowStr;
 
-            let mut link = broken_link.reference;
+            let mut link: &str = &broken_link.reference;
             if link.starts_with('`') && link.ends_with('`') && link.len() > 1 {
                 link = &link[1..link.len() - 1];
             }
@@ -158,9 +160,9 @@ impl<'a> Generator<'a> {
         };
         let mut events: Vec<_> = class_iterator.into_iter().collect();
         events.extend(vec![
-            Event::Start(Tag::Heading(1)),
+            Event::Start(Tag::Heading(HeadingLevel::H1, None, Vec::new())),
             Event::Text(CowStr::Borrowed("Classes:")),
-            Event::End(Tag::Heading(1)),
+            Event::End(Tag::Heading(HeadingLevel::H1, None, Vec::new())),
             Event::Start(Tag::List(None)),
         ]);
         for class_name in self.documentation.classes.keys() {
@@ -172,7 +174,7 @@ impl<'a> Generator<'a> {
             events.extend(vec![
                 Event::Start(Tag::Item),
                 Event::Start(link.clone()),
-                Event::Text(CowStr::Borrowed(&class_name)),
+                Event::Text(CowStr::Borrowed(class_name)),
                 Event::End(link.clone()),
                 Event::End(Tag::Item),
             ])
@@ -226,9 +228,9 @@ impl<'a> Generator<'a> {
 
         // Name of the class + inherit
         let mut events = vec![
-            Event::Start(Tag::Heading(1)),
-            Event::Text(CowStr::Borrowed(&name)),
-            Event::End(Tag::Heading(1)),
+            Event::Start(Tag::Heading(HeadingLevel::H1, None, Vec::new())),
+            Event::Text(CowStr::Borrowed(name)),
+            Event::End(Tag::Heading(HeadingLevel::H1, None, Vec::new())),
             Event::Start(Tag::Paragraph),
             Event::Start(Tag::Strong),
             Event::Text(CowStr::Borrowed("Inherit:")),
@@ -238,7 +240,7 @@ impl<'a> Generator<'a> {
         if let Some(inherit_link) = inherit_link.as_ref() {
             let link = Tag::Link(
                 LinkType::Shortcut,
-                CowStr::Borrowed(&inherit_link),
+                CowStr::Borrowed(inherit_link),
                 CowStr::Borrowed(""),
             );
             events.extend(vec![
@@ -251,9 +253,9 @@ impl<'a> Generator<'a> {
         }
         events.extend(vec![
             Event::End(Tag::Paragraph),
-            Event::Start(Tag::Heading(2)),
+            Event::Start(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
             Event::Text(CowStr::Borrowed("Description")),
-            Event::End(Tag::Heading(2)),
+            Event::End(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
         ]);
         callbacks.encode(&mut class_file, events);
 
@@ -290,9 +292,9 @@ impl<'a> Generator<'a> {
             callbacks.encode(
                 &mut class_file,
                 vec![
-                    Event::Start(Tag::Heading(2)),
+                    Event::Start(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
                     Event::Text(CowStr::Borrowed("Properties Descriptions")),
-                    Event::End(Tag::Heading(2)),
+                    Event::End(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
                 ],
             );
             for property in &class.properties {
@@ -316,9 +318,9 @@ impl<'a> Generator<'a> {
         callbacks.encode(
             &mut class_file,
             vec![
-                Event::Start(Tag::Heading(2)),
+                Event::Start(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
                 Event::Text(CowStr::Borrowed("Methods Descriptions")),
-                Event::End(Tag::Heading(2)),
+                Event::End(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
             ],
         );
         for method in &class.methods {
@@ -345,9 +347,9 @@ impl<'a> Generator<'a> {
         resolver: &'ev Resolver,
     ) -> Vec<Event<'ev>> {
         let mut events = vec![
-            Event::Start(Tag::Heading(2)),
+            Event::Start(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
             Event::Text(CowStr::Borrowed("Properties")),
-            Event::End(Tag::Heading(2)),
+            Event::End(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
             Event::Start(Tag::Table(vec![Alignment::Left, Alignment::Left])),
             Event::Start(Tag::TableHead),
             Event::Start(Tag::TableCell),
@@ -390,9 +392,9 @@ impl<'a> Generator<'a> {
     /// Create a table summarizing the methods.
     fn methods_table<'ev>(methods: &'ev [Method], resolver: &'ev Resolver) -> Vec<Event<'ev>> {
         let mut events = vec![
-            Event::Start(Tag::Heading(2)),
+            Event::Start(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
             Event::Text(CowStr::Borrowed("Methods")),
-            Event::End(Tag::Heading(2)),
+            Event::End(Tag::Heading(HeadingLevel::H2, None, Vec::new())),
             Event::Start(Tag::Table(vec![Alignment::Left, Alignment::Left])),
             Event::Start(Tag::TableHead),
             Event::Start(Tag::TableCell),
@@ -449,13 +451,13 @@ impl<'a> Generator<'a> {
 
 /// Iterate over [events](Event), resolving links and changing the resolved
 /// broken links types.
-struct EventIterator<'resolver, 'parser> {
+struct EventIterator<'resolver, 'input, 'cb> {
     context: &'resolver Resolver,
-    parser: Parser<'parser>,
+    parser: Parser<'input, 'cb>,
 }
 
-impl<'resolver, 'parser> Iterator for EventIterator<'resolver, 'parser> {
-    type Item = Event<'parser>;
+impl<'resolver, 'input, 'cb> Iterator for EventIterator<'resolver, 'input, 'cb> {
+    type Item = Event<'input>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut next_event = self.parser.next()?;

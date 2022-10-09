@@ -1,6 +1,6 @@
 use super::{Callbacks, Generator, Method};
 use pulldown_cmark::{CodeBlockKind, Event, Tag};
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf, fmt::Write as _};
 
 #[derive(Default)]
 pub(crate) struct GutCallbacks {
@@ -67,7 +67,7 @@ impl Callbacks for GutCallbacks {
                         s.push_str("func test_");
                         s.push_str(&self.current_method);
                         if self.current_method_index > 0 {
-                            s.push_str(&format!("_{}", self.current_method_index))
+                            let _ = write!(s, "_{}", self.current_method_index);
                         }
                         s.push_str("():\n");
                         self.current_method_index += 1;

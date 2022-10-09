@@ -197,7 +197,7 @@ impl GdnativeClass {
                         arg_name,
                         get_type_name(*ty.clone())
                             .unwrap_or_else(|| Type::Named("{ERROR}".to_string())),
-                        if attributes_contains(&attrs, "opt") {
+                        if attributes_contains(attrs, "opt") {
                             ParameterAttribute::Opt
                         } else {
                             ParameterAttribute::None
@@ -224,7 +224,7 @@ impl GdnativeClass {
             self_type: self.name.clone(),
             parameters,
             return_type,
-            documentation: get_docs(&attrs),
+            documentation: get_docs(attrs),
             file,
         })
     }

@@ -190,13 +190,25 @@ impl Resolver {
 
     /// Increase the header count, and resolve link destinations
     pub(super) fn resolve_event(&self, event: &mut Event) {
+        use pulldown_cmark::HeadingLevel;
+        fn increase_heading_level(level: HeadingLevel) -> HeadingLevel {
+            match level {
+                HeadingLevel::H1 => HeadingLevel::H4,
+                HeadingLevel::H2 => HeadingLevel::H5,
+                HeadingLevel::H3 | HeadingLevel::H4 | HeadingLevel::H5 | HeadingLevel::H6 => {
+                    HeadingLevel::H6
+                }
+            }
+        }
         match event {
             Event::Start(Tag::Link(_, dest, _)) | Event::End(Tag::Link(_, dest, _)) => {
-                if let Some(new_dest) = self.resolve(&dest) {
+                if let Some(new_dest) = self.resolve(dest) {
                     *dest = new_dest.to_string().into()
                 }
             }
-            Event::Start(Tag::Heading(n)) | Event::End(Tag::Heading(n)) => *n += 3,
+            Event::Start(Tag::Heading(n, _, _)) | Event::End(Tag::Heading(n, _, _)) => {
+                *n = increase_heading_level(*n);
+            }
             _ => {}
         }
     }
@@ -210,7 +222,7 @@ impl Resolver {
         let mut events = match self.resolve(type_name).map(|return_link| {
             Tag::Link(
                 pulldown_cmark::LinkType::Shortcut,
-                CowStr::Borrowed(&return_link),
+                CowStr::Borrowed(return_link),
                 CowStr::Borrowed(""),
             )
         }) {

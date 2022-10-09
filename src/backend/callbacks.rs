@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use super::{Generator, Resolver};
 use crate::documentation::{Method, Property};
-use pulldown_cmark::{CowStr, Event, Tag};
+use pulldown_cmark::{CowStr, Event, HeadingLevel, Tag};
 
 /// Callbacks to encode markdown input in a given format.
 ///
@@ -46,7 +46,7 @@ impl dyn Callbacks {
         self.encode(
             s,
             vec![
-                Event::Start(Tag::Heading(3)),
+                Event::Start(Tag::Heading(HeadingLevel::H3, None, Vec::new())),
                 Event::Html(CowStr::Borrowed(link)),
             ],
         );
@@ -54,7 +54,7 @@ impl dyn Callbacks {
         method_header.push_str(&method.name);
         method_header.push('(');
         for (index, (name, typ, _)) in method.parameters.iter().enumerate() {
-            method_header.push_str(&name);
+            method_header.push_str(name);
             method_header.push_str(": ");
             self.encode(s, vec![Event::Text(CowStr::Borrowed(&method_header))]);
             method_header.clear();
@@ -66,7 +66,7 @@ impl dyn Callbacks {
         method_header.push_str(") -> ");
         let mut last_events = vec![Event::Text(CowStr::Borrowed(&method_header))];
         last_events.extend(property.encode_type(&method.return_type));
-        last_events.push(Event::End(Tag::Heading(3)));
+        last_events.push(Event::End(Tag::Heading(HeadingLevel::H3, None, Vec::new())));
         last_events.push(Event::Rule);
         self.encode(s, last_events);
     }
@@ -94,12 +94,12 @@ impl dyn Callbacks {
         self.encode(
             s,
             vec![
-                Event::Start(Tag::Heading(3)),
+                Event::Start(Tag::Heading(HeadingLevel::H3, None, Vec::new())),
                 Event::Html(CowStr::Borrowed(link)),
             ],
         );
         let mut last_events = resolver.encode_type(&property.typ);
-        last_events.push(Event::End(Tag::Heading(3)));
+        last_events.push(Event::End(Tag::Heading(HeadingLevel::H3, None, Vec::new())));
         last_events.push(Event::Rule);
         self.encode(s, last_events);
     }

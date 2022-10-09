@@ -3,7 +3,7 @@ mod tests;
 
 use super::{Callbacks, Generator, Method, Property, Resolver};
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, LinkType, Tag};
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, fmt::Write as _, path::PathBuf};
 
 #[derive(Clone, Copy, PartialEq)]
 enum Nesting {
@@ -99,10 +99,10 @@ impl Callbacks for MarkdownCallbacks {
                             self.apply_nesting(s)
                         }
                     }
-                    Tag::Heading(level) => {
+                    Tag::Heading(level, _, _) => {
                         self.apply_nesting(s);
                         self.top_written = true;
-                        for _ in 0..level {
+                        for _ in 0..(level as i32) {
                             s.push('#');
                         }
                         s.push(' ');
@@ -164,7 +164,7 @@ impl Callbacks for MarkdownCallbacks {
                 },
                 Event::End(tag) => match tag {
                     Tag::Paragraph => {}
-                    Tag::Heading(_) => {}
+                    Tag::Heading(_, _, _) => {}
                     Tag::BlockQuote => {
                         self.nesting.pop();
                     }
@@ -290,13 +290,13 @@ impl MarkdownCallbacks {
         if let Some(links) = self.links.get_mut(&shortcut) {
             if let Some((index, _)) = links.iter().enumerate().find(|(_, l)| l == &link) {
                 if index > 0 {
-                    shortcut.push_str(&format!("-{}", index));
+                    let _ = write!(&mut shortcut, "-{index}");
                 }
             } else {
                 let index = links.len();
                 links.push(link.to_string());
                 if index > 0 {
-                    shortcut.push_str(&format!("-{}", index));
+                    let _ = write!(&mut shortcut, "-{index}");
                 }
             }
         } else {
@@ -308,7 +308,7 @@ impl MarkdownCallbacks {
     fn start_new_item(&mut self, s: &mut String) {
         if let Some(Nesting::ListLevel(Some(index))) = self.nesting.last_mut() {
             *index += 1;
-            s.push_str(&format!("{}. ", *index - 1))
+            let _ = write!(s, "{}. ", *index - 1);
         } else {
             s.push_str("- ");
         }
@@ -347,7 +347,7 @@ impl MarkdownCallbacks {
                 line.push('[');
                 line.push_str(&shortcut);
                 if index != 0 {
-                    line.push_str(&format!("-{}", index));
+                    let _ = write!(&mut line, "-{index}");
                 }
                 line.push_str("]: ");
                 line.push_str(&link);
