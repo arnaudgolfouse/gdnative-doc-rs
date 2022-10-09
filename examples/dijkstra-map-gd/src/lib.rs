@@ -2,14 +2,9 @@
 //!
 //! Examples describe how to use the code in gdscript.
 
-#![allow(dead_code, unused_variables)]
+#![allow(unused_variables)]
 
 use gdnative::prelude::*;
-
-/// Integer representing success in gdscript
-const GODOT_SUCCESS: i64 = 0;
-/// Integer representing failure in gdscript
-const GODOT_ERROR: i64 = 1;
 
 /// Interface exported to Godot
 ///
@@ -25,35 +20,6 @@ pub struct Interface {
     property: String,
 }
 
-/// Change a Rust's [`Result`] to an integer (which is how errors are reported
-/// to Godot).
-///
-/// [`Ok`] becomes `0`, and [`Err`] becomes `1`.
-fn result_to_int(res: Result<(), ()>) -> i64 {
-    match res {
-        Ok(()) => GODOT_SUCCESS,
-        Err(()) => GODOT_ERROR,
-    }
-}
-
-/// Try to convert the given [`Variant`] into a rectangle of `usize`.
-///
-/// Only works if `bounds` is a [`Rect2D`].
-///
-/// # Return
-///
-/// `(x_offset, y_offset, width, height)`
-fn variant_to_width_and_height(bounds: Variant) -> Option<(usize, usize, usize, usize)> {
-    bounds.try_to_rect2().map(|rect| {
-        (
-            rect.origin.x as usize,
-            rect.origin.y as usize,
-            rect.size.width as usize,
-            rect.size.height as usize,
-        )
-    })
-}
-
 #[methods]
 impl Interface {
     /// Create a new empty `DijkstraMap`.
@@ -63,12 +29,10 @@ impl Interface {
     /// var dijkstra_map = DijkstraMap.new()
     /// ```
     pub fn new(_owner: &Reference) -> Self {
-        Interface {
-            property: String::new(),
-        }
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Clear the underlying `DijkstraMap`.
     ///
     /// # Example
@@ -76,9 +40,9 @@ impl Interface {
     /// var dijkstra_map = DijkstraMap.new()
     /// dijkstra_map.clear()
     /// ```
-    pub fn clear(&mut self, _owner: &Reference) {}
+    pub fn clear(&mut self) {}
 
-    #[export]
+    #[method]
     /// If `source_instance` is a `dijkstra map`, it is cloned into
     /// `self`.
     ///
@@ -93,11 +57,11 @@ impl Interface {
     /// var dijkstra_map_copy = DijkstraMap.new()
     /// dijkstra_map_copy.duplicate_graph_from(dijkstra_map)
     /// ```
-    pub fn duplicate_graph_from(&mut self, _owner: &Reference, source_instance: Variant) -> i64 {
-        GODOT_SUCCESS
+    pub fn duplicate_graph_from(&mut self, source_instance: Variant) -> i64 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Returns the first positive available id.
     ///
     /// # Example
@@ -107,11 +71,11 @@ impl Interface {
     /// dijkstra_map.add_point(1)
     /// assert(dijkstra_map.get_available_point_id() == 2)
     /// ```
-    pub fn get_available_point_id(&mut self, _owner: &Reference) -> i32 {
-        0
+    pub fn get_available_point_id(&mut self) -> i32 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Add a new point with the given `terrain_type`.
     ///
     /// If `terrain_type` not specified, `-1` is used.
@@ -127,16 +91,11 @@ impl Interface {
     /// dijkstra_map.add_point(0) # terrain_type is -1
     /// dijkstra_map.add_point(1, 0) # terrain_type is 0
     /// ```
-    pub fn add_point(
-        &mut self,
-        _owner: &Reference,
-        point_id: i32,
-        #[opt] terrain_type: Option<i32>,
-    ) -> i64 {
-        result_to_int(Ok(()))
+    pub fn add_point(&mut self, point_id: i32, #[opt] terrain_type: Option<i32>) -> i64 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Set the terrain type for `point_id`.
     ///
     /// If `terrain_id` is not specified, `-1` is used.
@@ -154,16 +113,11 @@ impl Interface {
     /// dijkstra_map.set_terrain_for_point(0)
     /// assert(dijkstra_map.get_terrain_for_point(0) == -1)
     /// ```
-    pub fn set_terrain_for_point(
-        &mut self,
-        _owner: &Reference,
-        point_id: i32,
-        terrain_id: Option<i32>,
-    ) -> i64 {
-        result_to_int(Err(()))
+    pub fn set_terrain_for_point(&mut self, point_id: i32, terrain_id: Option<i32>) -> i64 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Get the terrain type for the given point.
     ///
     /// This function returns `-1` if no point with the given id exists in the
@@ -179,11 +133,11 @@ impl Interface {
     /// # `2` is not in the map, so this returns `-1`
     /// assert(dijkstra_map.get_terrain_for_point(2) == -1)
     /// ```
-    pub fn get_terrain_for_point(&mut self, _owner: &Reference, point_id: i32) -> i32 {
-        0
+    pub fn get_terrain_for_point(&mut self, point_id: i32) -> i32 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Removes a point from the map.
     ///
     /// # Errors
@@ -197,17 +151,17 @@ impl Interface {
     /// assert(dijkstra_map.remove_point(0) == 0)
     /// assert(dijkstra_map.remove_point(0) == 1)
     /// ```
-    pub fn remove_point(&mut self, _owner: &Reference, point_id: i32) -> i64 {
-        result_to_int(Ok(()))
+    pub fn remove_point(&mut self, point_id: i32) -> i64 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Returns [true] if the map contains the given point.
-    pub fn has_point(&mut self, _owner: &Reference, point_id: i32) -> bool {
-        false
+    pub fn has_point(&mut self, point_id: i32) -> bool {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Disable the given point for pathfinding.
     ///
     /// # Errors
@@ -221,11 +175,11 @@ impl Interface {
     /// assert(dijkstra_map.disable_point(0) == 0)
     /// assert(dijkstra_map.disable_point(1) == 1)
     /// ```
-    pub fn disable_point(&mut self, _owner: &Reference, point_id: i32) -> i64 {
-        result_to_int(Ok(()))
+    pub fn disable_point(&mut self, point_id: i32) -> i64 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Enable the given point for pathfinding.
     ///
     /// # Errors
@@ -239,11 +193,11 @@ impl Interface {
     /// assert(dijkstra_map.enable_point(0) == 0)
     /// assert(dijkstra_map.enable_point(1) == 1)
     /// ```
-    pub fn enable_point(&mut self, _owner: &Reference, point_id: i32) -> i64 {
-        result_to_int(Ok(()))
+    pub fn enable_point(&mut self, point_id: i32) -> i64 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Returns [true] if the point exists and is disabled, otherwise returns
     /// [false].
     ///
@@ -257,11 +211,11 @@ impl Interface {
     /// assert(!dijkstra_map.is_point_disabled(1))
     /// assert(!dijkstra_map.is_point_disabled(2))
     /// ```
-    pub fn is_point_disabled(&mut self, _owner: &Reference, point_id: i32) -> bool {
-        false
+    pub fn is_point_disabled(&mut self, point_id: i32) -> bool {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Connects the two given points.
     ///
     /// # Parameters
@@ -291,16 +245,15 @@ impl Interface {
     /// ```
     pub fn connect_points(
         &mut self,
-        _owner: &Reference,
         source: i32,
         target: i32,
         #[opt] weight: Option<f32>,
         #[opt] bidirectional: Option<bool>,
     ) -> i64 {
-        result_to_int(Ok(()))
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Remove a connection between the two given points.
     ///
     /// # Parameters
@@ -329,15 +282,14 @@ impl Interface {
     /// ```
     pub fn remove_connection(
         &mut self,
-        _owner: &Reference,
         source: i32,
         target: i32,
         #[opt] bidirectional: Option<bool>,
     ) -> i64 {
-        result_to_int(Ok(()))
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Returns [true] if there is a connection from `source` to `target`
     /// (and they both exist).
     ///
@@ -351,11 +303,11 @@ impl Interface {
     /// assert(!dijkstra_map.has_connection(1, 0))
     /// assert(!dijkstra_map.has_connection(0, 2))
     /// ```
-    pub fn has_connection(&mut self, _owner: &Reference, source: i32, target: i32) -> bool {
-        false
+    pub fn has_connection(&mut self, source: i32, target: i32) -> bool {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Given a point, returns the id of the next point along the shortest path
     /// toward the target.
     ///
@@ -375,11 +327,11 @@ impl Interface {
     /// assert(dijkstra_map.get_direction_at_point(1) == 0)
     /// assert(dijkstra_map.get_direction_at_point(2) == -1)
     /// ```
-    pub fn get_direction_at_point(&mut self, _owner: &Reference, point_id: i32) -> i32 {
-        -1
+    pub fn get_direction_at_point(&mut self, point_id: i32) -> i32 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Returns the cost of the shortest path from this point to the target.
     ///
     /// If there is no path, the cost is [INF].
@@ -396,11 +348,11 @@ impl Interface {
     /// assert(dijkstra_map.get_cost_at_point(1) == 1.0)
     /// assert(dijkstra_map.get_cost_at_point(2) == INF)
     /// ```
-    pub fn get_cost_at_point(&mut self, _owner: &Reference, point_id: i32) -> f32 {
-        1.0
+    pub fn get_cost_at_point(&mut self, point_id: i32) -> f32 {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Recalculates cost map and direction map information for each point,
     /// overriding previous results.
     ///
@@ -467,14 +419,13 @@ impl Interface {
     /// ```
     pub fn recalculate(
         &mut self,
-        _owner: &Reference,
         origin: gdnative::core_types::Variant,
         #[opt] optional_params: Option<Dictionary>,
     ) -> i64 {
-        GODOT_SUCCESS
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// For each point in the given array, returns the id of the next point
     /// along the shortest path toward the target.
     ///
@@ -491,15 +442,11 @@ impl Interface {
     /// dijkstra_map.recalculate(0)
     /// assert(Array(dijkstra_map.get_direction_at_points(PoolIntArray([0, 1, 2]))) == [0, 0, -1])
     /// ```
-    pub fn get_direction_at_points(
-        &mut self,
-        _owner: &Reference,
-        points: Int32Array,
-    ) -> Int32Array {
-        Int32Array::default()
+    pub fn get_direction_at_points(&mut self, points: Int32Array) -> Int32Array {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// For each point in the given array, returns the cost of the shortest
     /// path from this point to the target.
     ///
@@ -518,13 +465,12 @@ impl Interface {
     /// ```
     pub fn get_cost_at_points(
         &mut self,
-        _owner: &Reference,
         points: gdnative::core_types::Int32Array,
     ) -> gdnative::core_types::Float32Array {
-        Float32Array::default()
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Returns the entire Dijktra map of costs in form of a Dictionary.
     ///
     /// Keys are points' IDs, and values are costs. Inaccessible points are not
@@ -543,11 +489,11 @@ impl Interface {
     /// for id in computed_cost_map.keys():
     ///     assert(computed_cost_map[id] == cost_map[id])
     /// ```
-    pub fn get_cost_map(&mut self, _owner: &Reference) -> Dictionary {
-        Dictionary::new().into_shared()
+    pub fn get_cost_map(&mut self) -> Dictionary {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Returns the entire Dijkstra map of directions in form of a
     /// [Dictionary].
     ///
@@ -571,11 +517,11 @@ impl Interface {
     /// for id in computed_direction_map.keys():
     ///     assert(computed_direction_map[id] == direction_map[id])
     /// ```
-    pub fn get_direction_map(&mut self, _owner: &Reference) -> Dictionary {
-        Dictionary::new().into_shared()
+    pub fn get_direction_map(&mut self) -> Dictionary {
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Returns an array of all the points whose cost is between `min_cost` and
     /// `max_cost`.
     ///
@@ -593,14 +539,13 @@ impl Interface {
     /// ```
     pub fn get_all_points_with_cost_between(
         &mut self,
-        _owner: &Reference,
         min_cost: f32,
         max_cost: f32,
     ) -> gdnative::core_types::Int32Array {
-        Int32Array::default()
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Returns an [array] of points describing the shortest path from a
     /// starting point.
     ///
@@ -614,13 +559,12 @@ impl Interface {
     /// [array]: gdnative::core_types::Int32Array
     pub fn get_shortest_path_from_point(
         &mut self,
-        _owner: &Reference,
         point_id: i32,
     ) -> gdnative::core_types::Int32Array {
-        Int32Array::default()
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Adds a square grid of connected points.
     ///
     /// # Parameters
@@ -644,16 +588,15 @@ impl Interface {
     /// ([Vector2]) and values are their corresponding point IDs.
     pub fn add_square_grid(
         &mut self,
-        _owner: &Reference,
         bounds: Variant,
         #[opt] terrain_type: Option<i32>,
         #[opt] orthogonal_cost: Option<f32>,
         #[opt] diagonal_cost: Option<f32>,
     ) -> Dictionary {
-        Dictionary::new().into_shared()
+        unimplemented!()
     }
 
-    #[export]
+    #[method]
     /// Adds a hexagonal grid of connected points.
     ///
     /// # Parameters
@@ -694,18 +637,10 @@ impl Interface {
     ///```
     pub fn add_hexagonal_grid(
         &mut self,
-        _owner: &Reference,
         bounds: Variant,
         #[opt] terrain_type: Option<i32>,
         #[opt] weight: Option<f32>,
     ) -> Dictionary {
-        Dictionary::new().into_shared()
+        unimplemented!()
     }
 }
-
-fn init(handle: gdnative::prelude::InitHandle) {
-    handle.add_class::<Interface>();
-}
-godot_gdnative_init!();
-godot_nativescript_init!(init);
-godot_gdnative_terminate!();

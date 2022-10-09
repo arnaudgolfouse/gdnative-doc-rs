@@ -87,7 +87,7 @@ pub enum BuiltinBackend {
     ///     /// ```
     ///     pub fn new(_: &Node) -> Self {
     ///         // ...
-    /// # todo!()
+    /// # unimplemented!()
     ///     }
     /// }
     /// ```

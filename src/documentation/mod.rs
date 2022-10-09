@@ -103,7 +103,7 @@ pub struct GdnativeClass {
     ///
     /// As per `gdnative`'s documentation, exported methods are
     /// - In a `#[methods]` impl block
-    /// - Either `new`, or marked with `#[export]`
+    /// - Either `new`, or marked with `#[method]`
     pub methods: Vec<Method>,
     /// File in which the `struct` was declared
     pub file: PathBuf,
@@ -164,7 +164,7 @@ impl GdnativeClass {
             return;
         }
         // not exported nor a constructor
-        if !(attributes_contains(attrs, "export") || sig.ident == "new") {
+        if !(attributes_contains(attrs, "method") || sig.ident == "new") {
             return;
         }
 
@@ -177,10 +177,9 @@ impl GdnativeClass {
         } = sig;
 
         let mut parameters = inputs.into_iter();
-        if has_self {
-            parameters.next();
-        }
-        parameters.next(); // inherit argument
+        // - for `self` methods: Remove the `self` argument.
+        // - for `new`: remove the 'owner' argument.
+        parameters.next();
         let parameters = {
             let mut params = Vec::new();
             for arg in parameters {

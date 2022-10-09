@@ -32,7 +32,7 @@ An example: `process` function
   /// var processor = Myprocessor.new()
   /// assert_eq(processor.process("hello"), OK)
   /// ```
-  #[export]
+  #[method]
   pub fn process(&mut self, _: &Node, s: GodotString) -> i32 { /* ... */ }
   ````
 
@@ -44,16 +44,18 @@ An example: `process` function
   Process the given [`String`], returning [`FAILED`] on error.
 
   #### Example
+
   ```gdscript
   var processor = Myprocessor.new()
   assert_eq(processor.process("hello"), OK)
   ```
 
-  [String]: https://docs.godotengine.org/en/stable/classes/class_string.html
-  [`String`]: https://docs.godotengine.org/en/stable/classes/class_string.html
+  [string]: https://docs.godotengine.org/en/stable/classes/class_string.html
+  [`string`]: https://docs.godotengine.org/en/stable/classes/class_string.html
   [int]: https://docs.godotengine.org/en/stable/classes/class_int.html
-  [`FAILED`]: https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error
+  [`failed`]: https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error
   ````
+
 - Output: Gut
 
   ```gdscript
@@ -94,6 +96,10 @@ More informations can be found in the [documentation](https://docs.rs/gdnative-d
 The format of the configuration file can be found [here](configuration_file-format.md).
 
 You can also use the [command-line tool](gdnative-doc-cli).
+
+### Godot version
+
+For now, every godot class has its 3.2 name (although links take you to the current stable version). This should be fixed in the future.
 
 ## Limitations
 
