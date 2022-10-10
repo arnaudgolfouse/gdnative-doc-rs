@@ -1,5 +1,5 @@
 use super::Type;
-use crate::{Error};
+use crate::Error;
 
 /// Read and parse the file at the given `path` with `syn`, reporting any error.
 pub(super) fn read_file_at(path: &std::path::Path) -> Result<syn::File, Error> {
@@ -17,7 +17,7 @@ pub(super) fn attributes_contains(attrs: &[syn::Attribute], attribute: &str) -> 
 }
 
 /// Get this type's base name if it has one.
-pub(super) fn get_type_name(typ: syn::Type) -> Option<Type> {
+pub(super) fn get_type_name(typ: &syn::Type) -> Option<Type> {
     match typ {
         syn::Type::Path(path) => {
             let path_end = path.path.segments.last()?;
@@ -29,7 +29,7 @@ pub(super) fn get_type_name(typ: syn::Type) -> Option<Type> {
                     ..
                 }) => {
                     if type_name == "Option" && args.len() == 1 {
-                        if let Some(syn::GenericArgument::Type(typ)) = args.first().cloned() {
+                        if let Some(syn::GenericArgument::Type(typ)) = args.first() {
                             if let Some(Type::Named(name)) = get_type_name(typ) {
                                 Some(Type::Option(name))
                             } else {

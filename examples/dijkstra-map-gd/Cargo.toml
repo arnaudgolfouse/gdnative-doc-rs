@@ -2,7 +2,7 @@
 name = "dijkstra-map-gd"
 version = "0.1.0"
 authors = ["Astrale", "Matej Sloboda"]
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]

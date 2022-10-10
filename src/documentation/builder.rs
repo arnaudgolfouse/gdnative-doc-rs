@@ -54,7 +54,7 @@ impl DocumentationBuilder {
     #[inline]
     fn visit_item_impl_inner(&mut self, impl_block: &ItemImpl) {
         if attributes_contains(&impl_block.attrs, "methods") {
-            let self_type = match get_type_name(*impl_block.self_ty.clone()) {
+            let self_type = match get_type_name(&impl_block.self_ty) {
                 Some(Type::Named(self_type)) => self_type,
                 _ => {
                     log::error!("Unknown type in 'impl' block");

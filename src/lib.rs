@@ -29,8 +29,6 @@ mod builder;
 mod config;
 pub mod documentation;
 
-use std::convert::TryFrom;
-
 pub use builder::{Builder, Package};
 pub use config::ConfigFile;
 #[cfg(feature = "simplelog")]

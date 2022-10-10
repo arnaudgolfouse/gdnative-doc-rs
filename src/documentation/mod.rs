@@ -194,8 +194,7 @@ impl GdnativeClass {
 
                     params.push((
                         arg_name,
-                        get_type_name(*ty.clone())
-                            .unwrap_or_else(|| Type::Named("{ERROR}".to_string())),
+                        get_type_name(ty).unwrap_or_else(|| Type::Named("{ERROR}".to_string())),
                         if attributes_contains(attrs, "opt") {
                             ParameterAttribute::Opt
                         } else {
@@ -209,7 +208,7 @@ impl GdnativeClass {
 
         let return_type = match output {
             syn::ReturnType::Default => Type::Unit,
-            syn::ReturnType::Type(_, typ) => get_type_name(*typ.clone()).unwrap_or(Type::Unit),
+            syn::ReturnType::Type(_, typ) => get_type_name(typ).unwrap_or(Type::Unit),
         };
         log::trace!(
             "added method {}: parameters = {:?}, return = {:?}",
@@ -239,7 +238,7 @@ impl GdnativeClass {
                         .map(|ident| ident.to_string())
                         .unwrap_or_default(),
                     // FIXME: log unsupported types
-                    typ: get_type_name(field.ty.clone()).unwrap_or(Type::Unit),
+                    typ: get_type_name(&field.ty).unwrap_or(Type::Unit),
                     documentation: get_docs(&field.attrs),
                 };
                 log::trace!(

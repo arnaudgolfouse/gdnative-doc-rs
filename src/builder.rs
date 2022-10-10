@@ -3,7 +3,7 @@ use crate::{
     documentation::Documentation,
     ConfigFile, Error, GodotVersion,
 };
-use std::{convert::TryFrom as _, fs, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 /// Used to specify a crate in [`Builder::package`].
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
