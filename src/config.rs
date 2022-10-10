@@ -1,6 +1,6 @@
 //! User configuration settings.
 
-use crate::{Error, Result};
+use crate::Error;
 use serde::Deserialize;
 use std::{collections::HashMap, fs, path::PathBuf};
 
@@ -10,8 +10,8 @@ use std::{collections::HashMap, fs, path::PathBuf};
 ///
 /// # Example
 /// ```
-/// # use gdnative_doc::{Result, ConfigFile};
-/// # fn main() -> Result<()> {
+/// # use gdnative_doc::{Error, ConfigFile};
+/// # fn main() -> Result<(), Error> {
 /// const CONFIG_FILE_CONTENT: &str = r#"
 /// rename_classes = { RustName = "GDScriptName" }
 /// markdown_options = ["STRIKETHROUGH", "TABLES"]
@@ -31,8 +31,14 @@ use std::{collections::HashMap, fs, path::PathBuf};
 /// should prefer [`load_from_path`](ConfigFile::load_from_path).
 // Note: any update to this structure should be documented in
 // configuration_file-format.md.
-#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 pub struct ConfigFile {
+    /// Godot version used.
+    ///
+    /// Valid fields are "3.2", "3.3", "3.4" and "3.5".
+    ///
+    /// Defaults to "3.5".
+    pub godot_version: Option<String>,
     /// List of items for which the linking url should be overriden.
     pub url_overrides: Option<HashMap<String, String>>,
     /// Renaming of types when going from Rust to Godot.
@@ -64,7 +70,7 @@ pub struct ConfigFile {
 
 impl ConfigFile {
     /// Load the config file from the given `path`.
-    pub fn load_from_path(path: PathBuf) -> Result<Self> {
+    pub fn load_from_path(path: PathBuf) -> Result<Self, Error> {
         log::debug!("loading user config at {:?}", path);
         Ok(toml::from_str(&match fs::read_to_string(&path) {
             Ok(config) => config,
@@ -73,7 +79,7 @@ impl ConfigFile {
     }
 
     /// Load the config file from the given `config` string.
-    pub fn load_from_str(config: &str) -> Result<Self> {
+    pub fn load_from_str(config: &str) -> Result<Self, Error> {
         Ok(toml::from_str(config)?)
     }
 

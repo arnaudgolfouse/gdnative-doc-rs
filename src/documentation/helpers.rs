@@ -1,8 +1,8 @@
 use super::Type;
-use crate::{Error, Result};
+use crate::{Error};
 
 /// Read and parse the file at the given `path` with `syn`, reporting any error.
-pub(super) fn read_file_at(path: &std::path::Path) -> Result<syn::File> {
+pub(super) fn read_file_at(path: &std::path::Path) -> Result<syn::File, Error> {
     match std::fs::read_to_string(path) {
         Ok(content) => Ok(syn::parse_file(&content)?),
         Err(err) => Err(Error::Io(path.to_path_buf(), err)),

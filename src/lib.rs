@@ -29,10 +29,38 @@ mod builder;
 mod config;
 pub mod documentation;
 
+use std::convert::TryFrom;
+
 pub use builder::{Builder, Package};
 pub use config::ConfigFile;
 #[cfg(feature = "simplelog")]
 pub use simplelog::LevelFilter;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum GodotVersion {
+    /// Version `3.2`
+    Version32,
+    /// Version `3.3`
+    Version33,
+    /// Version `3.4`
+    Version34,
+    /// Version `3.5`
+    Version35,
+}
+
+impl TryFrom<&str> for GodotVersion {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "3.2" => Ok(Self::Version32),
+            "3.3" => Ok(Self::Version33),
+            "3.4" => Ok(Self::Version34),
+            "3.5" => Ok(Self::Version35),
+            _ => Err(Error::InvalidGodotVersion(String::from(value))),
+        }
+    }
+}
 
 /// Type of errors emitted by this library.
 #[derive(Debug, thiserror::Error)]
@@ -64,13 +92,13 @@ Please select the one you want via either:
     /// When trying to determine a root file, no suitable candidate was found.
     #[error("No crate was found with a 'cdylib' target")]
     NoCandidateCrate,
+    #[error("Invalid or unsupported godot version: {0}")]
+    InvalidGodotVersion(String),
     #[cfg(feature = "simplelog")]
     /// Error while initializing logging via [`init_logger`].
     #[error("Logger initialization failed: {0}")]
     InitLogger(#[from] log::SetLoggerError),
 }
-
-pub type Result<T> = std::result::Result<T, Error>;
 
 /// Initialize the logger with the specified logging level.
 ///
@@ -82,7 +110,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 ///
 /// The default recommended level is [`LevelFilter::Info`].
 #[cfg(feature = "simplelog")]
-pub fn init_logger(level: LevelFilter) -> Result<()> {
+pub fn init_logger(level: LevelFilter) -> Result<(), Error> {
     simplelog::TermLogger::init(
         level,
         simplelog::Config::default(),

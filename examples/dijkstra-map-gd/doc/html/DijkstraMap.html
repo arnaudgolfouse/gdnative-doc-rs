@@ -16,7 +16,7 @@ Source file: lib.rs
 
 <body>
 <h1>DijkstraMap</h1>
-<p><strong>Inherit:</strong> <a href="https://docs.godotengine.org/en/stable/classes/class_reference.html">Reference</a></p>
+<p><strong>Inherit:</strong> <a href="https://docs.godotengine.org/en/3.2/classes/class_reference.html">Reference</a></p>
 <h2>Description</h2>
 <p>Interface exported to Godot</p>
 <p>The map must first be filled by using e.g. <code>add_point</code>, <code>connect_points</code>,
@@ -24,39 +24,39 @@ Source file: lib.rs
 <p>And then you must call <code>recalculate</code> on it.</p>
 <h2>Properties</h2>
 <table><thead><tr><th style="text-align: left">type</th><th style="text-align: left">property</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_string.html">String</a></td><td style="text-align: left"><a href="#property-property" title="property">property</a></td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_string.html">String</a></td><td style="text-align: left"><a href="#property-property" title="property">property</a></td></tr>
 </tbody></table>
 <h2>Methods</h2>
 <table><thead><tr><th style="text-align: left">returns</th><th style="text-align: left">method</th></tr></thead><tbody>
 <tr><td style="text-align: left">Self</td><td style="text-align: left"><a href="#func-new" title="new">new</a>(  )</td></tr>
 <tr><td style="text-align: left">void</td><td style="text-align: left"><a href="#func-clear" title="clear">clear</a>(  )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-duplicate_graph_from" title="duplicate_graph_from">duplicate_graph_from</a>( source_instance: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-get_available_point_id" title="get_available_point_id">get_available_point_id</a>(  )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-add_point" title="add_point">add_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt) )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-set_terrain_for_point" title="set_terrain_for_point">set_terrain_for_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, terrain_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt) )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-get_terrain_for_point" title="get_terrain_for_point">get_terrain_for_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-remove_point" title="remove_point">remove_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a></td><td style="text-align: left"><a href="#func-has_point" title="has_point">has_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-disable_point" title="disable_point">disable_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-enable_point" title="enable_point">enable_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a></td><td style="text-align: left"><a href="#func-is_point_disabled" title="is_point_disabled">is_point_disabled</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-connect_points" title="connect_points">connect_points</a>( source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, weight: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt), bidirectional: <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a> (opt) )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-remove_connection" title="remove_connection">remove_connection</a>( source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, bidirectional: <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a> (opt) )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a></td><td style="text-align: left"><a href="#func-has_connection" title="has_connection">has_connection</a>( source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-get_direction_at_point" title="get_direction_at_point">get_direction_at_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a></td><td style="text-align: left"><a href="#func-get_cost_at_point" title="get_cost_at_point">get_cost_at_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-recalculate" title="recalculate">recalculate</a>( origin: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, optional_params: <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a> (opt) )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></td><td style="text-align: left"><a href="#func-get_direction_at_points" title="get_direction_at_points">get_direction_at_points</a>( points: <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html">PoolRealArray</a></td><td style="text-align: left"><a href="#func-get_cost_at_points" title="get_cost_at_points">get_cost_at_points</a>( points: <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></td><td style="text-align: left"><a href="#func-get_cost_map" title="get_cost_map">get_cost_map</a>(  )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></td><td style="text-align: left"><a href="#func-get_direction_map" title="get_direction_map">get_direction_map</a>(  )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></td><td style="text-align: left"><a href="#func-get_all_points_with_cost_between" title="get_all_points_with_cost_between">get_all_points_with_cost_between</a>( min_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a>, max_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></td><td style="text-align: left"><a href="#func-get_shortest_path_from_point" title="get_shortest_path_from_point">get_shortest_path_from_point</a>( point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></td><td style="text-align: left"><a href="#func-add_square_grid" title="add_square_grid">add_square_grid</a>( bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), orthogonal_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt), diagonal_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt) )</td></tr>
-<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></td><td style="text-align: left"><a href="#func-add_hexagonal_grid" title="add_hexagonal_grid">add_hexagonal_grid</a>( bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), weight: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt) )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-duplicate_graph_from" title="duplicate_graph_from">duplicate_graph_from</a>( source_instance: <a href="https://docs.godotengine.org/en/3.2/classes/class_variant.html">Variant</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-get_available_point_id" title="get_available_point_id">get_available_point_id</a>(  )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-add_point" title="add_point">add_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, terrain_type: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> (opt) )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-set_terrain_for_point" title="set_terrain_for_point">set_terrain_for_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, terrain_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> (opt) )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-get_terrain_for_point" title="get_terrain_for_point">get_terrain_for_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-remove_point" title="remove_point">remove_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a></td><td style="text-align: left"><a href="#func-has_point" title="has_point">has_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-disable_point" title="disable_point">disable_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-enable_point" title="enable_point">enable_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a></td><td style="text-align: left"><a href="#func-is_point_disabled" title="is_point_disabled">is_point_disabled</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-connect_points" title="connect_points">connect_points</a>( source: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, weight: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> (opt), bidirectional: <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a> (opt) )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-remove_connection" title="remove_connection">remove_connection</a>( source: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, bidirectional: <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a> (opt) )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a></td><td style="text-align: left"><a href="#func-has_connection" title="has_connection">has_connection</a>( source: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-get_direction_at_point" title="get_direction_at_point">get_direction_at_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a></td><td style="text-align: left"><a href="#func-get_cost_at_point" title="get_cost_at_point">get_cost_at_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></td><td style="text-align: left"><a href="#func-recalculate" title="recalculate">recalculate</a>( origin: <a href="https://docs.godotengine.org/en/3.2/classes/class_variant.html">Variant</a>, optional_params: <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a> (opt) )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a></td><td style="text-align: left"><a href="#func-get_direction_at_points" title="get_direction_at_points">get_direction_at_points</a>( points: <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_poolrealarray.html">PoolRealArray</a></td><td style="text-align: left"><a href="#func-get_cost_at_points" title="get_cost_at_points">get_cost_at_points</a>( points: <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a></td><td style="text-align: left"><a href="#func-get_cost_map" title="get_cost_map">get_cost_map</a>(  )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a></td><td style="text-align: left"><a href="#func-get_direction_map" title="get_direction_map">get_direction_map</a>(  )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a></td><td style="text-align: left"><a href="#func-get_all_points_with_cost_between" title="get_all_points_with_cost_between">get_all_points_with_cost_between</a>( min_cost: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a>, max_cost: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a></td><td style="text-align: left"><a href="#func-get_shortest_path_from_point" title="get_shortest_path_from_point">get_shortest_path_from_point</a>( point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a></td><td style="text-align: left"><a href="#func-add_square_grid" title="add_square_grid">add_square_grid</a>( bounds: <a href="https://docs.godotengine.org/en/3.2/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> (opt), orthogonal_cost: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> (opt), diagonal_cost: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> (opt) )</td></tr>
+<tr><td style="text-align: left"><a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a></td><td style="text-align: left"><a href="#func-add_hexagonal_grid" title="add_hexagonal_grid">add_hexagonal_grid</a>( bounds: <a href="https://docs.godotengine.org/en/3.2/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> (opt), weight: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> (opt) )</td></tr>
 </tbody></table>
 <h2>Properties Descriptions</h2>
-<h3><a id="property-property"></a> property: <a href="https://docs.godotengine.org/en/stable/classes/class_string.html">String</a></h3>
+<h3><a id="property-property"></a> property: <a href="https://docs.godotengine.org/en/3.2/classes/class_string.html">String</a></h3>
 <hr />
 <p>Dummy property for demonstration purposes</p>
 <h2>Methods Descriptions</h2>
@@ -73,19 +73,19 @@ Source file: lib.rs
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.clear()
 </code></pre>
-<h3><a id="func-duplicate_graph_from"></a>func duplicate_graph_from(source_instance: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-duplicate_graph_from"></a>func duplicate_graph_from(source_instance: <a href="https://docs.godotengine.org/en/3.2/classes/class_variant.html">Variant</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>If <code>source_instance</code> is a <code>dijkstra map</code>, it is cloned into
 <code>self</code>.</p>
 <h4>Errors</h4>
-<p>This function returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if <code>source_instance</code> is not a DijkstraMap.</p>
+<p>This function returns <a href="https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if <code>source_instance</code> is not a DijkstraMap.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 # fill dijkstra_map
 var dijkstra_map_copy = DijkstraMap.new()
 dijkstra_map_copy.duplicate_graph_from(dijkstra_map)
 </code></pre>
-<h3><a id="func-get_available_point_id"></a>func get_available_point_id() -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-get_available_point_id"></a>func get_available_point_id() -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Returns the first positive available id.</p>
 <h4>Example</h4>
@@ -94,24 +94,24 @@ dijkstra_map.add_point(0)
 dijkstra_map.add_point(1)
 assert(dijkstra_map.get_available_point_id() == 2)
 </code></pre>
-<h3><a id="func-add_point"></a>func add_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-add_point"></a>func add_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, terrain_type: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Add a new point with the given <code>terrain_type</code>.</p>
 <p>If <code>terrain_type</code> not specified, <code>-1</code> is used.</p>
 <h4>Errors</h4>
 <p>If a point with the given id already exists, the map is unchanged and
-<a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> is returned.</p>
+<a href="https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> is returned.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0) # terrain_type is -1
 dijkstra_map.add_point(1, 0) # terrain_type is 0
 </code></pre>
-<h3><a id="func-set_terrain_for_point"></a>func set_terrain_for_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, terrain_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-set_terrain_for_point"></a>func set_terrain_for_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, terrain_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Set the terrain type for <code>point_id</code>.</p>
 <p>If <code>terrain_id</code> is not specified, <code>-1</code> is used.</p>
 <h4>Errors</h4>
-<p>If the given id does not exists in the map, <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> is returned.</p>
+<p>If the given id does not exists in the map, <a href="https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> is returned.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0, 2)
@@ -120,7 +120,7 @@ assert(dijkstra_map.get_terrain_for_point(0) == 1)
 dijkstra_map.set_terrain_for_point(0)
 assert(dijkstra_map.get_terrain_for_point(0) == -1)
 </code></pre>
-<h3><a id="func-get_terrain_for_point"></a>func get_terrain_for_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-get_terrain_for_point"></a>func get_terrain_for_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Get the terrain type for the given point.</p>
 <p>This function returns <code>-1</code> if no point with the given id exists in the
@@ -134,46 +134,46 @@ assert(dijkstra_map.get_terrain_for_point(1) == -1)
 # `2` is not in the map, so this returns `-1`
 assert(dijkstra_map.get_terrain_for_point(2) == -1)
 </code></pre>
-<h3><a id="func-remove_point"></a>func remove_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-remove_point"></a>func remove_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Removes a point from the map.</p>
 <h4>Errors</h4>
-<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if the point does not exists in the map.</p>
+<p>Returns <a href="https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if the point does not exists in the map.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
 assert(dijkstra_map.remove_point(0) == 0)
 assert(dijkstra_map.remove_point(0) == 1)
 </code></pre>
-<h3><a id="func-has_point"></a>func has_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a></h3>
+<h3><a id="func-has_point"></a>func has_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a></h3>
 <hr />
-<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">true</a> if the map contains the given point.</p>
-<h3><a id="func-disable_point"></a>func disable_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<p>Returns <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">true</a> if the map contains the given point.</p>
+<h3><a id="func-disable_point"></a>func disable_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Disable the given point for pathfinding.</p>
 <h4>Errors</h4>
-<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if the point does not exists in the map.</p>
+<p>Returns <a href="https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if the point does not exists in the map.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
 assert(dijkstra_map.disable_point(0) == 0)
 assert(dijkstra_map.disable_point(1) == 1)
 </code></pre>
-<h3><a id="func-enable_point"></a>func enable_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-enable_point"></a>func enable_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Enable the given point for pathfinding.</p>
 <h4>Errors</h4>
-<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if the point does not exists in the map.</p>
+<p>Returns <a href="https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if the point does not exists in the map.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
 assert(dijkstra_map.enable_point(0) == 0)
 assert(dijkstra_map.enable_point(1) == 1)
 </code></pre>
-<h3><a id="func-is_point_disabled"></a>func is_point_disabled(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a></h3>
+<h3><a id="func-is_point_disabled"></a>func is_point_disabled(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a></h3>
 <hr />
-<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">true</a> if the point exists and is disabled, otherwise returns
-<a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">false</a>.</p>
+<p>Returns <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">true</a> if the point exists and is disabled, otherwise returns
+<a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">false</a>.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -183,7 +183,7 @@ assert(dijkstra_map.is_point_disabled(0))
 assert(!dijkstra_map.is_point_disabled(1))
 assert(!dijkstra_map.is_point_disabled(2))
 </code></pre>
-<h3><a id="func-connect_points"></a>func connect_points(source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, weight: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt), bidirectional: <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-connect_points"></a>func connect_points(source: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, weight: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> (opt), bidirectional: <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Connects the two given points.</p>
 <h4>Parameters</h4>
@@ -192,10 +192,10 @@ assert(!dijkstra_map.is_point_disabled(2))
 <li><code>target</code> : target point of the connection.</li>
 <li><code>weight</code> : weight of the connection. Defaults to <code>1.0</code>.</li>
 <li><code>bidirectional</code> : wether or not the reciprocal connection should be
-made. Defaults to <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">true</a>.</li>
+made. Defaults to <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">true</a>.</li>
 </ul>
 <h4>Errors</h4>
-<p>Return <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if one of the points does not exists in the map.</p>
+<p>Return <a href="https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if one of the points does not exists in the map.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -208,18 +208,18 @@ dijkstra_map.connect_points(1, 2, 1.0, false)
 #    2.0     1.0
 assert(dijkstra_map.connect_points(1, 3) == 1) # 3 does not exists in the map
 </code></pre>
-<h3><a id="func-remove_connection"></a>func remove_connection(source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, bidirectional: <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-remove_connection"></a>func remove_connection(source: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, bidirectional: <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Remove a connection between the two given points.</p>
 <h4>Parameters</h4>
 <ul>
 <li><code>source</code> : source point of the connection.</li>
 <li><code>target</code> : target point of the connection.</li>
-<li><code>bidirectional</code> (default : <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">true</a>) : if <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">true</a>, also removes
+<li><code>bidirectional</code> (default : <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">true</a>) : if <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">true</a>, also removes
 connection from target to source.</li>
 </ul>
 <h4>Errors</h4>
-<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if one of the points does not exist.</p>
+<p>Returns <a href="https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> if one of the points does not exist.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -232,9 +232,9 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.remove_connection(0, 1, false)
 assert(dijkstra_map.has_connection(1, 0))
 </code></pre>
-<h3><a id="func-has_connection"></a>func has_connection(source: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a></h3>
+<h3><a id="func-has_connection"></a>func has_connection(source: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, target: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a></h3>
 <hr />
-<p>Returns <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">true</a> if there is a connection from <code>source</code> to <code>target</code>
+<p>Returns <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">true</a> if there is a connection from <code>source</code> to <code>target</code>
 (and they both exist).</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
@@ -245,7 +245,7 @@ assert(dijkstra_map.has_connection(0, 1))
 assert(!dijkstra_map.has_connection(1, 0))
 assert(!dijkstra_map.has_connection(0, 2))
 </code></pre>
-<h3><a id="func-get_direction_at_point"></a>func get_direction_at_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-get_direction_at_point"></a>func get_direction_at_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Given a point, returns the id of the next point along the shortest path
 toward the target.</p>
@@ -262,10 +262,10 @@ assert(dijkstra_map.get_direction_at_point(0) == 0)
 assert(dijkstra_map.get_direction_at_point(1) == 0)
 assert(dijkstra_map.get_direction_at_point(2) == -1)
 </code></pre>
-<h3><a id="func-get_cost_at_point"></a>func get_cost_at_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a></h3>
+<h3><a id="func-get_cost_at_point"></a>func get_cost_at_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a></h3>
 <hr />
 <p>Returns the cost of the shortest path from this point to the target.</p>
-<p>If there is no path, the cost is <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">INF</a>.</p>
+<p>If there is no path, the cost is <a href="https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants">INF</a>.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -277,7 +277,7 @@ assert(dijkstra_map.get_cost_at_point(0) == 0.0)
 assert(dijkstra_map.get_cost_at_point(1) == 1.0)
 assert(dijkstra_map.get_cost_at_point(2) == INF)
 </code></pre>
-<h3><a id="func-recalculate"></a>func recalculate(origin: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, optional_params: <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a></h3>
+<h3><a id="func-recalculate"></a>func recalculate(origin: <a href="https://docs.godotengine.org/en/3.2/classes/class_variant.html">Variant</a>, optional_params: <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a></h3>
 <hr />
 <p>Recalculates cost map and direction map information for each point,
 overriding previous results.</p>
@@ -287,32 +287,32 @@ Dijkstra's algorithm.</p>
 <ul>
 <li>
 <p><code>origin</code> : ID of the origin point, or array of IDs (preferably
-<a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">Int32Array</a>).</p>
+<a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">Int32Array</a>).</p>
 </li>
 <li>
-<p><code>optional_params:</code> <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a> : Specifies optional arguments. <br />
+<p><code>optional_params:</code> <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a> : Specifies optional arguments. <br />
 Valid arguments are :</p>
 <ul>
-<li><code>&quot;input_is_destination&quot;:</code> <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">bool</a> (default : <a href="https://docs.godotengine.org/en/stable/classes/class_bool.html">true</a>) : <br />
+<li><code>&quot;input_is_destination&quot;:</code> <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">bool</a> (default : <a href="https://docs.godotengine.org/en/3.2/classes/class_bool.html">true</a>) : <br />
 Wether or not the <code>origin</code> points are seen as destination.</li>
-<li><code>&quot;maximum_cost&quot;:</code> <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a>
-(default : <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">INF</a>) : <br />
+<li><code>&quot;maximum_cost&quot;:</code> <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a>
+(default : <a href="https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants">INF</a>) : <br />
 Specifies maximum cost. Once all shortest paths no longer than
 maximum cost are found, algorithm terminates. All points with cost
 bigger than this are treated as inaccessible.</li>
-<li><code>&quot;initial_costs&quot;:</code> <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> <a href="https://docs.godotengine.org/en/stable/classes/class_array.html">Array</a> (default : empty) : <br />
+<li><code>&quot;initial_costs&quot;:</code> <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> <a href="https://docs.godotengine.org/en/3.2/classes/class_array.html">Array</a> (default : empty) : <br />
 Specifies initial costs for given origins. Values are paired with
 corresponding indices in the origin argument. Every unspecified
 cost is defaulted to <code>0.0</code>. <br />
 Can be used to weigh the origins with a preference.</li>
-<li><code>&quot;terrain_weights&quot;:</code> <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a> (default : empty) : <br />
+<li><code>&quot;terrain_weights&quot;:</code> <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a> (default : empty) : <br />
 Specifies weights of terrain types. Keys are terrain type IDs and
 values are floats. Unspecified terrains will have
-<a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">infinite</a> weight. <br />
+<a href="https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants">infinite</a> weight. <br />
 Note that <code>-1</code> correspond to the default terrain (which have a
 weight of <code>1.0</code>), and will thus be ignored if it appears in the
 keys.</li>
-<li><code>&quot;termination_points&quot;:</code> <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> OR <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> <a href="https://docs.godotengine.org/en/stable/classes/class_array.html">Array</a> (default : empty) : <br />
+<li><code>&quot;termination_points&quot;:</code> <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> OR <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> <a href="https://docs.godotengine.org/en/3.2/classes/class_array.html">Array</a> (default : empty) : <br />
 A set of points that stop the computation if they are reached by
 the algorithm.</li>
 </ul>
@@ -320,10 +320,10 @@ the algorithm.</li>
 </li>
 </ul>
 <h4>Errors</h4>
-<p><a href="https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> is returned if :</p>
+<p><a href="https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error">FAILED</a> is returned if :</p>
 <ul>
 <li>One of the keys in <code>optional_params</code> is invalid.</li>
-<li><code>origin</code> is neither an <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>, a <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a> or a <a href="https://docs.godotengine.org/en/stable/classes/class_array.html">Array</a>.</li>
+<li><code>origin</code> is neither an <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>, a <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a> or a <a href="https://docs.godotengine.org/en/3.2/classes/class_array.html">Array</a>.</li>
 </ul>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
@@ -345,7 +345,7 @@ assert(dijkstra_map.get_direction_at_point(1) == 0)
 # 2 is too far from 0, so because we set &quot;maximum_cost&quot; to 2.0, it is innaccessible.
 assert(dijkstra_map.get_direction_at_point(2) == -1)
 </code></pre>
-<h3><a id="func-get_direction_at_points"></a>func get_direction_at_points(points: <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></h3>
+<h3><a id="func-get_direction_at_points"></a>func get_direction_at_points(points: <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a></h3>
 <hr />
 <p>For each point in the given array, returns the id of the next point
 along the shortest path toward the target.</p>
@@ -360,12 +360,12 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.recalculate(0)
 assert(Array(dijkstra_map.get_direction_at_points(PoolIntArray([0, 1, 2]))) == [0, 0, -1])
 </code></pre>
-<h3><a id="func-get_cost_at_points"></a>func get_cost_at_points(points: <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html">PoolRealArray</a></h3>
+<h3><a id="func-get_cost_at_points"></a>func get_cost_at_points(points: <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_poolrealarray.html">PoolRealArray</a></h3>
 <hr />
 <p>For each point in the given array, returns the cost of the shortest
 path from this point to the target.</p>
 <p>If there is no path from a point to the target, the cost is
-<a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">INF</a>.</p>
+<a href="https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants">INF</a>.</p>
 <h4>Example</h4>
 <pre><code class="language-gdscript">var dijkstra_map = DijkstraMap.new()
 dijkstra_map.add_point(0)
@@ -375,7 +375,7 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.recalculate(0)
 assert(Array(dijkstra_map.get_cost_at_points(PoolIntArray([0, 1, 2]))) == [0.0, 1.0, INF])
 </code></pre>
-<h3><a id="func-get_cost_map"></a>func get_cost_map() -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h3>
+<h3><a id="func-get_cost_map"></a>func get_cost_map() -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a></h3>
 <hr />
 <p>Returns the entire Dijktra map of costs in form of a Dictionary.</p>
 <p>Keys are points' IDs, and values are costs. Inaccessible points are not
@@ -392,10 +392,10 @@ var computed_cost_map = dijkstra_map.get_cost_map()
 for id in computed_cost_map.keys():
     assert(computed_cost_map[id] == cost_map[id])
 </code></pre>
-<h3><a id="func-get_direction_map"></a>func get_direction_map() -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h3>
+<h3><a id="func-get_direction_map"></a>func get_direction_map() -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a></h3>
 <hr />
 <p>Returns the entire Dijkstra map of directions in form of a
-<a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a>.</p>
+<a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a>.</p>
 <p>Keys are points' IDs, and values are the next point along the shortest
 path.</p>
 <h5>Note</h5>
@@ -412,7 +412,7 @@ var computed_direction_map = dijkstra_map.get_direction_map()
 for id in computed_direction_map.keys():
     assert(computed_direction_map[id] == direction_map[id])
 </code></pre>
-<h3><a id="func-get_all_points_with_cost_between"></a>func get_all_points_with_cost_between(min_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a>, max_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></h3>
+<h3><a id="func-get_all_points_with_cost_between"></a>func get_all_points_with_cost_between(min_cost: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a>, max_cost: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a></h3>
 <hr />
 <p>Returns an array of all the points whose cost is between <code>min_cost</code> and
 <code>max_cost</code>.</p>
@@ -426,36 +426,36 @@ dijkstra_map.connect_points(0, 1)
 dijkstra_map.recalculate(0)
 assert(Array(dijkstra_map.get_all_points_with_cost_between(0.5, 1.5)) == [1])
 </code></pre>
-<h3><a id="func-get_shortest_path_from_point"></a>func get_shortest_path_from_point(point_id: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">PoolIntArray</a></h3>
+<h3><a id="func-get_shortest_path_from_point"></a>func get_shortest_path_from_point(point_id: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a>) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">PoolIntArray</a></h3>
 <hr />
-<p>Returns an <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">array</a> of points describing the shortest path from a
+<p>Returns an <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">array</a> of points describing the shortest path from a
 starting point.</p>
-<p>If the starting point is a target or is inaccessible, the <a href="https://docs.godotengine.org/en/stable/classes/class_poolintarray.html">array</a> will
+<p>If the starting point is a target or is inaccessible, the <a href="https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html">array</a> will
 be empty.</p>
 <h5>Note</h5>
 <p>The starting point itself is not included.</p>
-<h3><a id="func-add_square_grid"></a>func add_square_grid(bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), orthogonal_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt), diagonal_cost: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h3>
+<h3><a id="func-add_square_grid"></a>func add_square_grid(bounds: <a href="https://docs.godotengine.org/en/3.2/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> (opt), orthogonal_cost: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> (opt), diagonal_cost: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a></h3>
 <hr />
 <p>Adds a square grid of connected points.</p>
 <h4>Parameters</h4>
 <ul>
-<li><code>bounds</code> : Dimensions of the grid. At the moment, only <a href="https://docs.godotengine.org/en/stable/classes/class_rect2.html">Rect2</a> is
+<li><code>bounds</code> : Dimensions of the grid. At the moment, only <a href="https://docs.godotengine.org/en/3.2/classes/class_rect2.html">Rect2</a> is
 supported.</li>
 <li><code>terrain_type</code> (default : <code>-1</code>) : Terrain to use for all points of
 the grid.</li>
 <li><code>orthogonal_cost</code> (default : <code>1.0</code>) : specifies cost of orthogonal
 connections (up, down, right and left). <br />
-If <code>orthogonal_cost</code> is <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">INF</a> or <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">NAN</a>, orthogonal
+If <code>orthogonal_cost</code> is <a href="https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants">INF</a> or <a href="https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants">NAN</a>, orthogonal
 connections are disabled.</li>
-<li><code>diagonal_cost</code> (default : <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">INF</a>) : specifies cost of diagonal
+<li><code>diagonal_cost</code> (default : <a href="https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants">INF</a>) : specifies cost of diagonal
 connections. <br />
-If <code>diagonal_cost</code> is <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">INF</a> or <a href="https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants">NAN</a>, diagonal connections
+If <code>diagonal_cost</code> is <a href="https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants">INF</a> or <a href="https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants">NAN</a>, diagonal connections
 are disabled.</li>
 </ul>
 <h4>Returns</h4>
 <p>This function returns a Dictionary where keys are coordinates of points
-(<a href="https://docs.godotengine.org/en/stable/classes/class_vector2.html">Vector2</a>) and values are their corresponding point IDs.</p>
-<h3><a id="func-add_hexagonal_grid"></a>func add_hexagonal_grid(bounds: <a href="https://docs.godotengine.org/en/stable/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/stable/classes/class_int.html">int</a> (opt), weight: <a href="https://docs.godotengine.org/en/stable/classes/class_float.html">float</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a></h3>
+(<a href="https://docs.godotengine.org/en/3.2/classes/class_vector2.html">Vector2</a>) and values are their corresponding point IDs.</p>
+<h3><a id="func-add_hexagonal_grid"></a>func add_hexagonal_grid(bounds: <a href="https://docs.godotengine.org/en/3.2/classes/class_variant.html">Variant</a>, terrain_type: <a href="https://docs.godotengine.org/en/3.2/classes/class_int.html">int</a> (opt), weight: <a href="https://docs.godotengine.org/en/3.2/classes/class_float.html">float</a> (opt)) -&gt; <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a></h3>
 <hr />
 <p>Adds a hexagonal grid of connected points.</p>
 <h4>Parameters</h4>
@@ -465,13 +465,13 @@ are disabled.</li>
 <li><code>weight</code> (default : <code>1.0</code>) : specifies cost of connections.</li>
 </ul>
 <h4>Returns</h4>
-<p>This function returns a <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a> where keys are coordinates of
-points (<a href="https://docs.godotengine.org/en/stable/classes/class_vector2.html">Vector2</a>) and values are their corresponding point IDs.</p>
+<p>This function returns a <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a> where keys are coordinates of
+points (<a href="https://docs.godotengine.org/en/3.2/classes/class_vector2.html">Vector2</a>) and values are their corresponding point IDs.</p>
 <h4>Note</h4>
 <p>Hexgrid is in the &quot;pointy&quot; orentation by default (see example below).</p>
 <p>To switch to &quot;flat&quot; orientation, swap <code>width</code> and <code>height</code>, and switch
-<code>x</code> and <code>y</code> coordinates of the keys in the return <a href="https://docs.godotengine.org/en/stable/classes/class_dictionary.html">Dictionary</a>.
-(<a href="https://docs.godotengine.org/en/stable/classes/class_transform2d.html">Transform2D</a> may be convenient there)</p>
+<code>x</code> and <code>y</code> coordinates of the keys in the return <a href="https://docs.godotengine.org/en/3.2/classes/class_dictionary.html">Dictionary</a>.
+(<a href="https://docs.godotengine.org/en/3.2/classes/class_transform2d.html">Transform2D</a> may be convenient there)</p>
 <h4>Example</h4>
 <p>This is what <code>add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)</code> would produce:</p>
 <pre><code class="language-text">    / \     / \

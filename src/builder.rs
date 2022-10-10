@@ -1,9 +1,9 @@
 use crate::{
     backend::{self, BuiltinBackend, Callbacks, Resolver},
     documentation::Documentation,
-    ConfigFile, Error, Result,
+    ConfigFile, Error, GodotVersion,
 };
-use std::{fs, path::PathBuf};
+use std::{convert::TryFrom as _, fs, path::PathBuf};
 
 /// Used to specify a crate in [`Builder::package`].
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -23,11 +23,10 @@ pub enum Package {
 /// [`add_backend`]: Builder::add_backend
 /// [`add_backend_with_callbacks`]: Builder::add_backend_with_callbacks
 pub struct Builder {
-    resolver: Resolver,
     /// List of backends with their output directory
     backends: Vec<(Box<dyn Callbacks>, PathBuf)>,
     /// Configuration file
-    user_config: Option<ConfigFile>,
+    user_config: ConfigFile,
     /// Used to disambiguate which crate to use.
     package: Option<Package>,
 }
@@ -42,9 +41,8 @@ impl Builder {
     /// Create a default `Builder` with no backends.
     pub fn new() -> Self {
         Self {
-            resolver: Resolver::default(),
             backends: Vec::new(),
-            user_config: None,
+            user_config: ConfigFile::default(),
             package: None,
         }
     }
@@ -53,7 +51,7 @@ impl Builder {
     ///
     /// See the `ConfigFile` documentation for information about the configuration file format.
     pub fn user_config(mut self, config: ConfigFile) -> Self {
-        self.user_config = Some(config);
+        self.user_config = config;
         self
     }
 
@@ -114,23 +112,26 @@ impl Builder {
     /// [specified backend](Self::add_backend), creating the ouput directories if
     /// needed.
     #[allow(clippy::or_fun_call)]
-    pub fn build(mut self) -> Result<()> {
-        let (markdown_options, opening_comment) = if let Some(user_config) = self.user_config.take()
-        {
-            let opening_comment = user_config.opening_comment.unwrap_or(true);
-            let markdown_options = user_config
+    pub fn build(mut self) -> Result<(), Error> {
+        let mut resolver = Resolver::new(match &self.user_config.godot_version {
+            Some(s) => GodotVersion::try_from(s.as_str())?,
+            None => GodotVersion::Version35,
+        });
+
+        let (markdown_options, opening_comment) = {
+            let opening_comment = self.user_config.opening_comment.unwrap_or(true);
+            let markdown_options = self
+                .user_config
                 .markdown_options()
                 .unwrap_or(pulldown_cmark::Options::empty());
-            self.resolver.apply_user_config(user_config);
+            resolver.apply_user_config(&self.user_config);
             (markdown_options, opening_comment)
-        } else {
-            (pulldown_cmark::Options::empty(), true)
         };
 
-        let documentation = self.build_documentation()?;
+        let documentation = self.build_documentation(&resolver)?;
         for (mut callbacks, output_dir) in self.backends {
             let generator = backend::Generator::new(
-                &self.resolver,
+                &resolver,
                 &documentation,
                 markdown_options,
                 opening_comment,
@@ -156,7 +157,7 @@ impl Builder {
     ///
     /// The root file is either stored in `self`, or automatically discovered using
     /// [`find_root_file`].
-    fn build_documentation(&mut self) -> Result<Documentation> {
+    fn build_documentation(&mut self, resolver: &Resolver) -> Result<Documentation, Error> {
         log::debug!("building documentation");
         let (name, root_file) = match self.package.take() {
             Some(Package::Root(root_file)) => ("_".to_string(), root_file),
@@ -165,13 +166,13 @@ impl Builder {
         };
 
         let mut documentation = Documentation::from_root_file(name, root_file)?;
-        self.resolver.rename_classes(&mut documentation);
+        resolver.rename_classes(&mut documentation);
         Ok(documentation)
     }
 }
 
 /// Returns the name of the crate and the root file.
-fn find_root_file(package_name: Option<&str>) -> Result<(String, PathBuf)> {
+fn find_root_file(package_name: Option<&str>) -> Result<(String, PathBuf), Error> {
     let metadata = cargo_metadata::MetadataCommand::new().exec()?;
     let mut root_files = Vec::new();
     for package in metadata.packages {

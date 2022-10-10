@@ -99,7 +99,7 @@ You can also use the [command-line tool](gdnative-doc-cli).
 
 ### Godot version
 
-For now, every godot class has its 3.2 name (although links take you to the current stable version). This should be fixed in the future.
+Supported godot versions are `3.2`, `3.3`, `3.4` and `3.5`. By default, `3.5` will be selected. To select another version, use the `godot_version` field of the configuration file.
 
 ## Limitations
 

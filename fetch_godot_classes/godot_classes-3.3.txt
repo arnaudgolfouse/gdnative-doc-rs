@@ -1,4 +1,4 @@
-// This file was automatically generated from the file names at https://github.com/godotengine/godot/tree/3.2/doc/classes
+// This file was automatically generated from the file names at https://github.com/godotengine/godot/tree/3.3/doc/classes
 [
     "AABB",
     "ARVRAnchor",
@@ -41,12 +41,14 @@
     "Area2D",
     "Array",
     "ArrayMesh",
+    "AspectRatioContainer",
     "AtlasTexture",
     "AudioBusLayout",
     "AudioEffect",
     "AudioEffectAmplify",
     "AudioEffectBandLimitFilter",
     "AudioEffectBandPassFilter",
+    "AudioEffectCapture",
     "AudioEffectChorus",
     "AudioEffectCompressor",
     "AudioEffectDelay",
@@ -169,7 +171,6 @@
     "EditorResourcePreview",
     "EditorResourcePreviewGenerator",
     "EditorSceneImporter",
-    "EditorSceneImporterAssimp",
     "EditorScenePostImport",
     "EditorScript",
     "EditorSelection",
@@ -530,6 +531,7 @@
     "VisualShaderNodeTransformUniform",
     "VisualShaderNodeTransformVecMult",
     "VisualShaderNodeUniform",
+    "VisualShaderNodeUniformRef",
     "VisualShaderNodeVec3Constant",
     "VisualShaderNodeVec3Uniform",
     "VisualShaderNodeVectorClamp",

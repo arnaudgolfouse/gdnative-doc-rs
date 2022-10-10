@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: arnaudgolfouse
-@brief:  script that get godot classes for the 3.2 branch. Note that this is probably not portable :/
+@brief:  script that get godot classes for the 3.2, 3.3, 3.4 and 3.5 branches. Note that this is probably not portable :/
 """
 
 # %%
@@ -11,34 +11,53 @@ import os
 from pathlib import Path
 
 GODOT_REPOSITORY_URL = "https://github.com/godotengine/godot"
-BRANCH = "3.2"
 GODOT_REPOSITORY_PATH = "godot"
 CLASSES_PATH = "doc/classes"
-GODOT_CLASSES_FILE = "godot_classes" + "-" + BRANCH + ".txt"
+VERSIONS = ["3.2", "3.3", "3.4", "3.5"]
+
 
 script_path = Path(__file__).absolute().parent
 os.chdir(script_path)
 
-# clone if not already done
 if not Path(GODOT_REPOSITORY_PATH).exists():
-    subprocess.call(["git", "clone", "--no-checkout", "--branch", BRANCH,
-                     "--single-branch", "--depth", "1", GODOT_REPOSITORY_URL, GODOT_REPOSITORY_PATH])
+    os.mkdir(GODOT_REPOSITORY_PATH)
+    os.chdir(GODOT_REPOSITORY_PATH)
 
-# sparse checkout
-os.chdir(GODOT_REPOSITORY_PATH)
-subprocess.call(["git", "sparse-checkout", "init", "--cone"])
-subprocess.call(["git", "sparse-checkout", "set", CLASSES_PATH])
+    subprocess.call(["git", "init"])
 
-# get those files
-file_content = "// This file was automatically generated from the file names at " + \
-    GODOT_REPOSITORY_URL + "/tree/" + BRANCH + "/doc/classes\n"
-file_content += "[\n"
-for file in Path(CLASSES_PATH).glob("*"):
-    file_name = file.name
-    if (not file_name.startswith("@")) and file_name.endswith(".xml"):
-        file_content += "    \""
-        file_name = file_name[:-4]
-        file_content += file_name
-        file_content += "\",\n"
-file_content += "]"
-Path("../" + GODOT_CLASSES_FILE).write_text(file_content)
+    git_remote_add_args = ["git", "remote", "add"]
+    for version in VERSIONS:
+        git_remote_add_args.append("-t")
+        git_remote_add_args.append(version)
+    git_remote_add_args.append("origin")
+    git_remote_add_args.append(GODOT_REPOSITORY_URL)
+    subprocess.call(git_remote_add_args)
+
+    subprocess.call(["git", "fetch", "--depth", "1"])
+
+os.chdir(script_path)
+
+for version in VERSIONS:
+    godot_classes_file: str = f"godot_classes-{version}.txt"
+
+    # change branch
+    os.chdir(GODOT_REPOSITORY_PATH)
+    subprocess.call(["git", "checkout", version])
+
+    # get those files
+    classes_names = []
+    for file in Path(CLASSES_PATH).glob("*"):
+        file_name = file.name
+        if (not file_name.startswith("@")) and file_name.endswith(".xml"):
+            classes_names.append(file_name[:-4])
+    classes_names.sort()
+    os.chdir(script_path)
+
+    file_content = "// This file was automatically generated from the file names at " + \
+        GODOT_REPOSITORY_URL + "/tree/" + version + "/doc/classes\n"
+    file_content += "[\n"
+    for class_name in classes_names:
+        file_content += f"    \"{class_name}\",\n"
+    file_content += "]"
+    file_path = Path(godot_classes_file).absolute()
+    file_path.write_text(file_content)

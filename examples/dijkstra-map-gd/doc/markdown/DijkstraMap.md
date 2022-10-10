@@ -364,7 +364,7 @@ Dijkstra's algorithm.
     - `"terrain_weights":` [Dictionary] (default : empty) :  \
         Specifies weights of terrain types. Keys are terrain type IDs and
         values are floats. Unspecified terrains will have
-        [infinite](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants) weight.  \
+        [infinite](https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants) weight.  \
         Note that `-1` correspond to the default terrain (which have a
         weight of `1.0`), and will thus be ignored if it appears in the
         keys.
@@ -572,23 +572,23 @@ This is what `add_hexagonal_grid(Rect2(1, 4, 2, 3), ...)` would produce:
     \ /     \ /
 ```
 
-[Array]: https://docs.godotengine.org/en/stable/classes/class_array.html
-[Dictionary]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html
-[FAILED]: https://docs.godotengine.org/en/stable/classes/class_@globalscope.html#enum-globalscope-error
-[INF]: https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants
-[Int32Array]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
-[NAN]: https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#constants
-[PoolIntArray]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
-[PoolRealArray]: https://docs.godotengine.org/en/stable/classes/class_poolrealarray.html
-[Rect2]: https://docs.godotengine.org/en/stable/classes/class_rect2.html
-[Reference]: https://docs.godotengine.org/en/stable/classes/class_reference.html
-[String]: https://docs.godotengine.org/en/stable/classes/class_string.html
-[Transform2D]: https://docs.godotengine.org/en/stable/classes/class_transform2d.html
-[Variant]: https://docs.godotengine.org/en/stable/classes/class_variant.html
-[Vector2]: https://docs.godotengine.org/en/stable/classes/class_vector2.html
-[array]: https://docs.godotengine.org/en/stable/classes/class_poolintarray.html
-[bool]: https://docs.godotengine.org/en/stable/classes/class_bool.html
-[false]: https://docs.godotengine.org/en/stable/classes/class_bool.html
-[float]: https://docs.godotengine.org/en/stable/classes/class_float.html
-[int]: https://docs.godotengine.org/en/stable/classes/class_int.html
-[true]: https://docs.godotengine.org/en/stable/classes/class_bool.html
+[Array]: https://docs.godotengine.org/en/3.2/classes/class_array.html
+[Dictionary]: https://docs.godotengine.org/en/3.2/classes/class_dictionary.html
+[FAILED]: https://docs.godotengine.org/en/3.2/classes/class_@globalscope.html#enum-globalscope-error
+[INF]: https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants
+[Int32Array]: https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html
+[NAN]: https://docs.godotengine.org/en/3.2/classes/class_@gdscript.html#constants
+[PoolIntArray]: https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html
+[PoolRealArray]: https://docs.godotengine.org/en/3.2/classes/class_poolrealarray.html
+[Rect2]: https://docs.godotengine.org/en/3.2/classes/class_rect2.html
+[Reference]: https://docs.godotengine.org/en/3.2/classes/class_reference.html
+[String]: https://docs.godotengine.org/en/3.2/classes/class_string.html
+[Transform2D]: https://docs.godotengine.org/en/3.2/classes/class_transform2d.html
+[Variant]: https://docs.godotengine.org/en/3.2/classes/class_variant.html
+[Vector2]: https://docs.godotengine.org/en/3.2/classes/class_vector2.html
+[array]: https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html
+[bool]: https://docs.godotengine.org/en/3.2/classes/class_bool.html
+[false]: https://docs.godotengine.org/en/3.2/classes/class_bool.html
+[float]: https://docs.godotengine.org/en/3.2/classes/class_float.html
+[int]: https://docs.godotengine.org/en/3.2/classes/class_int.html
+[true]: https://docs.godotengine.org/en/3.2/classes/class_bool.html

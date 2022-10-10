@@ -1,2 +1,3 @@
 markdown_options = ["STRIKETHROUGH", "TABLES", "TASKLISTS"]
 rename_classes = { Interface = "DijkstraMap" }
+godot_version = "3.2"

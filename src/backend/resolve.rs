@@ -3,6 +3,7 @@
 use crate::{
     config::ConfigFile,
     documentation::{self, Documentation, Type},
+    GodotVersion,
 };
 use pulldown_cmark::{CowStr, Event, Tag};
 use std::collections::HashMap;
@@ -27,10 +28,19 @@ pub struct Resolver {
 }
 
 /// Url for the (stable) godot documentation
-const GODOT_DOCUMENTATION_URL: &str = "https://docs.godotengine.org/en/stable/classes";
+const GODOT_DOCUMENTATION_URL_3_2: &str = "https://docs.godotengine.org/en/3.2/classes";
+const GODOT_DOCUMENTATION_URL_3_3: &str = "https://docs.godotengine.org/en/3.3/classes";
+const GODOT_DOCUMENTATION_URL_3_4: &str = "https://docs.godotengine.org/en/3.4/classes";
+const GODOT_DOCUMENTATION_URL_3_5: &str = "https://docs.godotengine.org/en/3.5/classes";
 
-/// List of godot classes, like `Array`, `int`, `Transform2D`...
-const GODOT_CLASSES: &[&str] = &include!("../../fetch_godot_classes/godot_classes-3.2.txt");
+/// List of godot 3.2 classes, like `Array`, `int`, `Transform2D`...
+const GODOT_CLASSES_3_2: &[&str] = &include!("../../fetch_godot_classes/godot_classes-3.2.txt");
+/// List of godot 3.3 classes, like `Array`, `int`, `Transform2D`...
+const GODOT_CLASSES_3_3: &[&str] = &include!("../../fetch_godot_classes/godot_classes-3.3.txt");
+/// List of godot 3.4 classes, like `Array`, `int`, `Transform2D`...
+const GODOT_CLASSES_3_4: &[&str] = &include!("../../fetch_godot_classes/godot_classes-3.4.txt");
+/// List of godot 3.5 classes, like `Array`, `int`, `Transform2D`...
+const GODOT_CLASSES_3_5: &[&str] = &include!("../../fetch_godot_classes/godot_classes-3.5.txt");
 
 /// List of some godot constants and information about where they sould link to.
 ///
@@ -58,33 +68,39 @@ const RUST_TO_GODOT: &[(&str, &str)] = &[
     ("Float32Array", "PoolRealArray"),
 ];
 
-impl Default for Resolver {
-    fn default() -> Self {
+impl Resolver {
+    pub(crate) fn new(godot_version: GodotVersion) -> Self {
         Self {
-            godot_items: Self::godot_items(),
+            godot_items: Self::godot_items(godot_version),
             rust_to_godot: Self::rust_to_godot(),
             url_overrides: HashMap::new(),
             rename_classes: HashMap::new(),
         }
     }
-}
 
-impl Resolver {
-    fn godot_items() -> HashMap<String, String> {
+    fn godot_items(godot_version: GodotVersion) -> HashMap<String, String> {
         let mut godot_items = HashMap::new();
-        for class in GODOT_CLASSES {
+        let classes = match godot_version {
+            GodotVersion::Version32 => GODOT_CLASSES_3_2,
+            GodotVersion::Version33 => GODOT_CLASSES_3_3,
+            GodotVersion::Version34 => GODOT_CLASSES_3_4,
+            GodotVersion::Version35 => GODOT_CLASSES_3_5,
+        };
+        let documentation_url = match godot_version {
+            GodotVersion::Version32 => GODOT_DOCUMENTATION_URL_3_2,
+            GodotVersion::Version33 => GODOT_DOCUMENTATION_URL_3_3,
+            GodotVersion::Version34 => GODOT_DOCUMENTATION_URL_3_4,
+            GodotVersion::Version35 => GODOT_DOCUMENTATION_URL_3_5,
+        };
+        for class in classes {
             godot_items.insert(
                 class.to_string(),
-                format!(
-                    "{}/class_{}.html",
-                    GODOT_DOCUMENTATION_URL,
-                    class.to_lowercase()
-                ),
+                format!("{}/class_{}.html", documentation_url, class.to_lowercase()),
             );
         }
 
         for (name, links_to, section) in GODOT_CONSTANTS {
-            let mut link = format!("{}/{}.html", GODOT_DOCUMENTATION_URL, links_to);
+            let mut link = format!("{}/{}.html", documentation_url, links_to);
             if !section.is_empty() {
                 link.push('#');
                 link.push_str(section)
@@ -102,9 +118,9 @@ impl Resolver {
         rust_to_godot
     }
 
-    pub(crate) fn apply_user_config(&mut self, user_config: ConfigFile) {
-        self.url_overrides = user_config.url_overrides.unwrap_or_default();
-        self.rename_classes = user_config.rename_classes.unwrap_or_default();
+    pub(crate) fn apply_user_config(&mut self, user_config: &ConfigFile) {
+        self.url_overrides = user_config.url_overrides.clone().unwrap_or_default();
+        self.rename_classes = user_config.rename_classes.clone().unwrap_or_default();
     }
 
     /// Convert all type names from Rust to Godot.
