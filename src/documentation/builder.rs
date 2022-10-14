@@ -137,14 +137,14 @@ impl<'ast> Visit<'ast> for DocumentationBuilder {
             return;
         }
         let mut implement_native_class = false;
-        let mut inherit = None;
+        let mut inherit = String::from("Reference");
         for attr in &strukt.attrs {
             if let Ok(syn::Meta::List(syn::MetaList { path, nested, .. })) = attr.parse_meta() {
                 if path.is_ident("inherit") && nested.len() == 1 {
                     if let Some(syn::NestedMeta::Meta(syn::Meta::Path(path))) = nested.first() {
                         // TODO: support path of the form "gdnative::Class"
                         if let Some(class) = path.get_ident() {
-                            inherit = Some(class.to_string())
+                            inherit = class.to_string();
                         }
                     }
                 } else if path.is_ident("derive") && nested.len() == 1 {
@@ -161,33 +161,27 @@ impl<'ast> Visit<'ast> for DocumentationBuilder {
             return;
         }
 
-        if let Some(inherit) = inherit {
-            let self_type = strukt.ident.to_string();
-            log::trace!(
-                "found GDNative class '{}' that inherits '{}'",
-                self_type,
-                inherit
-            );
-            // FIXME: warn or error if we already visited a struct with the same name
-            // But be careful ! We *could* have encountered the name in an `impl` block, in which case no warning is warranted.
-            let class = self
-                .documentation
-                .classes
-                .entry(self_type.clone())
-                .or_insert(GdnativeClass {
-                    name: self_type,
-                    inherit: String::new(),
-                    documentation: String::new(),
-                    properties: Vec::new(),
-                    methods: Vec::new(),
-                    file: self.current_file.0.clone(),
-                });
-            if let syn::Fields::Named(fields) = &strukt.fields {
-                class.get_properties(fields)
-            }
-            class.inherit = inherit;
-            class.documentation = get_docs(&strukt.attrs);
+        let self_type = strukt.ident.to_string();
+        log::trace!("found GDNative class '{self_type}' that inherits '{inherit}'");
+        // FIXME: warn or error if we already visited a struct with the same name
+        // But be careful ! We *could* have encountered the name in an `impl` block, in which case no warning is warranted.
+        let class = self
+            .documentation
+            .classes
+            .entry(self_type.clone())
+            .or_insert(GdnativeClass {
+                name: self_type,
+                inherit: String::new(),
+                documentation: String::new(),
+                properties: Vec::new(),
+                methods: Vec::new(),
+                file: self.current_file.0.clone(),
+            });
+        if let syn::Fields::Named(fields) = &strukt.fields {
+            class.get_properties(fields)
         }
+        class.inherit = inherit;
+        class.documentation = get_docs(&strukt.attrs);
     }
 
     fn visit_item_impl(&mut self, impl_block: &'ast ItemImpl) {
