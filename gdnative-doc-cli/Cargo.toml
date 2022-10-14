@@ -1,6 +1,6 @@
 [package]
 name = "gdnative-doc-cli"
-version = "0.0.5"
+version = "0.0.6"
 description = "Command line utility for gdnative-doc"
 authors = ["Arnaud Golfouse <arnaud.golfouse@laposte.net>"]
 repository = "https://github.com/arnaudgolfouse/gdnative-doc-rs/"
@@ -9,6 +9,6 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
-gdnative-doc = { path = "..", version = "0.0.5" }
+gdnative-doc = { path = "..", version = "0.0.6" }
 clap = "4.0.11"
 anyhow = "1.0.65"
